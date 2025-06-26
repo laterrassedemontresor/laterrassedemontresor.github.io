@@ -1,0 +1,15 @@
+{
+  "name": "netlify-pin-app",
+  "version": "1.0.0",
+  "description": "Simple PIN access application with Netlify Function and Firebase Firestore",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
