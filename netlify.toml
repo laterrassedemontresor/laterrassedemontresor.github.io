@@ -1,3 +1,3 @@
 [build]
   functions = "netlify/functions"
-  publish = "build" # Ou le dossier où sont vos fichiers HTML/CSS/JS compilés
+  publish = "./" # Ou "public", ou le nom de votre dossier
