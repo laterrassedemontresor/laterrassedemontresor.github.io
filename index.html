@@ -330,7 +330,7 @@
                 backspaceButton: document.getElementById('backspaceButton')
             };
 
-            console.log("PortalAccessSystem initialized."); // Added log
+            console.log("PortalAccessSystem initialized."); 
             this.init();
         }
 
@@ -339,7 +339,7 @@
             await this.loadPinData(); // Initial load of PIN data
             this.resetSystem(); // Ensure initial state is reset and input is focused
             this.startStatusTimer(); // Start timer to check for expiration later and periodically refresh active PIN validity
-            console.log("init() completed."); // Added log
+            console.log("init() completed."); 
         }
 
         setupEventListeners() {
@@ -377,7 +377,7 @@
                     await this.resetAndReloadData();
                 }
             });
-            console.log("Event listeners set up."); // Added log
+            console.log("Event listeners set up."); 
         }
 
         animateElement(element) {
@@ -415,34 +415,34 @@
         }
 
         async loadPinData() {
-            console.log("Attempting to load PIN data from:", GOOGLE_SHEET_CSV_URL); // Added log
+            console.log("Attempting to load PIN data from:", GOOGLE_SHEET_CSV_URL); 
             try {
                 const response = await fetch(GOOGLE_SHEET_CSV_URL);
-                console.log("Fetch response received:", response); // Added log
+                console.log("Fetch response received:", response); 
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
                 }
                 
                 const csvText = await response.text();
-                console.log("CSV text received (first 200 chars):", csvText.substring(0, 200)); // Added log
-                this.pinData = this.parseCsv(csvText);
-                console.log("Données PIN chargées:", this.pinData); // Debugging output
+                console.log("CSV text received (first 200 chars):", csvText.substring(0, 200)); 
+                this.pinData = this.parseCsv(csvText); // This line is correct for parsing CSV to objects
+                console.log("Données PIN chargées:", this.pinData); 
                 if (this.pinData.length === 0) {
                     this.showMessage(`Aucun code PIN trouvé. Contactez l'administrateur.`, 'alert');
-                    console.warn("No PIN data parsed. Check CSV format or source."); // Added log
+                    console.warn("No PIN data parsed. Check CSV format or source."); 
                 }
             } catch (error) {
                 console.error("Erreur lors du chargement des données PIN:", error);
-                this.showMessage(`Erreur de chargement des données. (${error.message}). Réessayez.`, 'alert'); // Display error message
+                this.showMessage(`Erreur de chargement des données. (${error.message}). Réessayez.`, 'alert'); 
             }
         }
 
         parseCsv(csvText) {
             const lines = csvText.trim().split('\n');
             if (lines.length <= 1) {
-                console.log("No data lines in CSV (only header or empty)."); // Added log
-                return []; // No data or only header
+                console.log("No data lines in CSV (only header or empty)."); 
+                return []; 
             }
             
             const headers = lines[0].split(',').map(header => header.trim());
@@ -451,39 +451,41 @@
                 const values = line.split(',').map(value => value.trim());
                 const entry = {};
                 headers.forEach((header, index) => {
-                    entry[header] = values[index].replace(/^"|"$/g, ''); // Ensure quotes are removed
+                    entry[header] = values[index].replace(/^"|"$/g, ''); 
                 });
                 return entry;
             });
-            console.log("Parsed CSV data:", parsedPins); // Added log
+            console.log("Parsed CSV data:", parsedPins); 
             return parsedPins;
         }
 
-        // Parses date/time from "JJ/MM/AAAA" and "hh:mm" strings
+        // This function is no longer called for parsing arrival/departure times,
+        // but kept in case it's used for other date parsing needs in the future.
+        // It expects 'JJ/MM/AAAA' and 'hh:mm' strings.
         parseDateTime(dateStr, timeStr) {
             const dateParts = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
             const timeParts = timeStr.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
 
             if (!dateParts || !timeParts) {
                 console.error("Format de date ou d'heure invalide :", dateStr, timeStr);
-                return new Date(NaN); // Returns an invalid date
+                return new Date(NaN); 
             }
 
             const year = parseInt(dateParts[3], 10);
-            const month = parseInt(dateParts[2], 10) - 1; // Month is 0-indexed in JavaScript (January = 0)
+            const month = parseInt(dateParts[2], 10) - 1; 
             const day = parseInt(dateParts[1], 10);
             const hour = parseInt(timeParts[1], 10);
             const minute = parseInt(timeParts[2], 10);
             const second = timeParts[3] ? parseInt(timeParts[3], 10) : 0; 
             
             const dateObj = new Date(year, month, day, hour, minute, second);
-            console.log(`Parsed date ${dateStr} ${timeStr} to:`, dateObj); // Added log
+            console.log(`Parsed date ${dateStr} ${timeStr} to:`, dateObj); 
             return dateObj;
         }
 
         async validatePin() {
-            const enteredPin = this.elements.pinInput.value.toUpperCase(); // Ensure uppercase for comparison
-            console.log("Validating PIN:", enteredPin); // Added log
+            const enteredPin = this.elements.pinInput.value.toUpperCase(); 
+            console.log("Validating PIN:", enteredPin); 
             if (enteredPin.length !== PIN_LENGTH) {
                 this.showMessage(`Le code PIN doit contenir ${PIN_LENGTH} chiffres/lettres.`, 'alert');
                 return;
@@ -491,17 +493,19 @@
 
             const now = new Date();
             const pinEntry = this.pinData.find(entry => entry.PIN && entry.PIN.toUpperCase() === enteredPin);
-            console.log("Found PIN entry:", pinEntry); // Added log
+            console.log("Found PIN entry:", pinEntry); 
 
             if (!pinEntry) {
                 this.showMessage('Code PIN incorrect', 'alert');
-                this.elements.pinInput.value = ''; // Clear for re-entry
+                this.elements.pinInput.value = ''; 
                 this.updateButtonStates();
                 return;
             }
 
-            const arrivalTime = this.parseDateTime(pinEntry.date_arrival, pinEntry.time_arrival);
-            const departureTime = this.parseDateTime(pinEntry.date_departure, pinEntry.time_departure);
+            // *** FIX APPLIED HERE: Use existing arrivalDateTime and departureDateTime fields directly ***
+            const arrivalTime = new Date(pinEntry.arrivalDateTime);
+            const departureTime = new Date(pinEntry.departureDateTime);
+            // ******************************************************************************************
             
             if (isNaN(arrivalTime.getTime()) || isNaN(departureTime.getTime())) {
                 console.error("Parsed invalid arrival or departure time for PIN:", enteredPin, pinEntry);
@@ -524,44 +528,41 @@
                 this.arrivalDate = arrivalTime;
                 this.expirationDate = departureTime;
                 this.isValidated = true;
-                this.currentActivePin = enteredPin; // Store the active PIN
+                this.currentActivePin = enteredPin; 
 
-                this.elements.pinSection.classList.add('hidden'); // Hide input section
-                this.showPortalButton(); // Show gate button
-                this.showMessage('Accès accordé !', 'success'); // Success message
-                console.log(`PIN ${enteredPin} valid until:`, this.expirationDate); // Added log
+                this.elements.pinSection.classList.add('hidden'); 
+                this.showPortalButton(); 
+                this.showMessage('Accès accordé !', 'success'); 
+                console.log(`PIN ${enteredPin} valid until:`, this.expirationDate); 
             }
         }
 
-        // New method to reset session and reload data
         async resetAndReloadData() {
-            console.log("Resetting system and reloading data..."); // Added log
-            this.resetSystem(); // Reset UI and session state
-            await this.loadPinData(); // Reload data from Google Sheet
+            console.log("Resetting system and reloading data..."); 
+            this.resetSystem(); 
+            await this.loadPinData(); 
             this.showMessage('Session réinitialisée. Saisissez un code PIN.', 'info');
         }
 
         resetSystem() {
-            console.log("Resetting system state..."); // Added log
+            console.log("Resetting system state..."); 
             this.isValidated = false;
             this.arrivalDate = null;
             this.expirationDate = null;
-            this.currentActivePin = null; // Clear the active PIN
+            this.currentActivePin = null; 
             
-            this.elements.pinSection.classList.remove('hidden'); // Show input section
+            this.elements.pinSection.classList.remove('hidden'); 
 
-            // Remove portal button if it exists
             let portalBtn = document.getElementById('portalBtn');
             if (portalBtn) portalBtn.remove();
             
-            // Remove reset button if it exists
             let resetButton = document.getElementById('resetButton');
             if (resetButton) resetButton.remove();
             
-            this.elements.pinInput.value = ''; // Clear input field
-            this.updateButtonStates(); // Update button disabled state
-            this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`); // Set initial message
-            this.setFocus(this.elements.pinInput); // Focus the input field
+            this.elements.pinInput.value = ''; 
+            this.updateButtonStates(); 
+            this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`); 
+            this.setFocus(this.elements.pinInput); 
         }
 
         showMessage(text, type = '') {
@@ -570,9 +571,9 @@
                 this.messageTimeout = null;
             }
 
-            this.elements.message.className = 'message'; // Reset classes
+            this.elements.message.className = 'message'; 
             this.elements.message.innerHTML = text;
-            this.elements.message.style.color = 'var(--fluo-orange)'; // Default to fluo orange
+            this.elements.message.style.color = 'var(--fluo-orange)'; 
 
             if (type) {
                 this.elements.message.classList.add(type);
@@ -586,19 +587,19 @@
 
                 if (type === 'alert' || type === 'success') {
                     this.messageTimeout = setTimeout(() => {
-                        if (!this.isValidated) { // Only revert if not in a valid state
+                        if (!this.isValidated) { 
                             this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
-                        } else { // If still valid, revert to validity message
-                            this.updateStatus(); // Display expiration info again
+                        } else { 
+                            this.updateStatus(); 
                         }
                         this.messageTimeout = null;
-                    }, 5000); // Display for 5 seconds
+                    }, 5000); 
                 }
             }
         }
 
         showPortalButton() {
-            console.log("Showing portal buttons..."); // Added log
+            console.log("Showing portal buttons..."); 
             let portalBtn = document.getElementById('portalBtn');
             if (!portalBtn) {
                 portalBtn = document.createElement('button');
@@ -623,8 +624,7 @@
         }
 
         async togglePortal() {
-            console.log("Toggle portal initiated."); // Added log
-            // Re-validate just before crucial action
+            console.log("Toggle portal initiated."); 
             await this.refreshActivePinValidity(); 
             if (!this.isValidated || !this.isCurrentlyValid()) {
                 this.showMessage('Accès non valide ou expiré. Veuillez réessayer.', 'alert');
@@ -643,10 +643,10 @@
 
             try {
                 const response = await fetch(WEBHOOK_URL_REAL, { method: 'GET', mode: 'no-cors' });
-                console.log("Webhook response (no-cors means no direct access to response):", response); // Added log
+                console.log("Webhook response (no-cors means no direct access to response):", response); 
                 this.showMessage('Attention, le portail va s\'ouvrir/fermer.', 'success');
             } catch (error) {
-                console.error('Erreur lors de l\'envoi de la commande au portail:', error); // More detailed error
+                console.error('Erreur lors de l\'envoi de la commande au portail:', error); 
                 this.showMessage('Erreur lors de l\'envoi de la commande au portail. Réessayez.', 'alert');
             } finally {
                 setTimeout(() => {
@@ -680,8 +680,10 @@
                 return;
             }
 
-            const newArrivalTime = this.parseDateTime(freshPinEntry.date_arrival, freshPinEntry.time_arrival);
-            const newDepartureTime = this.parseDateTime(freshPinEntry.date_departure, freshPinEntry.time_departure);
+            // *** FIX APPLIED HERE: Use existing arrivalDateTime and departureDateTime fields directly ***
+            const newArrivalTime = new Date(freshPinEntry.arrivalDateTime);
+            const newDepartureTime = new Date(freshPinEntry.departureDateTime);
+            // ******************************************************************************************
 
             if (isNaN(newArrivalTime.getTime()) || isNaN(newDepartureTime.getTime())) {
                 console.error("Erreur de format de date/heure après rafraîchissement pour PIN:", this.currentActivePin, freshPinEntry);
