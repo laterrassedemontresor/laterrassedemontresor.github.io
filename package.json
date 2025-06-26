@@ -1,0 +1,9 @@
+{
+  "name": "montresor",
+  "version": "1.0.0",
+  "description": "Site La Terrasse de Montrésor avec fonction portail",
+  "main": "index.html",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
