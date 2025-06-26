@@ -330,6 +330,7 @@
                 backspaceButton: document.getElementById('backspaceButton')
             };
 
+            console.log("PortalAccessSystem initialized."); // Added log
             this.init();
         }
 
@@ -338,6 +339,7 @@
             await this.loadPinData(); // Initial load of PIN data
             this.resetSystem(); // Ensure initial state is reset and input is focused
             this.startStatusTimer(); // Start timer to check for expiration later and periodically refresh active PIN validity
+            console.log("init() completed."); // Added log
         }
 
         setupEventListeners() {
@@ -375,6 +377,7 @@
                     await this.resetAndReloadData();
                 }
             });
+            console.log("Event listeners set up."); // Added log
         }
 
         animateElement(element) {
@@ -412,29 +415,39 @@
         }
 
         async loadPinData() {
+            console.log("Attempting to load PIN data from:", GOOGLE_SHEET_CSV_URL); // Added log
             try {
                 const response = await fetch(GOOGLE_SHEET_CSV_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                console.log("Fetch response received:", response); // Added log
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
                 
                 const csvText = await response.text();
+                console.log("CSV text received (first 200 chars):", csvText.substring(0, 200)); // Added log
                 this.pinData = this.parseCsv(csvText);
                 console.log("Données PIN chargées:", this.pinData); // Debugging output
                 if (this.pinData.length === 0) {
                     this.showMessage(`Aucun code PIN trouvé. Contactez l'administrateur.`, 'alert');
+                    console.warn("No PIN data parsed. Check CSV format or source."); // Added log
                 }
             } catch (error) {
                 console.error("Erreur lors du chargement des données PIN:", error);
-                this.showMessage('Erreur de chargement des données. Réessayez.', 'alert');
+                this.showMessage(`Erreur de chargement des données. (${error.message}). Réessayez.`, 'alert'); // Display error message
             }
         }
 
         parseCsv(csvText) {
             const lines = csvText.trim().split('\n');
-            if (lines.length <= 1) return []; // No data or only header
+            if (lines.length <= 1) {
+                console.log("No data lines in CSV (only header or empty)."); // Added log
+                return []; // No data or only header
+            }
             
             const headers = lines[0].split(',').map(header => header.trim());
             
-            return lines.slice(1).map(line => {
+            const parsedPins = lines.slice(1).map(line => {
                 const values = line.split(',').map(value => value.trim());
                 const entry = {};
                 headers.forEach((header, index) => {
@@ -442,12 +455,13 @@
                 });
                 return entry;
             });
+            console.log("Parsed CSV data:", parsedPins); // Added log
+            return parsedPins;
         }
 
         // Parses date/time from "JJ/MM/AAAA" and "hh:mm" strings
         parseDateTime(dateStr, timeStr) {
             const dateParts = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-            // Updated regex for hh:mm, seconds part is optional
             const timeParts = timeStr.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
 
             if (!dateParts || !timeParts) {
@@ -460,14 +474,16 @@
             const day = parseInt(dateParts[1], 10);
             const hour = parseInt(timeParts[1], 10);
             const minute = parseInt(timeParts[2], 10);
-            // Default seconds to 0 if not present in the time string
             const second = timeParts[3] ? parseInt(timeParts[3], 10) : 0; 
             
-            return new Date(year, month, day, hour, minute, second);
+            const dateObj = new Date(year, month, day, hour, minute, second);
+            console.log(`Parsed date ${dateStr} ${timeStr} to:`, dateObj); // Added log
+            return dateObj;
         }
 
         async validatePin() {
             const enteredPin = this.elements.pinInput.value.toUpperCase(); // Ensure uppercase for comparison
+            console.log("Validating PIN:", enteredPin); // Added log
             if (enteredPin.length !== PIN_LENGTH) {
                 this.showMessage(`Le code PIN doit contenir ${PIN_LENGTH} chiffres/lettres.`, 'alert');
                 return;
@@ -475,6 +491,7 @@
 
             const now = new Date();
             const pinEntry = this.pinData.find(entry => entry.PIN && entry.PIN.toUpperCase() === enteredPin);
+            console.log("Found PIN entry:", pinEntry); // Added log
 
             if (!pinEntry) {
                 this.showMessage('Code PIN incorrect', 'alert');
@@ -512,17 +529,20 @@
                 this.elements.pinSection.classList.add('hidden'); // Hide input section
                 this.showPortalButton(); // Show gate button
                 this.showMessage('Accès accordé !', 'success'); // Success message
+                console.log(`PIN ${enteredPin} valid until:`, this.expirationDate); // Added log
             }
         }
 
         // New method to reset session and reload data
         async resetAndReloadData() {
+            console.log("Resetting system and reloading data..."); // Added log
             this.resetSystem(); // Reset UI and session state
             await this.loadPinData(); // Reload data from Google Sheet
             this.showMessage('Session réinitialisée. Saisissez un code PIN.', 'info');
         }
 
         resetSystem() {
+            console.log("Resetting system state..."); // Added log
             this.isValidated = false;
             this.arrivalDate = null;
             this.expirationDate = null;
@@ -578,31 +598,32 @@
         }
 
         showPortalButton() {
+            console.log("Showing portal buttons..."); // Added log
             let portalBtn = document.getElementById('portalBtn');
             if (!portalBtn) {
                 portalBtn = document.createElement('button');
-                portalBtn.id = 'portalBtn';
+                portalBtn.id = 'portalBtn'; 
                 portalBtn.classList.add('portal-btn');
                 this.elements.dynamicContent.appendChild(portalBtn);
             }
-            portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; // Changed to use innerHTML for two lines
+            portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; 
             portalBtn.disabled = false;
             
-            // New reset button
             let resetButton = document.getElementById('resetButton');
             if (!resetButton) {
                 resetButton = document.createElement('button');
-                resetButton.id = 'resetButton';
+                resetButton.id = 'resetButton'; 
                 resetButton.classList.add('reset-btn');
                 resetButton.textContent = 'Déconnexion / Réinitialiser';
                 this.elements.dynamicContent.appendChild(resetButton);
             }
             resetButton.disabled = false;
 
-            this.setFocus(portalBtn); // Focus the main action button
+            this.setFocus(portalBtn); 
         }
 
         async togglePortal() {
+            console.log("Toggle portal initiated."); // Added log
             // Re-validate just before crucial action
             await this.refreshActivePinValidity(); 
             if (!this.isValidated || !this.isCurrentlyValid()) {
@@ -612,49 +633,50 @@
             }
 
             const portalBtn = document.getElementById('portalBtn');
-            const resetButton = document.getElementById('resetButton'); // Get the reset button too
+            const resetButton = document.getElementById('resetButton'); 
             if (!portalBtn) return;
 
             portalBtn.disabled = true;
-            if (resetButton) resetButton.disabled = true; // Disable reset button during action
+            if (resetButton) resetButton.disabled = true; 
             portalBtn.textContent = 'Action en cours...';
             this.showMessage('Commande envoyée au portail...', 'info');
 
             try {
-                await fetch(WEBHOOK_URL_REAL, { method: 'GET', mode: 'no-cors' });
+                const response = await fetch(WEBHOOK_URL_REAL, { method: 'GET', mode: 'no-cors' });
+                console.log("Webhook response (no-cors means no direct access to response):", response); // Added log
                 this.showMessage('Attention, le portail va s\'ouvrir/fermer.', 'success');
             } catch (error) {
-                console.error('Erreur lors de l\'envoi de la commande au portail. Réessayez.', 'alert');
+                console.error('Erreur lors de l\'envoi de la commande au portail:', error); // More detailed error
+                this.showMessage('Erreur lors de l\'envoi de la commande au portail. Réessayez.', 'alert');
             } finally {
                 setTimeout(() => {
                     if (this.isValidated && this.isCurrentlyValid() && portalBtn) {
                         portalBtn.disabled = false;
-                        portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; // Ensure two lines are restored
-                        if (resetButton) resetButton.disabled = false; // Re-enable reset button
-                        this.updateStatus(); // Re-display expiration info
+                        portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; 
+                        if (resetButton) resetButton.disabled = false; 
+                        this.updateStatus(); 
                     } else {
-                        this.resetSystem(); // If no longer valid, reset completely
+                        this.resetSystem(); 
                     }
                 }, 3000);
             }
         }
 
-        // New method to refresh the validity of the currently active PIN
         async refreshActivePinValidity() {
-            this.lastDataRefreshTime = Date.now(); // Mark when refresh started
-            if (!this.currentActivePin) return; // No active PIN to refresh
+            this.lastDataRefreshTime = Date.now(); 
+            if (!this.currentActivePin) return; 
 
-            console.log("Refreshing active PIN validity...");
-            await this.loadPinData(); // Load fresh data from Google Sheet
+            console.log("Refreshing active PIN validity for:", this.currentActivePin); 
+            await this.loadPinData(); 
 
             const freshPinEntry = this.pinData.find(entry => 
                 entry.PIN && entry.PIN.toUpperCase() === this.currentActivePin
             );
 
             if (!freshPinEntry) {
-                // PIN no longer exists in the sheet (e.g., deleted)
                 this.resetSystem();
                 this.showMessage('Votre code PIN a été révoqué ou modifié.<br>Veuillez saisir un nouveau code.', 'alert');
+                console.warn("Active PIN no longer found after refresh.");
                 return;
             }
 
@@ -662,7 +684,7 @@
             const newDepartureTime = this.parseDateTime(freshPinEntry.date_departure, freshPinEntry.time_departure);
 
             if (isNaN(newArrivalTime.getTime()) || isNaN(newDepartureTime.getTime())) {
-                console.error("Erreur de format de date/heure après rafraîchissement pour PIN:", this.currentActivePin);
+                console.error("Erreur de format de date/heure après rafraîchissement pour PIN:", this.currentActivePin, freshPinEntry);
                 this.resetSystem();
                 this.showMessage('Erreur de format de date/heure.<br>Réinitialisation requise.', 'alert');
                 return;
@@ -670,28 +692,25 @@
 
             const now = new Date();
             if (now < newArrivalTime || now >= newDepartureTime) {
-                // PIN is no longer valid based on fresh dates
                 this.resetSystem();
                 this.showMessage('Votre accès a expiré ou n\'est plus valide.<br>Veuillez saisir un nouveau code.', 'alert');
+                console.warn("Active PIN no longer valid after refresh due to time conditions.");
                 return;
             }
 
-            // PIN is still valid, update internal dates
             this.arrivalDate = newArrivalTime;
             this.expirationDate = newDepartureTime;
-            this.isValidated = true; // Ensure it remains true
+            this.isValidated = true; 
             console.log("Active PIN validity refreshed. New expiration:", this.expirationDate);
         }
 
 
-        async updateStatus() { // Made updateStatus async
+        async updateStatus() { 
             const now = new Date();
             if (this.messageTimeout && (this.elements.message.classList.contains('alert') || this.elements.message.classList.contains('success'))) {
-                // Do not override an ongoing alert or success message until its timeout expires
                 return;
             }
 
-            // Periodically refresh active PIN data if a session is valid
             if (this.isValidated && (Date.now() - this.lastDataRefreshTime > REFRESH_INTERVAL_MS)) {
                 await this.refreshActivePinValidity();
             }
@@ -703,8 +722,8 @@
                     this.isValidated = false;
                     this.resetSystem();
                     this.showMessage('Votre accès a expiré.<br>Veuillez saisir un nouveau code', 'alert');
+                    console.log("PIN expired.");
                 } else {
-                    // French day and month names
                     const daysOfWeek = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
                     const months = ["janvier", "février", "mars", "avril", "mai", "juin", 
                                     "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
@@ -717,13 +736,11 @@
                     const minutes = this.expirationDate.getMinutes().toString().padStart(2, '0');
 
                     const formattedExpiration = `${dayOfWeek} ${dayOfMonth} ${month} ${year} à ${hours}h${minutes}`;
-                    // Added a line break after "Accès valide jusqu'au"
                     this.showMessage(`Accès valide jusqu'au<br>${formattedExpiration}`, 'info');
                 }
             } else if (!this.isValidated && this.elements.pinSection.classList.contains('hidden')) {
-                // This state should ideally not be reached if resetSystem works as expected.
-                // It means pinSection is hidden but isValidated is false. Force a reset.
                 this.resetSystem();
+                console.warn("Pin section hidden but not validated. Forcing reset.");
             } else if (!this.isValidated) {
                 this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
             }
@@ -735,12 +752,10 @@
         }
 
         startStatusTimer() {
-            // Call updateStatus immediately, then set interval
             this.updateStatus(); 
             if (this.statusInterval) clearInterval(this.statusInterval);
-            // Set a shorter interval for status updates (e.g., 1 second)
-            // The data refresh itself will be less frequent, handled inside updateStatus
             this.statusInterval = setInterval(() => this.updateStatus(), 1000); 
+            console.log("Status timer started.");
         }
     }
 
