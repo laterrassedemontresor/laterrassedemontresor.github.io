@@ -233,7 +233,7 @@
             this.expirationDate = null;
             this.isValidated = false;
             this.statusInterval = null;
-            this.dataRefreshInterval = null; // Still good to have the property, but it won't be set for automatic refresh
+            this.dataRefreshInterval = null; 
 
             this.addEventListeners();
             this.init();
@@ -252,14 +252,13 @@
 
         async init() {
             this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
-            await this.loadPinData(); // Initial load of PIN data
-            this.startStatusTimer(); // Starts the 1-second UI update timer
+            await this.loadPinData(); 
+            this.startStatusTimer(); 
 
-            // *** MODIFICATION ICI : Suppression de l'actualisation automatique toutes les minutes ***
-            // La mise à jour des données sera désormais déclenchée par le bouton "Réinitialiser"
+            // Pas de rafraîchissement automatique, la mise à jour se fait avec le bouton "Réinitialiser"
             if (this.dataRefreshInterval) {
                 clearInterval(this.dataRefreshInterval);
-                this.dataRefreshInterval = null; // Set to null after clearing
+                this.dataRefreshInterval = null;
             }
         }
 
