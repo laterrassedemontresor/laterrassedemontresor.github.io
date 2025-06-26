@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienvenue à La Terrasse de Montrésor</title>
+    <style>
+        :root {
+            --dark-blue: #2c3e50;
+            --medium-blue: #34495e;
+            --light-blue: #00ff0071; /* Original green for positive actions/focus */
+            --lighter-blue: #2980b9;
+            --text-color: white;
+            --light-text-color: #ecf0f1;
+            --red: #e74c3c;
+            --dark-red: #c0392b;
+            --green: #2ecc71; /* A standard green for success */
+            --dark-green: #27ae60; /* Darker green for hover */
+            --focused-color: #ff6b35;
+            --shadow-color: rgba(0,0,0,0.3);
+            --focused-shadow-color: rgba(255, 107, 53, 0.3);
+            --disabled-color: #7f8c8d;
+            --background-input: #1a252f; /* Background for the input field */
+            --bright-red: #ff0000;
+            --info-blue: #3498db; /* A distinct blue for info messages */
+            --dark-info-blue: #2980b9;
+            --fluo-orange: #FF6600; /* Fluorescent Orange for messages */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            user-select: none;
+        }
+
+        .container {
+            background: var(--dark-blue);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px var(--shadow-color);
+            width: 100%;
+            max-width: 320px;
+            padding: 25px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--green), var(--dark-green));
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--light-text-color);
+            line-height: 1.3;
+        }
+        
+        .message {
+            border-radius: 12px;
+            margin-bottom: 12px;
+            padding: 15px;
+            text-align: center;
+            min-height: 4.2em; /* Fixed height for two lines of text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--fluo-orange); /* Fluorescent Orange text */
+            background: transparent; /* No background */
+            border: none; /* No border */
+            box-sizing: border-box;
+        }
+
+        /* Message type colors for text only, background is always transparent */
+        .message.success {
+            color: var(--green);
+        }
+
+        .message.alert {
+            color: var(--bright-red);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .message.info {
+            color: var(--info-blue);
+        }
+
+        #pinInput { /* Styled for standard text input */
+            background: var(--background-input);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            width: 100%;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px; /* Adjusted for alphanumeric */
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: var(--light-text-color);
+            outline: none; /* Remove default focus outline */
+            text-transform: uppercase; /* Ensure alphanumeric PINs are consistent */
+            box-sizing: border-box; /* Include padding in width */
+            -webkit-appearance: none; /* Remove iOS default styles */
+        }
+
+        #pinInput:focus {
+            border-color: var(--focused-color);
+            box-shadow: 0 0 20px var(--focused-shadow-color);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns for OK and Backspace */
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .action-buttons button {
+            /* Styles adopted from keypad buttons in your original design */
+            background: var(--medium-blue); /* Default button background */
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            appearance: none;
+        }
+
+        .action-buttons button:hover:not(:disabled) {
+            background: #3d5a75; /* Darker on hover */
+            transform: translateY(-2px);
+        }
+
+        .action-buttons button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .action-buttons button:disabled {
+            background: var(--dark-blue);
+            color: var(--disabled-color);
+            cursor: not-allowed;
+        }
+
+        /* Specific colors for Check and Backspace buttons, overriding default */
+        .check-pin-btn {
+            background: var(--green) !important;
+        }
+
+        .check-pin-btn:hover:not(:disabled) {
+            background: var(--dark-green) !important;
+        }
+
+        .backspace-btn {
+            background: var(--red) !important;
+        }
+
+        .backspace-btn:hover:not(:disabled) {
+            background: var(--dark-red) !important;
+        }
+
+        .portal-btn {
+            width: 100%;
+            background: var(--info-blue);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            margin-bottom: 0px;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            line-height: 1.2; /* Adjust line height for two lines */
+        }
+
+        .portal-btn:hover:not(:disabled) {
+            background: var(--dark-info-blue);
+            transform: translateY(-2px);
+        }
+
+        .portal-btn:disabled {
+            background: var(--disabled-color);
+            cursor: not-allowed;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-height: 650px) {
+            .container { padding: 20px; max-width: 300px; }
+            .title { font-size: 18px; }
+            #pinInput { font-size: 20px; padding: 10px; }
+            .message { padding: 10px; margin-bottom: 8px; min-height: 4em; } /* Adjust for smaller screens */
+            .action-buttons button { font-size: 20px; padding: 12px; min-height: 45px; }
+            .portal-btn { padding: 15px; }
+        }
+
+        @media (max-height: 550px) {
+            .container { padding: 15px; max-width: 280px; }
+            .title { font-size: 16px; margin-bottom: 15px; }
+            #pinInput { font-size: 18px; padding: 8px; }
+            .message { padding: 8px; margin-bottom: 6px; min-height: 3.8em; } /* Adjust for smaller screens */
+            .action-buttons button { font-size: 18px; padding: 10px; min-height: 40px; }
+            .portal-btn { padding: 12px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🏠</div>
+        <h1 class="title">Bienvenue à La Terrasse<br>de Montrésor</h1>
+        
+        <div class="message" id="message">Saisissez votre code à 4 chiffres</div>
+
+        <div class="dynamic-content" id="dynamicContent">
+            </div>
+
+        <div class="pin-section" id="pinSection">
+            <input type="text" id="pinInput" maxlength="4" placeholder="••••" 
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                   inputmode="text"> <div class="action-buttons">
+                <button id="backspaceButton" class="backspace-btn">&#9003;</button>
+                <button id="checkPinButton" class="check-pin-btn">&#10003;</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const WEBHOOK_URL_REAL = "https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html";
+    const GOOGLE_SHEET_CSV_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/e/2PACX-1vSPS5zMM1RwapLlcJ0ljKeaHbYqGGoQSrCfN8YoWxYcxWCSphQNFpqBYCMxwECVt_qr1MoaC0ExFgf-/pub?gid=0&single=true&output=csv");
+    const PIN_LENGTH = 4; // Define PIN length here
+
+    class PortalAccessSystem {
+        constructor() {
+            this.pinData = []; // Stores all PIN entries from Google Sheet
+            this.arrivalDate = null; // For the current valid session's arrival
+            this.expirationDate = null; // For the current valid session's departure
+            this.isValidated = false; // True if a PIN is currently active
+            this.focusedElement = null; // For CSS focus styling
+            this.statusInterval = null; // Interval for status updates
+            this.messageTimeout = null; // Timeout for alert messages
+            
+            this.elements = {
+                message: document.getElementById('message'),
+                pinInput: document.getElementById('pinInput'),
+                pinSection: document.getElementById('pinSection'),
+                dynamicContent: document.getElementById('dynamicContent'),
+                checkPinButton: document.getElementById('checkPinButton'),
+                backspaceButton: document.getElementById('backspaceButton')
+            };
+
+            this.init();
+        }
+
+        async init() {
+            this.setupEventListeners();
+            await this.loadPinData();
+            this.resetSystem(); // Ensure initial state is reset and input is focused
+            this.startStatusTimer(); // Start timer to check for expiration later
+        }
+
+        setupEventListeners() {
+            this.elements.checkPinButton.addEventListener('click', () => {
+                this.animateElement(this.elements.checkPinButton);
+                this.validatePin();
+            });
+
+            this.elements.backspaceButton.addEventListener('click', () => {
+                this.animateElement(this.elements.backspaceButton);
+                this.removeDigit();
+            });
+
+            // Handle keyboard input (for PCs/tablets with physical keyboards)
+            this.elements.pinInput.addEventListener('input', () => {
+                // Automatically convert to uppercase as user types
+                this.elements.pinInput.value = this.elements.pinInput.value.toUpperCase();
+                this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`); // Clear messages on input
+                this.updateButtonStates();
+            });
+
+            this.elements.pinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && this.elements.pinInput.value.length === PIN_LENGTH) {
+                    e.preventDefault(); // Prevent default form submission behavior
+                    this.validatePin();
+                }
+            });
+
+            // Handle clicks on dynamically added portal button
+            this.elements.dynamicContent.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'portalBtn') {
+                    this.togglePortal();
+                }
+            });
+        }
+
+        animateElement(element) {
+            element.classList.add('pulse');
+            setTimeout(() => element.classList.remove('pulse'), 300);
+        }
+
+        setFocus(element) {
+            if (this.focusedElement) {
+                this.focusedElement.classList.remove('focused');
+            }
+            if (element) {
+                element.classList.add('focused');
+                this.focusedElement = element;
+                // For input field, explicitly focus it
+                if (element.tagName === 'INPUT') {
+                    element.focus();
+                }
+            } else {
+                this.focusedElement = null; // Clear focus if no element provided
+            }
+        }
+
+        updateButtonStates() {
+            const currentLength = this.elements.pinInput.value.length;
+            this.elements.checkPinButton.disabled = currentLength !== PIN_LENGTH;
+        }
+
+        removeDigit() {
+            if (this.elements.pinInput.value.length > 0) {
+                this.elements.pinInput.value = this.elements.pinInput.value.slice(0, -1);
+                this.updateButtonStates();
+                this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
+            }
+        }
+
+        async loadPinData() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const csvText = await response.text();
+                this.pinData = this.parseCsv(csvText);
+                console.log("Données PIN chargées:", this.pinData);
+                if (this.pinData.length === 0) {
+                    this.showMessage(`Aucun code PIN trouvé. Contactez l'administrateur.`, 'alert');
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des données PIN:", error);
+                this.showMessage('Erreur de chargement des données. Réessayez.', 'alert');
+            }
+        }
+
+        parseCsv(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length <= 1) return []; // No data or only header
+            
+            const headers = lines[0].split(',').map(header => header.trim());
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',').map(value => value.trim());
+                const entry = {};
+                headers.forEach((header, index) => {
+                    entry[header] = values[index];
+                });
+                return entry;
+            });
+        }
+
+        // Parses date/time from "JJ/MM/AAAA" and "hh:mm" strings
+        parseDateTime(dateStr, timeStr) {
+            const dateParts = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            // Updated regex for hh:mm, seconds part is optional
+            const timeParts = timeStr.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+
+            if (!dateParts || !timeParts) {
+                console.error("Format de date ou d'heure invalide :", dateStr, timeStr);
+                return new Date(NaN); // Returns an invalid date
+            }
+
+            const year = parseInt(dateParts[3], 10);
+            const month = parseInt(dateParts[2], 10) - 1; // Month is 0-indexed in JavaScript (January = 0)
+            const day = parseInt(dateParts[1], 10);
+            const hour = parseInt(timeParts[1], 10);
+            const minute = parseInt(timeParts[2], 10);
+            // Default seconds to 0 if not present in the time string
+            const second = timeParts[3] ? parseInt(timeParts[3], 10) : 0; 
+            
+            return new Date(year, month, day, hour, minute, second);
+        }
+
+        async validatePin() {
+            const enteredPin = this.elements.pinInput.value.toUpperCase(); // Ensure uppercase for comparison
+            if (enteredPin.length !== PIN_LENGTH) {
+                this.showMessage(`Le code PIN doit contenir ${PIN_LENGTH} chiffres/lettres.`, 'alert');
+                return;
+            }
+
+            const now = new Date();
+            const pinEntry = this.pinData.find(entry => entry.PIN && entry.PIN.toUpperCase() === enteredPin);
+
+            if (!pinEntry) {
+                this.showMessage('Code PIN incorrect', 'alert');
+                this.elements.pinInput.value = ''; // Clear for re-entry
+                this.updateButtonStates();
+                return;
+            }
+
+            const arrivalTime = this.parseDateTime(pinEntry.date_arrival, pinEntry.time_arrival);
+            const departureTime = this.parseDateTime(pinEntry.date_departure, pinEntry.time_departure);
+            
+            if (isNaN(arrivalTime.getTime()) || isNaN(departureTime.getTime())) {
+                console.error("Parsed invalid arrival or departure time for PIN:", enteredPin, pinEntry);
+                this.showMessage('Erreur de format de date/heure pour ce code PIN.', 'alert');
+                this.elements.pinInput.value = '';
+                this.updateButtonStates();
+                return;
+            }
+
+            if (now < arrivalTime) {
+                this.showMessage('Accès non encore accordé', 'alert');
+                this.elements.pinInput.value = '';
+                this.updateButtonStates();
+            } else if (now >= departureTime) {
+                this.showMessage('Code PIN expiré', 'alert');
+                this.elements.pinInput.value = '';
+                this.updateButtonStates();
+            } else {
+                // PIN is valid and within the active window
+                this.arrivalDate = arrivalTime;
+                this.expirationDate = departureTime;
+                this.isValidated = true;
+                
+                this.elements.pinSection.classList.add('hidden'); // Hide input section
+                this.showPortalButton(); // Show gate button
+                this.showMessage('Accès accordé !', 'success'); // Success message
+            }
+        }
+
+        resetSystem() {
+            this.isValidated = false;
+            this.arrivalDate = null;
+            this.expirationDate = null;
+            
+            this.elements.pinSection.classList.remove('hidden'); // Show input section
+            // Remove portal button if it exists
+            const portalBtn = document.getElementById('portalBtn');
+            if (portalBtn) portalBtn.remove();
+            
+            this.elements.pinInput.value = ''; // Clear input field
+            this.updateButtonStates(); // Update button disabled state
+            this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`); // Set initial message
+            this.setFocus(this.elements.pinInput); // Focus the input field
+        }
+
+        showMessage(text, type = '') {
+            if (this.messageTimeout) {
+                clearTimeout(this.messageTimeout);
+                this.messageTimeout = null;
+            }
+
+            this.elements.message.className = 'message'; // Reset classes
+            this.elements.message.innerHTML = text;
+            this.elements.message.style.color = 'var(--fluo-orange)'; // Default to fluo orange
+
+            if (type) {
+                this.elements.message.classList.add(type);
+                if (type === 'alert') {
+                    this.elements.message.style.color = 'var(--bright-red)';
+                } else if (type === 'success') {
+                    this.elements.message.style.color = 'var(--green)';
+                } else if (type === 'info') {
+                    this.elements.message.style.color = 'var(--info-blue)';
+                }
+
+                if (type === 'alert' || type === 'success') {
+                    this.messageTimeout = setTimeout(() => {
+                        if (!this.isValidated) {
+                            this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
+                        }
+                        this.messageTimeout = null;
+                    }, 5000); // Display for 5 seconds
+                }
+            }
+        }
+
+        showPortalButton() {
+            let portalBtn = document.getElementById('portalBtn');
+            if (!portalBtn) {
+                portalBtn = document.createElement('button');
+                portalBtn.id = 'portalBtn';
+                portalBtn.classList.add('portal-btn');
+                this.elements.dynamicContent.appendChild(portalBtn);
+            }
+            portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; // Changed to use innerHTML for two lines
+            portalBtn.disabled = false;
+            this.setFocus(portalBtn);
+        }
+
+        async togglePortal() {
+            if (!this.isValidated || !this.isCurrentlyValid()) {
+                this.showMessage('Accès non valide ou expiré. Veuillez réessayer.', 'alert');
+                this.resetSystem();
+                return;
+            }
+
+            const portalBtn = document.getElementById('portalBtn');
+            if (!portalBtn) return;
+
+            portalBtn.disabled = true;
+            portalBtn.textContent = 'Action en cours...';
+            this.showMessage('Commande envoyée au portail...', 'info');
+
+            try {
+                await fetch(WEBHOOK_URL_REAL, { method: 'GET', mode: 'no-cors' });
+                this.showMessage('Le portail va s\'ouvrir/fermer (commande envoyée à Alexa).', 'success');
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi de la commande au portail. Réessayez.', 'alert');
+            } finally {
+                setTimeout(() => {
+                    if (this.isValidated && this.isCurrentlyValid() && portalBtn) {
+                        portalBtn.disabled = false;
+                        portalBtn.innerHTML = 'Ouvrir / Fermer<br>le Portail'; // Ensure two lines are restored
+                        this.showMessage('Accès valide');
+                    } else {
+                        this.resetSystem();
+                    }
+                }, 3000);
+            }
+        }
+
+        updateStatus() {
+            const now = new Date();
+            if (this.messageTimeout && (this.elements.message.classList.contains('alert') || this.elements.message.classList.contains('success'))) {
+                return;
+            }
+
+            if (this.isValidated && this.expirationDate) {
+                const timeLeft = this.expirationDate - now;
+
+                if (timeLeft <= 0) {
+                    this.isValidated = false;
+                    this.resetSystem();
+                    this.showMessage('Votre accès a expiré.<br>Veuillez saisir un nouveau code', 'alert');
+                } else {
+                    // French day and month names
+                    const daysOfWeek = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+                    const months = ["janvier", "février", "mars", "avril", "mai", "juin", 
+                                    "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+                    const dayOfWeek = daysOfWeek[this.expirationDate.getDay()];
+                    const dayOfMonth = this.expirationDate.getDate();
+                    const month = months[this.expirationDate.getMonth()];
+                    const year = this.expirationDate.getFullYear();
+                    const hours = this.expirationDate.getHours().toString().padStart(2, '0');
+                    const minutes = this.expirationDate.getMinutes().toString().padStart(2, '0');
+
+                    const formattedExpiration = `${dayOfWeek} ${dayOfMonth} ${month} ${year} à ${hours}h${minutes}`;
+                    // Added a line break after "Accès valide jusqu'au"
+                    this.showMessage(`Accès valide jusqu'au<br>${formattedExpiration}`, 'info');
+                }
+            } else if (!this.isValidated && this.elements.pinSection.classList.contains('hidden')) {
+                this.resetSystem();
+            } else if (!this.isValidated) {
+                this.showMessage(`Saisissez votre code à ${PIN_LENGTH} chiffres`);
+            }
+        }
+
+        isCurrentlyValid() {
+            const now = new Date();
+            return this.arrivalDate && this.expirationDate && now >= this.arrivalDate && now < this.expirationDate;
+        }
+
+        startStatusTimer() {
+            this.updateStatus();
+            if (this.statusInterval) clearInterval(this.statusInterval);
+            this.statusInterval = setInterval(() => this.updateStatus(), 1000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new PortalAccessSystem();
+    });
+</script>
+</body>
+</html>
