@@ -20,8 +20,8 @@ const db = admin.firestore();
 exports.handler = async (event, context) => {
     try {
         const pins = [];
-        // Change 'pins' to your new collection name 'LaterrassePINsDB'
-        const snapshot = await db.collection('LaterrassePINsDB').get();
+        // CORRECTION ICI: La collection est bien 'pins', pas 'LaterrassePINsDB'
+        const snapshot = await db.collection('pins').get();
 
         snapshot.forEach(doc => {
             const data = doc.data();
@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
             const row = [
                 `"${pin.PIN}"`,
                 `"${pin.arrivalDateTime.toISOString()}"`, // Ensure ISO string for dates
-                `"${pin.departureDateTime.toISOString()}"`  // Ensure ISO string for dates
+                `"${pin.departureDateTime.toISOString()}"`,  // Ensure ISO string for dates
             ].join(',');
             csv += row + '\n';
         });
@@ -60,7 +60,7 @@ exports.handler = async (event, context) => {
                 "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
                 "Pragma": "no-cache",
                 "Expires": "0",
-                "Surrogate-Control": "no-store"
+                "Surrogate-Control": "no-store",
             },
             body: csv,
         };
