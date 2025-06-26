@@ -20,7 +20,6 @@ const db = admin.firestore();
 exports.handler = async (event, context) => {
     try {
         const pins = [];
-        // CORRECTION ICI: La collection est bien 'pins', pas 'LaterrassePINsDB'
         const snapshot = await db.collection('pins').get();
 
         snapshot.forEach(doc => {
@@ -42,12 +41,11 @@ exports.handler = async (event, context) => {
 
         // Add each PIN entry to the CSV
         pins.forEach(pin => {
-            // Enclose date strings in quotes to handle potential commas or complex formats,
-            // though ISO 8601 usually doesn't need it, it's safer for CSV
+            // CORRECTION ICI: Utilisez .toDate() avant .toISOString()
             const row = [
                 `"${pin.PIN}"`,
-                `"${pin.arrivalDateTime.toISOString()}"`, // Ensure ISO string for dates
-                `"${pin.departureDateTime.toISOString()}"`,  // Ensure ISO string for dates
+                `"${pin.arrivalDateTime.toDate().toISOString()}"`, // Convertir en Date JavaScript
+                `"${pin.departureDateTime.toDate().toISOString()}"`  // Convertir en Date JavaScript
             ].join(',');
             csv += row + '\n';
         });
