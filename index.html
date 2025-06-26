@@ -305,8 +305,8 @@
 <script>
     const WEBHOOK_URL_REAL = "https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html";
     const GOOGLE_SHEET_CSV_URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPS5zMM1RwapLlcJ0ljKeaHbYqGGoQSrCfN8YoWxYcxWCSphQNFpqBYCMxwECVt_qr1MoaC0ExFgf-/pub?gid=0&single=true&output=csv"; // L'URL de base de votre feuille Google
-    // Utilisation d'un proxy CORS pour accéder à la Google Sheet
-    const GOOGLE_SHEET_CSV_URL = `https://cors-anywhere.herokuapp.com/${GOOGLE_SHEET_CSV_URL_BASE}&nocache=${new Date().getTime()}`;
+    // Nouvelle URL pour la fonction Netlify
+    const GOOGLE_SHEET_CSV_URL = "/.netlify/functions/get-sheet";
     const PIN_LENGTH = 4; // Define PIN length here
     const REFRESH_INTERVAL_MS = 60000; // Refresh data every 60 seconds for active sessions
 
