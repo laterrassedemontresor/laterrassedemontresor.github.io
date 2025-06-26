@@ -1,6 +1,5 @@
-// netlify/functions/get-sheet.js
+// netlify/functions/get-sheets.js
 exports.handler = async function(event, context) {
-    // Votre logique pour récupérer le CSV ici
     const GOOGLE_SHEET_CSV_URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPS5zMM1RwapLlcJ0ljKeaHbYqGGoQSrCfN8YoWxYcxWCSphQNFpqBYCMxwECVt_qr1MoaC0ExFgf-/pub?gid=0&single=true&output=csv";
     try {
         const response = await fetch(GOOGLE_SHEET_CSV_URL_BASE);
@@ -14,16 +13,9 @@ exports.handler = async function(event, context) {
         return {
             statusCode: 200,
             headers: {
-                "Content-Type": "text/csv", // Important pour que le navigateur sache que c'est du CSV
-                 "Access-Control-Allow-Origin": "*" // Important pour les requêtes CORS
+                "Content-Type": "text/csv",
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", // Empêche la mise en cache
+                "Pragma": "no-cache", // Pour la compatibilité avec d'anciens caches
+                "Expires": "0" // Pour la compatibilité avec d'anciens caches
             },
-            body: csvData
-        };
-    } catch (error) {
-        console.error("Erreur dans la fonction Netlify:", error);
-        return {
-            statusCode: 500,
-            body: `Erreur interne du serveur: ${error.message}`
-        };
-    }
-};
