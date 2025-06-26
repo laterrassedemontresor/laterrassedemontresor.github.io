@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienvenue à La Terrasse de Montrésor</title>
+    <style>
+        :root {
+            --dark-blue: #2c3e50;
+            --medium-blue: #34495e;
+            --light-blue: #00ff0071;
+            --lighter-blue: #2980b9;
+            --text-color: white;
+            --light-text-color: #ecf0f1;
+            --red: #e74c3c;
+            --dark-red: #c0392b;
+            --green: #00ff0071;
+            --dark-green: #229954;
+            --focused-color: #ff6b35;
+            --shadow-color: rgba(0,0,0,0.3);
+            --focused-shadow-color: rgba(255, 107, 53, 0.3);
+            --disabled-color: #7f8c8d;
+            --background-pin-display: #1a252f;
+            --bright-red: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            user-select: none;
+        }
+
+        .container {
+            background: var(--dark-blue);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px var(--shadow-color);
+            width: 100%;
+            max-width: 320px;
+            padding: 25px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--light-blue), var(--lighter-blue));
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--light-text-color);
+            line-height: 1.3;
+        }
+        
+        .message {
+            border-radius: 12px;
+            margin-bottom: 0px;
+            text-align: center;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--green);
+            border: 2px solid var(--green);
+            padding: 15px;
+            min-height: 50px;
+        }
+
+        .message.alert {
+            color: var(--bright-red);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .message.info {
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--light-blue);
+            border: 2px solid var(--light-blue);
+            padding: 15px;
+            min-height: 50px;
+        }
+
+        .pin-display {
+            background: var(--background-pin-display);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+            min-height: 290px;
+        }
+
+        .key {
+            background: var(--medium-blue);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            min-height: 50px;
+            min-width: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            appearance: none;
+        }
+
+        .key:hover:not(:disabled) {
+            background: #3d5a75;
+            transform: translateY(-2px);
+        }
+
+        .key:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .key:disabled {
+            background: var(--dark-blue);
+            color: var(--disabled-color);
+            cursor: not-allowed;
+        }
+
+        .focused {
+            border-color: var(--focused-color) !important;
+            box-shadow: 0 0 20px var(--focused-shadow-color) !important;
+        }
+
+        .backspace-key {
+            background: var(--red);
+        }
+
+        .backspace-key:hover:not(:disabled) {
+            background: var(--dark-red);
+        }
+
+        .validate-key {
+            background: var(--green);
+        }
+
+        .validate-key:hover:not(:disabled) {
+            background: var(--dark-green);
+        }
+
+        .portal-btn {
+            width: 100%;
+            background: var(--light-blue);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            margin-bottom: 20px;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .portal-btn:hover:not(:disabled) {
+            background: var(--lighter-blue);
+            transform: translateY(-2px);
+        }
+
+        .portal-btn:disabled {
+            background: var(--disabled-color);
+            cursor: not-allowed;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        .pin-section.validated {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @media (max-height: 650px) {
+            .container { padding: 20px; max-width: 300px; }
+            .title { font-size: 18px; }
+            .key { font-size: 20px; padding: 12px; }
+        }
+
+        @media (max-height: 550px) {
+            .container { padding: 15px; max-width: 280px; }
+            .title { font-size: 16px; margin-bottom: 15px; }
+            .key { font-size: 18px; padding: 10px; min-height: 45px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🏠</div>
+        <h1 class="title">Bienvenue à La Terrasse<br>de Montrésor</h1>
+        
+        <div class="dynamic-content" id="dynamicContent">
+            <div class="message" id="message">Saisissez votre code à 5 chiffres</div>
+        </div>
+
+        <div class="pin-section" id="pinSection">
+            <div class="pin-display" id="pinDisplay">•••••</div>
+            <div class="keypad" id="keypad"></div>
+        </div>
+    </div>
+
+<script>
+    const WEBHOOK_URL_REAL = "https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html";
+    const GOOGLE_SHEET_CSV_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/e/2PACX-1vSPS5zMM1RwapLlcJ0ljKeaHbYqGGoQSrCfN8YoWxYcxWCSphQNFpqBYCMxwECVt_qr1MoaC0ExFgf-/pub?gid=0&single=true&output=csv");
+
+    class PortalAccessSystem {
+        constructor() {
+            this.currentPin = '';
+            this.correctPin = null;
+            this.pinData = [];
+            this.expirationDate = null;
+            this.isValidated = false;
+            this.focusedElement = null;
+            this.statusInterval = null;
+            this.messageTimeout = null;
+            
+            this.elements = {
+                message: document.getElementById('message'),
+                pinDisplay: document.getElementById('pinDisplay'),
+                keypad: document.getElementById('keypad'),
+                pinSection: document.getElementById('pinSection'),
+                dynamicContent: document.getElementById('dynamicContent')
+            };
+
+            this.init();
+        }
+
+        async init() {
+            this.generateKeypad();
+            this.setupEventListeners();
+            await this.loadPinData();
+            this.checkStoredState();
+            this.startStatusTimer();
+            this.setFocus(this.elements.pinDisplay);
+        }
+
+        generateKeypad() {
+            const fragment = document.createDocumentFragment();
+            
+            // Chiffres 1-9
+            for (let i = 1; i <= 9; i++) {
+                const key = this.createKey(i.toString(), i.toString());
+                fragment.appendChild(key);
+            }
+
+            // Backspace
+            const backspaceKey = this.createKey('backspace', '⌫', 'backspace-key');
+            fragment.appendChild(backspaceKey);
+
+            // Zéro
+            const keyZero = this.createKey('0', '0');
+            fragment.appendChild(keyZero);
+
+            // Validate
+            const validateKey = this.createKey('validate', '✓', 'validate-key');
+            validateKey.disabled = true;
+            fragment.appendChild(validateKey);
+
+            this.elements.keypad.appendChild(fragment);
+        }
+
+        createKey(action, text, extraClass = '') {
+            const key = document.createElement('button');
+            key.classList.add('key');
+            if (extraClass) key.classList.add(extraClass);
+            key.dataset.action = action;
+            key.textContent = text;
+            return key;
+        }
+
+        setupEventListeners() {
+            this.elements.keypad.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('key')) return;
+                
+                const action = e.target.dataset.action;
+                this.animateElement(e.target);
+                
+                if (action >= '0' && action <= '9') {
+                    this.addDigit(action);
+                } else if (action === 'backspace') {
+                    this.removeDigit();
+                } else if (action === 'validate') {
+                    this.validatePin();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (this.isValidated) return;
+                
+                if (e.key >= '0' && e.key <= '9') {
+                    this.addDigit(e.key);
+                } else if (e.key === 'Backspace') {
+                    this.removeDigit();
+                } else if (e.key === 'Enter' && this.currentPin.length === 5) {
+                    this.validatePin();
+                }
+            });
+
+            this.elements.dynamicContent.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'portalBtn') {
+                    this.togglePortal();
+                }
+            });
+        }
+
+        animateElement(element) {
+            element.classList.add('pulse');
+            setTimeout(() => element.classList.remove('pulse'), 300);
+        }
+
+        setFocus(element) {
+            if (this.focusedElement) {
+                this.focusedElement.classList.remove('focused');
+            }
+            element.classList.add('focused');
+            this.focusedElement = element;
+        }
+
+        addDigit(digit) {
+            if (this.currentPin.length < 5 && !this.isValidated) {
+                this.currentPin += digit;
+                this.updatePinDisplay();
+                
+                const validateBtn = this.elements.keypad.querySelector('[data-action="validate"]');
+                if (this.currentPin.length === 5) {
+                    validateBtn.disabled = false;
+                    this.setFocus(validateBtn);
+                }
+            }
+        }
+
+        removeDigit() {
+            if (this.currentPin.length > 0 && !this.isValidated) {
+                this.currentPin = this.currentPin.slice(0, -1);
+                this.updatePinDisplay();
+                this.elements.keypad.querySelector('[data-action="validate"]').disabled = true;
+                this.setFocus(this.elements.pinDisplay);
+            }
+        }
+
+        updatePinDisplay() {
+            const display = this.currentPin.padEnd(5, '•');
+            this.elements.pinDisplay.textContent = display.split('').join(' ');
+        }
+
+        async loadPinData() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                
+                const csvText = await response.text();
+                this.pinData = this.parseCsv(csvText);
+                console.log("Données PIN chargées:", this.pinData);
+            } catch (error) {
+                console.error("Erreur lors du chargement des données PIN:", error);
+                this.showMessage('Erreur de chargement des données. Réessayez.', 'alert');
+            }
+        }
+
+        parseCsv(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',').map(header => header.trim());
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',').map(value => value.trim());
+                const entry = {};
+                headers.forEach((header, index) => {
+                    entry[header] = values[index];
+                });
+                return entry;
+            });
+        }
+
+        parseDateFromDMYHMS(dateString) {
+            const parts = dateString.match(/(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2}):(\d{2})/);
+            if (parts) {
+                const [, day, month, year, hour, minute, second] = parts;
+                return new Date(year, month - 1, day, hour, minute, second);
+            }
+            return new Date(NaN);
+        }
+
+        async validatePin() {
+            if (this.currentPin.length !== 5) return;
+
+            const now = new Date();
+            const enteredPin = this.currentPin.trim();
+            const pinEntry = this.pinData.find(entry => entry.PIN && entry.PIN.trim() === enteredPin);
+
+            if (pinEntry) {
+                const expirationDate = this.parseDateFromDMYHMS(pinEntry.expirationDate);
+                
+                if (now < expirationDate) {
+                    this.expirationDate = expirationDate;
+                    this.isValidated = true;
+                    this.correctPin = enteredPin;
+                    this.elements.pinSection.classList.add('hidden');
+                    this.showPortalButton();
+                    this.saveState();
+                    this.showMessage('Accès accordé!', 'success');
+                } else {
+                    this.showMessage('Code PIN expiré. Accès refusé.', 'alert');
+                    this.resetPinInput();
+                }
+            } else {
+                this.showMessage('Code incorrect, veuillez réessayer', 'alert');
+                this.resetPinInput();
+            }
+        }
+
+        resetPinInput() {
+            this.currentPin = '';
+            this.updatePinDisplay();
+            this.elements.keypad.querySelector('[data-action="validate"]').disabled = true;
+            this.setFocus(this.elements.pinDisplay);
+        }
+
+        resetSystem() {
+            this.clearStoredState();
+            this.currentPin = '';
+            this.isValidated = false;
+            this.expirationDate = null;
+            this.correctPin = null;
+            
+            this.updatePinDisplay();
+            this.elements.pinSection.classList.remove('hidden', 'validated');
+            this.elements.dynamicContent.innerHTML = '';
+            this.elements.dynamicContent.appendChild(this.elements.message);
+            
+            this.setFocus(this.elements.pinDisplay);
+            this.generateKeypad();
+        }
+
+        showMessage(text, type = '') {
+            if (this.messageTimeout) {
+                clearTimeout(this.messageTimeout);
+                this.messageTimeout = null;
+            }
+
+            this.elements.message.className = 'message';
+            this.elements.message.innerHTML = text;
+
+            if (type) {
+                this.elements.message.classList.add(type);
+                if (type === 'alert') {
+                    this.messageTimeout = setTimeout(() => {
+                        this.showMessage('Saisissez votre code à 5 chiffres');
+                        this.messageTimeout = null;
+                    }, 5000);
+                }
+            }
+        }
+
+        showPortalButton() {
+            this.elements.dynamicContent.innerHTML = `<button class="portal-btn focused" id="portalBtn">Ouvrir / Fermer le Portail</button>`;
+            this.setFocus(document.getElementById('portalBtn'));
+        }
+
+        async togglePortal() {
+            if (!this.isValidated || !this.isCurrentlyValid()) {
+                this.showMessage('Accès non valide ou expiré. Veuillez réessayer.', 'alert');
+                this.resetSystem();
+                return;
+            }
+
+            const portalBtn = document.getElementById('portalBtn');
+            portalBtn.disabled = true;
+            portalBtn.textContent = 'Action en cours...';
+            this.showMessage('Commande envoyée au portail...', 'info');
+
+            try {
+                await fetch(WEBHOOK_URL_REAL, { method: 'GET', mode: 'no-cors' });
+                this.showMessage('Le portail va s\'ouvrir/fermer (commande envoyée à Alexa).', 'success');
+            } catch (error) {
+                this.showMessage('Erreur lors de l\'envoi de la commande au portail. ' + error.message, 'alert');
+            } finally {
+                setTimeout(() => {
+                    if (portalBtn && this.isValidated && this.isCurrentlyValid()) {
+                        portalBtn.disabled = false;
+                        portalBtn.textContent = 'Ouvrir / Fermer le Portail';
+                    } else {
+                        this.resetSystem();
+                    }
+                }, 3000);
+            }
+        }
+
+        updateStatus() {
+            const now = new Date();
+            if (!this.expirationDate || (this.messageTimeout && this.elements.message.classList.contains('alert'))) {
+                return;
+            }
+
+            const timeLeft = this.expirationDate - now;
+
+            if (timeLeft <= 0) {
+                if (this.isValidated) {
+                    this.isValidated = false;
+                    this.elements.pinSection.classList.remove('hidden', 'validated');
+                    this.showMessage('Votre accès a expiré.<br>Veuillez saisir un nouveau code', 'alert');
+                    this.clearStoredState();
+                    this.setFocus(this.elements.pinDisplay);
+                    this.elements.dynamicContent.innerHTML = '';
+                    this.elements.dynamicContent.appendChild(this.elements.message);
+                    this.resetPinInput();
+                } else {
+                    this.showMessage('Saisissez votre code à 5 chiffres');
+                    this.elements.pinSection.classList.remove('hidden');
+                }
+            } else if (this.isValidated) {
+                const totalSeconds = Math.floor(timeLeft / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                let timeString = '';
+                if (days > 0) timeString += `${days}j `;
+                if (hours > 0) timeString += `${hours}h `;
+                timeString += `${minutes.toString().padStart(2, '0')}m `;
+                timeString += `${seconds.toString().padStart(2, '0')}s`;
+
+                this.showMessage(`Accès valide encore ${timeString}`, 'info');
+            } else {
+                this.showMessage('Saisissez votre code à 5 chiffres');
+                this.elements.pinSection.classList.remove('hidden');
+            }
+        }
+
+        isCurrentlyValid() {
+            return this.expirationDate && new Date() < this.expirationDate;
+        }
+
+        startStatusTimer() {
+            this.updateStatus();
+            if (this.statusInterval) clearInterval(this.statusInterval);
+            this.statusInterval = setInterval(() => this.updateStatus(), 1000);
+        }
+
+        saveState() {
+            const state = {
+                isValidated: this.isValidated,
+                expirationDate: this.expirationDate ? this.expirationDate.toISOString() : null,
+                correctPin: this.correctPin
+            };
+            try {
+                localStorage.setItem('portalAccessState', JSON.stringify(state));
+            } catch (e) {
+                console.error("Erreur localStorage:", e);
+            }
+        }
+
+        checkStoredState() {
+            const storedState = localStorage.getItem('portalAccessState');
+            if (!storedState) {
+                this.showMessage('Saisissez votre code à 5 chiffres');
+                return;
+            }
+
+            try {
+                const state = JSON.parse(storedState);
+                const pinEntry = this.pinData.find(entry => entry.PIN && entry.PIN.trim() === state.correctPin?.trim());
+
+                if (state.isValidated && pinEntry) {
+                    const storedExpiration = new Date(state.expirationDate);
+                    const sheetExpiration = this.parseDateFromDMYHMS(pinEntry.expirationDate);
+
+                    if (new Date() < storedExpiration && new Date() < sheetExpiration) {
+                        this.expirationDate = storedExpiration;
+                        this.isValidated = true;
+                        this.correctPin = state.correctPin;
+                        this.elements.pinSection.classList.add('hidden', 'validated');
+                        this.showPortalButton();
+                    } else {
+                        this.clearStoredState();
+                        this.showMessage('Votre accès a expiré ou le code n\'est plus valide.<br>Veuillez saisir un nouveau code', 'alert');
+                    }
+                } else {
+                    this.clearStoredState();
+                    this.showMessage('Saisissez votre code à 5 chiffres');
+                }
+            } catch {
+                this.clearStoredState();
+                this.showMessage('Erreur de données de stockage. Veuillez saisir votre code à 5 chiffres.', 'alert');
+            }
+        }
+
+        clearStoredState() {
+            localStorage.removeItem('portalAccessState');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new PortalAccessSystem();
+    });
+</script>
+</body>
+</html>
