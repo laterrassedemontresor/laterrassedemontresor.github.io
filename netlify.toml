@@ -1,2 +1,3 @@
-[functions]
-directory = "netlify/functions"
+[build]
+  functions = "netlify/functions"
+  publish = "build" # Ou le dossier où sont vos fichiers HTML/CSS/JS compilés
