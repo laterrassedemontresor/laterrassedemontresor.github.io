@@ -1,56 +1,74 @@
 const admin = require('firebase-admin');
 
-// Vérifiez si l'application Firebase est déjà initialisée
+// Ensure Firebase is initialized only once
 if (!admin.apps.length) {
     try {
-        const serviceAccountKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccountKey)
+            credential: admin.credential.cert(serviceAccount)
         });
-    } catch (error) {
-        console.error("Erreur lors de l'initialisation de Firebase Admin:", error);
-        // Gérer l'erreur, par exemple, en arrêtant le processus ou en logguant
+        console.log("Firebase Admin initialized successfully.");
+    } catch (e) {
+        console.error("Erreur lors de l'initialisation de Firebase Admin:", e);
         throw new Error("Erreur de configuration Firebase.");
     }
 }
 
 const db = admin.firestore();
 
-exports.handler = async function(event, context) {
+exports.handler = async (event, context) => {
     try {
-        // Récupérer tous les documents de la collection 'pins'
-        const snapshot = await db.collection('pins').get();
-        
-        let csvContent = "PIN,arrivalDateTime,departureDateTime\n"; // En-têtes CSV
+        const pins = [];
+        // Change 'pins' to your new collection name 'LaterrassePINsDB'
+        const snapshot = await db.collection('LaterrassePINsDB').get();
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            const pin = data.pin || ''; // Assurez-vous que le champ 'pin' existe
-            
-            // Convertir les Timestamps en chaînes ISO 8601 pour le CSV
-            // C'est important pour que JavaScript puisse les reparser facilement côté client
-            const arrivalDateTime = data.arrivalDateTime ? data.arrivalDateTime.toDate().toISOString() : '';
-            const departureDateTime = data.departureDateTime ? data.departureDateTime.toDate().toISOString() : '';
+            // Ensure proper fields are present before pushing
+            if (data.PIN && data.arrivalDateTime && data.departureDateTime) {
+                pins.push({
+                    PIN: data.PIN,
+                    arrivalDateTime: data.arrivalDateTime,
+                    departureDateTime: data.departureDateTime
+                });
+            }
+        });
 
-            csvContent += `${pin},"${arrivalDateTime}","${departureDateTime}"\n`;
+        // Convert data to CSV format
+        // Headers for the CSV
+        const headers = ["PIN", "arrivalDateTime", "departureDateTime"];
+        let csv = headers.join(',') + '\n';
+
+        // Add each PIN entry to the CSV
+        pins.forEach(pin => {
+            // Enclose date strings in quotes to handle potential commas or complex formats,
+            // though ISO 8601 usually doesn't need it, it's safer for CSV
+            const row = [
+                `"${pin.PIN}"`,
+                `"${pin.arrivalDateTime.toISOString()}"`, // Ensure ISO string for dates
+                `"${pin.departureDateTime.toISOString()}"`  // Ensure ISO string for dates
+            ].join(',');
+            csv += row + '\n';
         });
 
         return {
             statusCode: 200,
             headers: {
                 "Content-Type": "text/csv",
-                "Access-Control-Allow-Origin": "*",
-                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", // Empêche la mise en cache
-                "Pragma": "no-cache", // Pour la compatibilité avec d'anciens caches
-                "Expires": "0" // Pour la compatibilité avec d'anciens caches
+                // Disable caching for the function's response to ensure fresh data
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+                "Surrogate-Control": "no-store"
             },
-            body: csvContent
+            body: csv,
         };
     } catch (error) {
-        console.error("Erreur dans la fonction Netlify:", error);
+        console.error("Erreur lors de la récupération des données Firestore:", error);
         return {
             statusCode: 500,
-            body: `Erreur interne du serveur: ${error.message}`
+            body: JSON.stringify({ error: "Erreur lors de la récupération des données Firestore.", details: error.message }),
         };
     }
 };
