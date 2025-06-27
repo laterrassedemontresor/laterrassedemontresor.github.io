@@ -343,8 +343,6 @@
     </div>
 
     <script type="module">
-        // --- Firebase et Logique Fonctionnelle (script.js intégré ici) ---
-
         // Import des fonctions nécessaires du SDK Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
@@ -365,6 +363,15 @@
         const collectionName = "pins"; // Le nom de votre collection dans Firebase
 
         let editingId = null; // Pour garder une trace de l'ID de l'entrée en cours de modification
+
+        // --- EXPOSITION DES FONCTIONS AU NIVEAU GLOBAL POUR LES BOUTONS HTML ---
+        window.showMessage = showMessage;
+        window.addEntry = addEntry;
+        window.editEntry = editEntry;
+        window.saveEdit = saveEdit;
+        window.cancelEdit = cancelEdit;
+        window.deleteEntry = deleteEntry;
+        // --- FIN DE L'EXPOSITION ---
 
         // Fonction utilitaire pour afficher les messages
         function showMessage(msg, type = 'error') {
