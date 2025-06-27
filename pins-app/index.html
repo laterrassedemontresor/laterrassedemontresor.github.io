@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saisie PINs La Terrasse</title>
+    <style>
+        /* --- Styles CSS Adaptés --- */
+        :root {
+            --dark-blue: #2c3e50;
+            --medium-blue: #34495e;
+            --light-blue: #00ff0071; /* Original green for positive actions/focus */
+            --lighter-blue: #2980b9;
+            --text-color: white;
+            --light-text-color: #ecf0f1;
+            --red: #e74c3c;
+            --dark-red: #c0392b;
+            --green: #2ecc71; /* A standard green for success */
+            --dark-green: #27ae60; /* Darker green for hover */
+            --focused-color: #ff6b35;
+            --shadow-color: rgba(0,0,0,0.3);
+            --focused-shadow-color: rgba(255, 107, 53, 0.3);
+            --disabled-color: #7f8c8d;
+            --background-input: #1a252f; /* Background for the input field */
+            --bright-red: #ff0000;
+            --info-blue: #3498db; /* A distinct blue for info messages */
+            --dark-info-blue: #2980b9;
+            --fluo-orange: #FF6600; /* Fluorescent Orange for messages */
+            /* Nouvelles variables pour le tableau */
+            --table-header-bg: var(--medium-blue);
+            --table-border-color: #4a6278; /* Un gris-bleu plus sombre pour les bordures */
+            --table-row-even-bg: #3c5268; /* Couleur plus claire pour les lignes paires */
+            --table-row-hover-bg: #4a6278; /* Hover plus clair sur les lignes */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue));
+            display: flex;
+            flex-direction: column; /* Organiser les éléments en colonne */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px; /* Plus d'espace sur les grands écrans */
+            color: var(--light-text-color); /* Couleur de texte par défaut pour le body */
+        }
+
+        /* Conteneur principal pour le tableau, pour lui donner l'aspect "application" */
+        .container-table {
+            background: var(--dark-blue);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px var(--shadow-color);
+            width: 100%;
+            max-width: 900px; /* Largeur maximale pour le tableau */
+            padding: 25px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--light-text-color);
+            line-height: 1.3;
+            padding-bottom: 10px; /* Ajouter un peu de padding pour le style */
+        }
+        
+        .message {
+            border-radius: 12px;
+            margin-bottom: 15px; /* Plus d'espace sous le message */
+            padding: 15px;
+            text-align: center;
+            min-height: 4.2em; /* Fixed height for two lines of text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 16px; /* Taille de police légèrement augmentée */
+            font-weight: bold; /* Mettre en gras par défaut */
+            color: var(--fluo-orange); /* Fluorescent Orange text */
+            background: transparent; /* No background */
+            border: 2px solid var(--fluo-orange); /* Bordure pour le message */
+            box-sizing: border-box;
+        }
+
+        /* Message type colors for text and border */
+        .message.success {
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+        .message.error { /* Renamed 'alert' to 'error' for consistency with JS */
+            color: var(--bright-red);
+            border-color: var(--bright-red);
+            font-weight: bold;
+            font-size: 18px; /* Plus grande pour les erreurs */
+        }
+
+        .message.info {
+            color: var(--info-blue);
+            border-color: var(--info-blue);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background-color: var(--medium-blue); /* Utilisez une couleur plus sombre pour le fond du tableau */
+            border-radius: 10px; /* Coins arrondis pour le tableau */
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--table-border-color); /* Bordures plus sombres */
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: middle;
+            color: var(--light-text-color); /* Texte clair dans les cellules */
+        }
+
+        th {
+            background-color: var(--table-header-bg); /* Couleur d'en-tête */
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95em;
+            color: var(--text-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-row-even-bg); /* Lignes paires légèrement différentes */
+        }
+
+        tr:hover:not(#newEntryRow) {
+            background-color: var(--table-row-hover-bg); /* Survol des lignes */
+            cursor: pointer;
+        }
+
+        /* Style pour les inputs dans le tableau (saisie et modification) */
+        td input[type="text"],
+        td input[type="datetime-local"] {
+            background: var(--background-input);
+            border-radius: 8px; /* Arrondi léger */
+            padding: 10px;
+            margin: 0; /* Pas de marge interne pour les inputs de tableau */
+            width: calc(100% - 2px); /* Ajuster légèrement pour la bordure */
+            font-size: 1em;
+            color: var(--light-text-color);
+            border: 1px solid var(--table-border-color); /* Bordure subtile */
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            text-transform: uppercase; /* Pour le PIN */
+        }
+
+        td input[type="text"]:focus,
+        td input[type="datetime-local"]:focus {
+            border-color: var(--focused-color);
+            box-shadow: 0 0 8px var(--focused-shadow-color);
+        }
+
+        /* Boutons d'action dans le tableau */
+        .add, .edit, .delete, .save, .cancel {
+            padding: 8px 12px;
+            margin: 3px;
+            border: none;
+            border-radius: 8px; /* Légèrement plus arrondi pour les boutons du tableau */
+            cursor: pointer;
+            font-size: 0.85em; /* Plus petit pour les boutons internes */
+            font-weight: bold;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .add { background-color: var(--green); }
+        .add:hover { background-color: var(--dark-green); }
+
+        .edit { background-color: var(--lighter-blue); } /* Utiliser lighter-blue pour l'édition */
+        .edit:hover { background-color: var(--info-blue); }
+
+        .delete { background-color: var(--red); }
+        .delete:hover { background-color: var(--dark-red); }
+
+        .save { background-color: var(--focused-color); } /* Utiliser focused-color pour sauvegarder */
+        .save:hover { background-color: #d15c2f; } /* Une nuance plus foncée */
+
+        .cancel { background-color: var(--disabled-color); }
+        .cancel:hover { background-color: #606f71; }
+
+        /* Styles Responsive pour les petits écrans */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container-table {
+                padding: 15px;
+                max-width: 100%; /* Permettre au tableau de prendre plus de largeur sur mobile */
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            .message {
+                font-size: 14px;
+                padding: 10px;
+                min-height: 3.8em;
+            }
+            .message.error {
+                font-size: 16px;
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid var(--table-border-color);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid #3c5268; /* Bordure plus claire pour la séparation des cellules */
+                position: relative;
+                padding-left: 45%; /* Espace pour le label mobile */
+                text-align: right;
+                min-height: 45px; /* Pour aligner le contenu avec les labels */
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-bottom: 10px;
+                justify-content: center; /* Centrer les boutons d'action */
+                flex-wrap: wrap; /* Permet aux boutons de passer à la ligne */
+            }
+
+            td:before {
+                position: absolute;
+                top: 50%;
+                left: 10px;
+                width: 40%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: var(--light-text-color);
+                transform: translateY(-50%);
+            }
+
+            /* Labels pour les colonnes en mode mobile */
+            td:nth-of-type(1):before { content: "PIN:"; }
+            td:nth-of-type(2):before { content: "Arrivée:"; }
+            td:nth-of-type(3):before { content: "Départ:"; }
+            td:nth-of-type(4):before { content: "Actions:"; }
+
+            #newEntryRow td {
+                text-align: left; /* La ligne de saisie reste plus traditionnelle */
+                justify-content: flex-start;
+                padding-left: 15px; /* Pas de label, donc pas besoin d'autant d'espace */
+            }
+            #newEntryRow td:before { content: none; } /* Pas de label pour la ligne d'ajout */
+            #newEntryRow button {
+                width: calc(100% - 6px); /* Prend presque toute la largeur */
+                margin: 5px 3px;
+                font-size: 1em;
+            }
+            input[type="text"], input[type="datetime-local"] {
+                width: calc(100% - 2px); /* Prend presque toute la largeur disponible sur mobile */
+                margin: 0; /* Supprime les marges latérales pour plus d'espace */
+                font-size: 0.9em; /* Légèrement plus petit sur mobile */
+                padding: 8px;
+            }
+        }
+
+        /* Pour les très petits écrans (ex: petits smartphones) */
+        @media screen and (max-width: 480px) {
+            h1 { font-size: 20px; margin-bottom: 15px; }
+            .message { font-size: 12px; padding: 8px; min-height: 3.5em; }
+            .message.error { font-size: 14px; }
+            td { padding-left: 40%; }
+            td:before { width: 35%; }
+            .add, .edit, .delete, .save, .cancel {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-table">
+        <h1>Gestion des PINs La Terrasse</h1>
+
+        <div id="message" style="display: none;"></div>
+
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>PIN</th>
+                    <th>Date d'arrivée</th>
+                    <th>Date de départ</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="newEntryRow">
+                    <td><input type="text" id="newPin" maxlength="4" placeholder="ABCD"></td>
+                    <td><input type="datetime-local" id="newArrivalDateTime"></td>
+                    <td><input type="datetime-local" id="newDepartureDateTime"></td>
+                    <td><button class="add" onclick="addEntry()">Ajouter</button></td>
+                </tr>
+                </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        // --- Firebase et Logique Fonctionnelle (script.js intégré ici) ---
+
+        // Import des fonctions nécessaires du SDK Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+        // Votre configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAez8fncKVaNuOzrTfDXmacs_2K_ptZFQI",
+            authDomain: "poartailaccesspins.firebaseapp.com",
+            projectId: "poartailaccesspins",
+            storageBucket: "poartailaccesspins.firebasestorage.app",
+            messagingSenderId: "248588255030",
+            appId: "1:248588255030:web:d1a50104cbc330412cbd97"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Obtenir l'instance de Firestore
+        const collectionName = "pins"; // Le nom de votre collection dans Firebase
+
+        let editingId = null; // Pour garder une trace de l'ID de l'entrée en cours de modification
+
+        // Fonction utilitaire pour afficher les messages
+        function showMessage(msg, type = 'error') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = msg;
+            messageDiv.className = ''; // Réinitialise les classes
+            messageDiv.classList.add('message', type); // Ajoute toujours la classe 'message' et le type
+            messageDiv.style.display = 'flex'; // Utiliser flex pour centrer le contenu
+            // Masquer le message après quelques secondes
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Convertit un timestamp Firebase en format datetime-local pour les inputs
+        function formatTimestampToDatetimeLocal(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Fonction pour charger et afficher les données
+        async function loadData() {
+            const tableBody = document.querySelector('#dataTable tbody');
+            // Supprimer toutes les lignes de données existantes (sauf la ligne d'ajout)
+            tableBody.querySelectorAll('tr:not(#newEntryRow)').forEach(row => row.remove());
+            showMessage('Chargement des données...', 'info'); // Message temporaire
+
+            try {
+                const querySnapshot = await getDocs(collection(db, collectionName));
+                if (querySnapshot.empty) {
+                    showMessage("Aucune donnée trouvée. Ajoutez la première entrée !", 'info');
+                } else {
+                    showMessage("Données chargées avec succès.", 'success');
+                }
+
+                querySnapshot.forEach((document) => {
+                    const data = document.data();
+                    const row = tableBody.insertRow(-1); // Insérer à la fin
+                    row.id = document.id; // Stocker l'ID du document Firebase dans l'ID de la ligne
+
+                    // Créer les cellules et afficher les données
+                    row.insertCell(0).textContent = data.PIN || '';
+                    row.insertCell(1).textContent = data.arrivalDateTime ? new Date(data.arrivalDateTime).toLocaleString('fr-FR', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }) : '';
+                    row.insertCell(2).textContent = data.departureDateTime ? new Date(data.departureDateTime).toLocaleString('fr-FR', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }) : '';
+
+                    const actionsCell = row.insertCell(3);
+                    actionsCell.innerHTML = `
+                        <button class="edit" onclick="editEntry('${document.id}')">Modifier</button>
+                        <button class="delete" onclick="deleteEntry('${document.id}')">Supprimer</button>
+                    `;
+                });
+            } catch (error) {
+                showMessage("Erreur de chargement des données : " + error.message, 'error');
+                console.error("Erreur de chargement des données:", error);
+            }
+        }
+
+        // Fonction pour ajouter une nouvelle entrée
+        async function addEntry() {
+            const pinInput = document.getElementById('newPin');
+            const arrivalInput = document.getElementById('newArrivalDateTime');
+            const departureInput = document.getElementById('newDepartureDateTime');
+
+            const pin = pinInput.value.trim().toUpperCase(); // Convertir en majuscules
+            const arrival = arrivalInput.value;
+            const departure = departureInput.value;
+
+            // 1. Validation des champs
+            if (pin.length !== 4 || !/^[a-zA-Z0-9]{4}$/.test(pin)) {
+                showMessage("Le PIN doit contenir exactement 4 caractères alphanumériques (A-Z, 0-9).", 'error');
+                return;
+            }
+            if (!arrival || !departure) {
+                showMessage("Les dates d'arrivée et de départ sont obligatoires.", 'error');
+                return;
+            }
+
+            const arrivalDate = new Date(arrival);
+            const departureDate = new Date(departure);
+
+            // Vérifier si les dates sont valides (getTime() retourne NaN pour une date invalide)
+            if (isNaN(arrivalDate.getTime()) || isNaN(departureDate.getTime())) {
+                showMessage("Format de date/heure invalide. Veuillez utiliser le sélecteur.", 'error');
+                return;
+            }
+
+            // 2. Contrôle de la date d'arrivée antérieure à la date de départ
+            if (arrivalDate.getTime() >= departureDate.getTime()) {
+                showMessage("La date d'arrivée doit être strictement antérieure à la date de départ.", 'error');
+                return;
+            }
+
+            // 3. Envoi à Firebase
+            try {
+                await addDoc(collection(db, collectionName), {
+                    PIN: pin,
+                    arrivalDateTime: arrivalDate.getTime(), // Stocker en timestamp (millisecondes depuis l'époque UNIX)
+                    departureDateTime: departureDate.getTime()
+                });
+                showMessage("Entrée ajoutée avec succès !", 'success');
+                // Réinitialiser les champs du formulaire
+                pinInput.value = '';
+                arrivalInput.value = '';
+                departureInput.value = '';
+                loadData(); // Recharger les données pour afficher la nouvelle entrée
+            } catch (error) {
+                showMessage("Erreur lors de l'ajout : " + error.message, 'error');
+                console.error("Erreur d'ajout:", error);
+            }
+        }
+
+        // Fonction pour passer une entrée en mode modification
+        async function editEntry(docId) {
+            if (editingId && editingId !== docId) {
+                // Gérer le cas où une autre ligne est déjà en cours d'édition
+                showMessage("Veuillez terminer l'édition de la ligne actuelle avant d'en modifier une autre.", 'error');
+                return;
+            }
+            if (editingId === docId) { // Si on clique deux fois sur le même bouton modifier
+                cancelEdit(docId); // Annuler l'édition en cours
+                return;
+            }
+
+            const row = document.getElementById(docId);
+            if (!row) return;
+
+            // Récupérer les cellules et leurs valeurs actuelles
+            const pinCell = row.cells[0];
+            const arrivalCell = row.cells[1];
+            const departureCell = row.cells[2];
+            const actionsCell = row.cells[3];
+
+            const currentPin = pinCell.textContent;
+            // Récupérer le timestamp initialement stocké pour une conversion précise
+            try {
+                const documentSnapshot = await getDoc(doc(db, collectionName, docId));
+
+                if (documentSnapshot.exists()) {
+                    const data = documentSnapshot.data();
+                    const currentArrivalTimestamp = data.arrivalDateTime;
+                    const currentDepartureTimestamp = data.departureDateTime;
+
+                    const currentArrivalFormatted = formatTimestampToDatetimeLocal(currentArrivalTimestamp);
+                    const currentDepartureFormatted = formatTimestampToDatetimeLocal(currentDepartureTimestamp);
+
+                    // Remplacer le texte par des inputs
+                    pinCell.innerHTML = `<input type="text" id="editPin_${docId}" value="${currentPin}" maxlength="4">`;
+                    arrivalCell.innerHTML = `<input type="datetime-local" id="editArrival_${docId}" value="${currentArrivalFormatted}">`;
+                    departureCell.innerHTML = `<input type="datetime-local" id="editDeparture_${docId}" value="${currentDepartureFormatted}">`;
+
+                    // Mettre à jour les boutons d'action
+                    actionsCell.innerHTML = `
+                        <button class="save" onclick="saveEdit('${docId}')">Sauvegarder</button>
+                        <button class="cancel" onclick="cancelEdit('${docId}')">Annuler</button>
+                    `;
+                    editingId = docId;
+                    showMessage("Mode édition activé pour l'entrée.", 'info');
+                } else {
+                    showMessage("Document non trouvé pour l'édition.", 'error');
+                }
+            } catch (error) {
+                showMessage("Erreur lors de la récupération des données pour édition : " + error.message, 'error');
+                console.error("Erreur de récupération pour édition:", error);
+            }
+        }
+
+        // Fonction pour sauvegarder les modifications
+        async function saveEdit(docId) {
+            const pinInput = document.getElementById(`editPin_${docId}`);
+            const arrivalInput = document.getElementById(`editArrival_${docId}`);
+            const departureInput = document.getElementById(`editDeparture_${docId}`);
+
+            const pin = pinInput.value.trim().toUpperCase();
+            const arrival = arrivalInput.value;
+            const departure = departureInput.value;
+
+            // 1. Validation des champs (similaire à addEntry)
+            if (pin.length !== 4 || !/^[a-zA-Z0-9]{4}$/.test(pin)) {
+                showMessage("Le PIN doit contenir exactement 4 caractères alphanumériques (A-Z, 0-9).", 'error');
+                return;
+            }
+            if (!arrival || !departure) {
+                showMessage("Les dates d'arrivée et de départ sont obligatoires.", 'error');
+                return;
+            }
+
+            const arrivalDate = new Date(arrival);
+            const departureDate = new Date(departure);
+
+            if (isNaN(arrivalDate.getTime()) || isNaN(departureDate.getTime())) {
+                showMessage("Format de date/heure invalide. Veuillez utiliser le sélecteur.", 'error');
+                return;
+            }
+
+            if (arrivalDate.getTime() >= departureDate.getTime()) {
+                showMessage("La date d'arrivée doit être strictement antérieure à la date de départ.", 'error');
+                return;
+            }
+
+            // 2. Mise à jour dans Firebase
+            try {
+                await updateDoc(doc(db, collectionName, docId), {
+                    PIN: pin,
+                    arrivalDateTime: arrivalDate.getTime(),
+                    departureDateTime: departureDate.getTime()
+                });
+                showMessage("Entrée modifiée avec succès !", 'success');
+                editingId = null; // Réinitialiser l'ID d'édition
+                loadData(); // Recharger les données pour afficher les modifications
+            } catch (error) {
+                showMessage("Erreur lors de la modification : " + error.message, 'error');
+                console.error("Erreur de modification:", error);
+            }
+        }
+
+        // Fonction pour annuler la modification
+        function cancelEdit(docId) {
+            editingId = null; // Réinitialiser l'ID d'édition
+            loadData(); // Recharger les données pour annuler les modifications non sauvegardées
+            showMessage("Modification annulée.", 'info');
+        }
+
+        // Fonction pour supprimer une entrée
+        async function deleteEntry(docId) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée ? Cette action est irréversible.")) {
+                try {
+                    await deleteDoc(doc(db, collectionName, docId));
+                    showMessage("Entrée supprimée avec succès !", 'success');
+                    loadData(); // Recharger les données pour retirer l'entrée supprimée
+                } catch (error) {
+                    showMessage("Erreur lors de la suppression : " + error.message, 'error');
+                    console.error("Erreur de suppression:", error);
+                }
+            }
+        }
+
+        // Charger les données au chargement de la page
+        window.onload = loadData;
+    </script>
+</body>
+</html>
