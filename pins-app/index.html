@@ -50,67 +50,65 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue));
+            background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue)); /* Restored background */
             display: flex;
-            flex-direction: column; /* Organiser les éléments en colonne */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px; /* Plus d'espace sur les grands écrans */
-            color: var(--light-text-color); /* Couleur de texte par défaut pour le body */
+            padding: 10px;
+            color: var(--light-text-color);
         }
 
-        /* Conteneur principal pour le tableau, pour lui donner l'aspect "application" */
         .container-table {
-            background: var(--dark-blue);
-            border-radius: 15px;
-            box-shadow: 0 15px 30px var(--shadow-color);
+            
+            border-radius: 1px;
+            box-shadow: none; /* Removed shadow as requested */
             width: 100%;
-            max-width: 900px; /* Largeur maximale pour le tableau */
-            padding: 25px;
+            max-width: 400px; /* Largeur maximale réduite pour l'ensemble du tableau */
+            padding: 15px;
             color: var(--text-color);
             transition: all 0.3s ease;
         }
 
         h1 {
             text-align: center;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             color: var(--light-text-color);
             line-height: 1.3;
-            padding-bottom: 10px; /* Ajouter un peu de padding pour le style */
+            padding-bottom: 8px;
         }
         
         .message {
-            border-radius: 12px;
-            margin-bottom: 15px; /* Plus d'espace sous le message */
-            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
             text-align: center;
-            min-height: 4.2em; /* Fixed height for two lines of text */
+            min-height: 3.8em;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            font-size: 16px; /* Taille de police légèrement augmentée */
-            font-weight: bold; /* Mettre en gras par défaut */
-            color: var(--fluo-orange); /* Fluorescent Orange text */
-            background: transparent; /* No background */
-            border: 2px solid var(--fluo-orange); /* Bordure pour le message */
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--fluo-orange);
+            background: transparent;
+          
             box-sizing: border-box;
         }
 
-        /* Message type colors for text and border */
         .message.success {
             color: var(--green);
-            border-color: var(--green);
+           
         }
 
-        .message.error { /* Renamed 'alert' to 'error' for consistency with JS */
+        .message.error {
             color: var(--bright-red);
             border-color: var(--bright-red);
             font-weight: bold;
-            font-size: 18px; /* Plus grande pour les erreurs */
+            font-size: 16px;
         }
 
         .message.info {
@@ -121,35 +119,75 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            background-color: var(--medium-blue); /* Utilisez une couleur plus sombre pour le fond du tableau */
-            border-radius: 10px; /* Coins arrondis pour le tableau */
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Restored shadow */
+            background-color: var(--medium-blue);
+            border-radius: 10px;
             overflow: hidden;
         }
 
         th, td {
-            border: 1px solid var(--table-border-color); /* Bordures plus sombres */
-            padding: 12px 15px;
+            border: 1px solid var(--table-border-color);
+            padding: 4px; /* Padding global réduit pour la compacité */
             text-align: left;
             vertical-align: middle;
-            color: var(--light-text-color); /* Texte clair dans les cellules */
+            color: var(--light-text-color);
+            font-size: 0.9em; /* Taille de police unifiée pour toutes les lignes */
+            line-height: 1.2; /* Interlignage réduit */
+            height: 30px; /* Hauteur fixe pour les cellules */
+        }
+        
+        /* 1ère colonne: PIN */
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 90px;
+            text-align: center;
+        }
+
+        /* 2ème colonne: ARRIVEE */
+        th:nth-child(2), td:nth-child(2) {
+            width: 180px; /* Largeur ajustée pour ARRIVEE */
+            text-align: center; /* Centre le contenu et libellé */
+        }
+
+        /* 3ème colonne: DEPART */
+        th:nth-child(3), td:nth-child(3) {
+            width: 180px; /* Largeur ajustée pour DEPART */
+            text-align: center; /* Centre le contenu et libellé */
+        }
+
+        /* 4ème colonne: Actions (sans bordure ni fond distinct pour les cellules de données) */
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 50px; /* Plus petit pour juste les boutons */
+            text-align: center;
+            background: transparent; /* Pas de fond pour cette cellule */
+            box-shadow: none;
+            display: flex; /* Utiliser flex pour centrer les boutons */
+            align-items: center;
+            justify-content: center;
+            gap: 2px; /* Petit espacement entre les boutons d'action */
+        }
+        /* Assurer que la 4ème colonne du thead ait une bordure et un fond */
+        th:nth-child(4) {
+            border: 1px solid var(--table-border-color); /* Remettre la bordure pour le header */
+            background-color: var(--table-header-bg); /* Remettre le fond pour le header */
         }
 
         th {
-            background-color: var(--table-header-bg); /* Couleur d'en-tête */
+            background-color: var(--table-header-bg);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.95em;
+            font-size: 0.9em; /* Taille de police unifiée pour toutes les lignes */
             color: var(--text-color);
         }
 
         tr:nth-child(even) {
-            background-color: var(--table-row-even-bg); /* Lignes paires légèrement différentes */
+            background-color: var(--table-row-even-bg);
         }
 
         tr:hover:not(#newEntryRow) {
-            background-color: var(--table-row-hover-bg); /* Survol des lignes */
+            background-color: var(--table-row-hover-bg);
             cursor: pointer;
         }
 
@@ -157,74 +195,126 @@
         td input[type="text"],
         td input[type="datetime-local"] {
             background: var(--background-input);
-            border-radius: 8px; /* Arrondi léger */
-            padding: 10px;
-            margin: 0; /* Pas de marge interne pour les inputs de tableau */
-            width: calc(100% - 2px); /* Ajuster légèrement pour la bordure */
-            font-size: 1em;
+            border-radius: 5px;
+            padding: 4px 3px; /* Padding très réduit pour les inputs */
+            margin: 0;
+            width: 100%; /* Occupe toute la largeur de sa cellule */
+            height: 100%; /* Occupe toute la hauteur de sa cellule */
+            font-size: 0.9em; /* Taille de police inputs unifiée */
             color: var(--light-text-color);
-            border: 1px solid var(--table-border-color); /* Bordure subtile */
+            border: none; /* Pas de bordure sur l'input, la cellule a déjà une bordure */
             outline: none;
             transition: all 0.2s ease;
             box-sizing: border-box;
-            text-transform: uppercase; /* Pour le PIN */
+            text-transform: uppercase;
+            text-align: center; /* Centre le contenu des inputs */
+        }
+        td input[type="text"] {
+             text-align: center;
+        }
+
+        /* Augmenter la taille du texte de la ligne de saisie */
+        #newEntryRow input {
+            font-size: 0.9em; /* Taille identique pour la ligne d'ajout pour uniformité */
+            padding: 4px 3px; /* Padding identique pour la ligne d'ajout pour uniformité */
         }
 
         td input[type="text"]:focus,
         td input[type="datetime-local"]:focus {
-            border-color: var(--focused-color);
-            box-shadow: 0 0 8px var(--focused-shadow-color);
+            border-color: var(--focused-color); /* Le focus peut se voir sur la bordure de la cellule ou une ombre */
+            box-shadow: 0 0 5px var(--focused-shadow-color) inset; /* Ombre interne pour le focus */
         }
-
-        /* Boutons d'action dans le tableau */
-        .add, .edit, .delete, .save, .cancel {
-            padding: 8px 12px;
-            margin: 3px;
-            border: none;
-            border-radius: 8px; /* Légèrement plus arrondi pour les boutons du tableau */
+        /* Pour les datetime-local, réactiver la flèche native si elle était cachée */
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            background: unset;
+            color: unset;
             cursor: pointer;
-            font-size: 0.85em; /* Plus petit pour les boutons internes */
-            font-weight: bold;
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: unset;
+            height: unset;
+            position: unset;
+            top: unset;
+            left: unset;
+        }
+        /* Pour Firefox */
+        input[type="datetime-local"] {
+            -moz-appearance: auto; /* Permet l'affichage de l'indicateur natif */
+        }
+        input[type="datetime-local"]::-moz-calendar-picker-indicator {
+            opacity: 1; /* S'assurer qu'il est visible */
+            pointer-events: auto; /* S'assurer qu'il est cliquable */
         }
 
-        .add { background-color: var(--green); }
-        .add:hover { background-color: var(--dark-green); }
 
-        .edit { background-color: var(--lighter-blue); } /* Utiliser lighter-blue pour l'édition */
-        .edit:hover { background-color: var(--info-blue); }
+        /* Boutons d'action dans le tableau (colonne 4) */
+        .action-buttons-container {
+            display: flex;
+            gap: 2px; /* Petit espacement entre les boutons */
+            justify-content: center;
+            align-items: center;
+            /* Ces propriétés sont déjà sur la td:nth-child(4), mais pour être sûr */
+            border: none !important;
+            background: transparent !important;
+        }
 
-        .delete { background-color: var(--red); }
-        .delete:hover { background-color: var(--dark-red); }
+        .add, .edit, .delete, .save, .cancel {
+            width: 28px; /* Taille des icônes ajustée pour la compacité */
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em; /* Taille des symboles */
+            font-weight: bold;
+            background: transparent;
+            box-shadow: none;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
 
-        .save { background-color: var(--focused-color); } /* Utiliser focused-color pour sauvegarder */
-        .save:hover { background-color: #d15c2f; } /* Une nuance plus foncée */
+        /* Couleurs spécifiques et épaisseur des symboles */
+        .add { 
+            color: var(--green); 
+            font-size: 1.5em; /* Symbole '+' plus grand */
+            font-weight: bolder; /* Symbole '+' plus épais */
+        }
+        .add:hover { background-color: rgba(var(--green), 0.15); } 
 
-        .cancel { background-color: var(--disabled-color); }
-        .cancel:hover { background-color: #606f71; }
+        .edit { color: white; } /* Crayon blanc */
+        .edit:hover { background-color: rgba(255,255,255, 0.15); }
+
+        .delete { color: var(--red); }
+        .delete:hover { background-color: rgba(var(--red), 0.15); }
+
+        .save { color: var(--green); }
+        .save:hover { background-color: rgba(var(--green), 0.15); }
+
+        .cancel { color: var(--disabled-color); }
+        .cancel:hover { background-color: rgba(var(--disabled-color), 0.15); }
+
 
         /* Styles Responsive pour les petits écrans */
         @media screen and (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 5px;
             }
             .container-table {
-                padding: 15px;
-                max-width: 100%; /* Permettre au tableau de prendre plus de largeur sur mobile */
+                padding: 10px;
+                max-width: 100%;
             }
             h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
+                font-size: 20px;
+                margin-bottom: 15px;
             }
             .message {
-                font-size: 14px;
-                padding: 10px;
-                min-height: 3.8em;
+                font-size: 12px;
+                padding: 8px;
+                min-height: 3.5em;
             }
             .message.error {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             table, thead, tbody, th, td, tr {
@@ -238,80 +328,129 @@
             }
 
             tr {
-                margin-bottom: 15px;
+                margin-bottom: 10px;
                 border: 1px solid var(--table-border-color);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Restored shadow */
+                border-radius: 8px;
                 overflow: hidden;
             }
 
             td {
                 border: none;
-                border-bottom: 1px solid #3c5268; /* Bordure plus claire pour la séparation des cellules */
+                border-bottom: 1px solid #3c5268;
                 position: relative;
-                padding-left: 45%; /* Espace pour le label mobile */
+                padding-left: 40%;
                 text-align: right;
-                min-height: 45px; /* Pour aligner le contenu avec les labels */
+                min-height: 40px; /* Hauteur des cellules un peu plus généreuse sur mobile */
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
+                height: auto; /* Supprimer la hauteur fixe sur mobile */
             }
 
             td:last-child {
                 border-bottom: none;
-                padding-bottom: 10px;
-                justify-content: center; /* Centrer les boutons d'action */
-                flex-wrap: wrap; /* Permet aux boutons de passer à la ligne */
+                padding-bottom: 8px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            /* Reset specific td styles for mobile when display:block */
+            td:nth-child(1), td:nth-child(2), td:nth-child(3) { /* PIN, ARRIVEE, DEPART */
+                width: auto; /* Supprimer les largeurs fixes */
+                border-left: 1px solid var(--table-border-color); /* Remettre les bordures */
+                border-right: 1px solid var(--table-border-color); /* Remettre les bordures */
+                padding: 8px 6px; /* Remettre le padding standard mobile */
+                background: var(--table-row-even-bg); /* Remettre un fond */
+            }
+            /* Colonne d'action, doit rester transparente sur mobile */
+            td:nth-child(4) {
+                background: transparent;
+                border: none;
             }
 
             td:before {
                 position: absolute;
                 top: 50%;
-                left: 10px;
-                width: 40%;
-                padding-right: 10px;
+                left: 8px;
+                width: 35%;
+                padding-right: 8px;
                 white-space: nowrap;
                 text-align: left;
                 font-weight: bold;
                 color: var(--light-text-color);
                 transform: translateY(-50%);
+                font-size: 0.85em;
             }
 
             /* Labels pour les colonnes en mode mobile */
             td:nth-of-type(1):before { content: "PIN:"; }
-            td:nth-of-type(2):before { content: "Arrivée:"; }
-            td:nth-of-type(3):before { content: "Départ:"; }
-            td:nth-of-type(4):before { content: "Actions:"; }
+            td:nth-of-type(2):before { content: "ARRIVEE:"; }
+            td:nth-of-type(3):before { content: "DEPART:"; }
+            td:nth-of-type(4):before { content: "ACTIONS:"; }
 
             #newEntryRow td {
-                text-align: left; /* La ligne de saisie reste plus traditionnelle */
+                text-align: left;
                 justify-content: flex-start;
-                padding-left: 15px; /* Pas de label, donc pas besoin d'autant d'espace */
+                padding-left: 10px;
             }
-            #newEntryRow td:before { content: none; } /* Pas de label pour la ligne d'ajout */
-            #newEntryRow button {
-                width: calc(100% - 6px); /* Prend presque toute la largeur */
-                margin: 5px 3px;
-                font-size: 1em;
+            #newEntryRow td:before { content: none; }
+            #newEntryRow .add {
+                width: 100%;
+                height: auto;
+                padding: 8px 10px; /* Padding du bouton Ajouter sur mobile */
+                font-size: 1.2em; /* Taille de police du bouton Ajouter sur mobile */
+                margin: 4px 0;
+                background-color: var(--green); /* Le bouton Ajouter garde un fond sur mobile */
+                color: var(--text-color);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Restored shadow */
+                font-weight: bold; /* S'assurer qu'il est bien gras */
             }
+            #newEntryRow .add:hover {
+                background-color: var(--dark-green);
+            }
+
             input[type="text"], input[type="datetime-local"] {
-                width: calc(100% - 2px); /* Prend presque toute la largeur disponible sur mobile */
-                margin: 0; /* Supprime les marges latérales pour plus d'espace */
-                font-size: 0.9em; /* Légèrement plus petit sur mobile */
-                padding: 8px;
+                width: calc(100% - 2px);
+                margin: 0;
+                font-size: 0.9em; /* Taille de police des inputs mobile ajustée */
+                padding: 6px;
+            }
+            #newEntryRow input {
+                font-size: 0.9em; /* Ligne de saisie même taille que les autres sur mobile */
+                padding: 6px;
+            }
+
+            /* Boutons d'action sur mobile */
+            .add, .edit, .delete, .save, .cancel {
+                width: 35px; /* Taille légèrement plus grande pour la facilité de clic */
+                height: 35px;
+                font-size: 1.3em; /* Symboles plus grands */
+            }
+            .add { font-size: 1.8em; } /* Rendre le + encore plus gros sur mobile */
+
+            /* inputs dans les td sur mobile */
+            td input[type="text"], td input[type="datetime-local"] {
+                width: 100%; /* L'input prend toute la largeur disponible dans la cellule mobile */
+                height: auto; /* Hauteur auto pour l'input sur mobile */
             }
         }
 
         /* Pour les très petits écrans (ex: petits smartphones) */
         @media screen and (max-width: 480px) {
-            h1 { font-size: 20px; margin-bottom: 15px; }
-            .message { font-size: 12px; padding: 8px; min-height: 3.5em; }
-            .message.error { font-size: 14px; }
-            td { padding-left: 40%; }
-            td:before { width: 35%; }
+            h1 { font-size: 18px; margin-bottom: 10px; }
+            .message { font-size: 11px; padding: 6px; min-height: 3em; }
+            .message.error { font-size: 13px; }
+            td { padding-left: 35%; }
+            td:before { width: 30%; font-size: 0.8em; }
             .add, .edit, .delete, .save, .cancel {
-                padding: 6px 10px;
-                font-size: 0.8em;
+                width: 30px; /* Taille des boutons sur très petits écrans */
+                height: 30px;
+                font-size: 1.2em;
+            }
+            .add { font-size: 1.6em; }
+            #newEntryRow input {
+                font-size: 0.9em;
+                padding: 4px;
             }
         }
     </style>
@@ -326,17 +465,16 @@
             <thead>
                 <tr>
                     <th>PIN</th>
-                    <th>Date d'arrivée</th>
-                    <th>Date de départ</th>
-                    <th>Actions</th>
-                </tr>
+                    <th>ARRIVEE</th>
+                    <th>DEPART</th>
+                    <th></th> </tr>
             </thead>
             <tbody>
                 <tr id="newEntryRow">
                     <td><input type="text" id="newPin" maxlength="4" placeholder="ABCD"></td>
                     <td><input type="datetime-local" id="newArrivalDateTime"></td>
                     <td><input type="datetime-local" id="newDepartureDateTime"></td>
-                    <td><button class="add" onclick="addEntry()">Ajouter</button></td>
+                    <td><button class="add" onclick="addEntry()">+</button></td>
                 </tr>
                 </tbody>
         </table>
@@ -390,7 +528,7 @@
         function formatTimestampToDatetimeLocal(timestamp) {
             if (!timestamp) return '';
             const date = new Date(timestamp);
-            const year = date.getFullYear();
+            const year = String(date.getFullYear());
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
@@ -418,21 +556,30 @@
                     const row = tableBody.insertRow(-1); // Insérer à la fin
                     row.id = document.id; // Stocker l'ID du document Firebase dans l'ID de la ligne
 
-                    // Créer les cellules et afficher les données
+                    // Cellule PIN
                     row.insertCell(0).textContent = data.PIN || '';
-                    row.insertCell(1).textContent = data.arrivalDateTime ? new Date(data.arrivalDateTime).toLocaleString('fr-FR', {
-                        year: 'numeric', month: '2-digit', day: '2-digit',
-                        hour: '2-digit', minute: '2-digit', hour12: false
-                    }) : '';
-                    row.insertCell(2).textContent = data.departureDateTime ? new Date(data.departureDateTime).toLocaleString('fr-FR', {
-                        year: 'numeric', month: '2-digit', day: '2-digit',
-                        hour: '2-digit', minute: '2-digit', hour12: false
-                    }) : '';
 
+                    // Cellules ARRIVEE
+                    const arrivalCell = row.insertCell(1);
+                    arrivalCell.textContent = data.arrivalDateTime ? new Date(data.arrivalDateTime).toLocaleString('fr-FR', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }) : '';
+                    
+
+                    // Cellules DEPART
+                    const departureCell = row.insertCell(2);
+                    departureCell.textContent = data.departureDateTime ? new Date(data.departureDateTime).toLocaleString('fr-FR', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }) : '';
+                    
+                    // Cellule Actions
                     const actionsCell = row.insertCell(3);
+                    actionsCell.classList.add('action-buttons-container');
                     actionsCell.innerHTML = `
-                        <button class="edit" onclick="editEntry('${document.id}')">Modifier</button>
-                        <button class="delete" onclick="deleteEntry('${document.id}')">Supprimer</button>
+                        <button class="edit" onclick="editEntry('${document.id}')">✎</button>
+                        <button class="delete" onclick="deleteEntry('${document.id}')">✖</button>
                     `;
                 });
             } catch (error) {
@@ -440,7 +587,7 @@
                 console.error("Erreur de chargement des données:", error);
             }
         }
-
+        
         // Fonction pour ajouter une nouvelle entrée
         async function addEntry() {
             const pinInput = document.getElementById('newPin');
@@ -512,12 +659,12 @@
 
             // Récupérer les cellules et leurs valeurs actuelles
             const pinCell = row.cells[0];
-            const arrivalCell = row.cells[1];
-            const departureCell = row.cells[2];
+            const arrivalDisplayCell = row.cells[1];
+            const departureDisplayCell = row.cells[2];
             const actionsCell = row.cells[3];
 
             const currentPin = pinCell.textContent;
-            // Récupérer le timestamp initialement stocké pour une conversion précise
+            
             try {
                 const documentSnapshot = await getDoc(doc(db, collectionName, docId));
 
@@ -531,13 +678,14 @@
 
                     // Remplacer le texte par des inputs
                     pinCell.innerHTML = `<input type="text" id="editPin_${docId}" value="${currentPin}" maxlength="4">`;
-                    arrivalCell.innerHTML = `<input type="datetime-local" id="editArrival_${docId}" value="${currentArrivalFormatted}">`;
-                    departureCell.innerHTML = `<input type="datetime-local" id="editDeparture_${docId}" value="${currentDepartureFormatted}">`;
+                    
+                    arrivalDisplayCell.innerHTML = `<input type="datetime-local" id="editArrival_${docId}" value="${currentArrivalFormatted}">`;
+                    departureDisplayCell.innerHTML = `<input type="datetime-local" id="editDeparture_${docId}" value="${currentDepartureFormatted}">`;
 
                     // Mettre à jour les boutons d'action
                     actionsCell.innerHTML = `
-                        <button class="save" onclick="saveEdit('${docId}')">Sauvegarder</button>
-                        <button class="cancel" onclick="cancelEdit('${docId}')">Annuler</button>
+                        <button class="save" onclick="saveEdit('${docId}')">✔</button>
+                        <button class="cancel" onclick="cancelEdit('${docId}')">✖</button>
                     `;
                     editingId = docId;
                     showMessage("Mode édition activé pour l'entrée.", 'info');
