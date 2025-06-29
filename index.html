@@ -1159,24 +1159,27 @@
         }
 
         async function triggerPortal() {
-            if (!currentGuestPin) {
-                displayGuestMessage('alert', "Aucun code PIN actif pour contrôler le portail.");
-                return;
-            }
+        if (!currentGuestPin) {
+            displayGuestMessage('alert', "Aucun code PIN actif pour contrôler le portail.");
+            return;
+        }
 
-            try {
-                // Send request to webhook
-                const response = await fetch(WEBHOOK_URL);
-                const data = await response.text(); // Get raw response
-                if (response.ok && data.includes("Success")) { // Check for "Success" in the response body
-                    displayGuestMessage('success', "Portail activé !");
-                } else {
-                    displayGuestMessage('danger', `Erreur portail: ${data || response.statusText}`);
-                }
-            } catch (error) {
-                console.error("Erreur lors du déclenchement du portail:", error);
-                displayGuestMessage('danger', "Erreur réseau. Impossible d'atteindre le portail.");
+        try {
+            // Send request to webhook
+            const response = await fetch(WEBHOOK_URL);
+            const data = await response.text(); // Get raw response
+            if (response.ok && data.includes("Success")) { // Check for "Success" in the response body
+                displayGuestMessage('success', "Portail activé !");
+            } else {
+                // Ce bloc est exécuté si la réponse n'est pas "OK" (code statut 2xx)
+                // ou si le corps de la réponse ne contient pas "Success".
+                displayGuestMessage('danger', `Erreur portail: ${data || response.statusText}`);
             }
+        } catch (error) {
+            // Ce bloc est exécuté si une erreur réseau fondamentale se produit (ex: TypeError).
+            console.error("Erreur lors du déclenchement du portail (détails techniques):", error); // Ajout de ce log
+            displayGuestMessage('danger', "En cas de dysfonctionnement veuillez vérifier votre connexion");
+        }
         }
 
         // --- MANAGER App Functions ---
