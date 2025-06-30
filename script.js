@@ -386,10 +386,19 @@
         const { pinCodeInput, dateInInput, dateOutInput, contactInput, phoneInput } =
           dom.manager.form;
 
+        const dateIn = new Date(dateInInput.value);
+        const dateOut = new Date(dateOutInput.value);
+
+        // Validation de la cohérence des dates
+        if (dateIn > dateOut) {
+          ui.showMessage('danger', 'Erreur de date : IN est postérieure à OUT');
+          return; // Empêche la soumission du formulaire
+        }
+
         const pinData = {
           pinCode: pinCodeInput.value.toUpperCase(),
-          dateIn: firebase.firestore.Timestamp.fromDate(new Date(dateInInput.value)),
-          dateOut: firebase.firestore.Timestamp.fromDate(new Date(dateOutInput.value)),
+          dateIn: firebase.firestore.Timestamp.fromDate(dateIn),
+          dateOut: firebase.firestore.Timestamp.fromDate(dateOut),
           contact: contactInput.value.trim(),
           phone: phoneInput.value.trim(),
         };
