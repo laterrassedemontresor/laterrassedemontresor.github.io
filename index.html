@@ -78,30 +78,26 @@
       </section>
 
       <section id="manager-app" class="app-hidden">
-        <div id="auth-controls" style="text-align: center; margin-bottom: 20px">
-          <div id="logged-in-view" style="display: none">
-            <p>
-              Connecté(e) en tant que:
-              <span id="user-email" style="font-weight: bold"></span>
-            </p>
-            <button id="sign-out-btn" class="action-button danger-button">Déconnexion</button>
-          </div>
-        </div>
         <header class="header">
           <h1 id="header-title">PIN Code Manager - Montrésor</h1>
           <button
             class="return-to-guest-btn"
             id="returnToGuestButton"
-            title="Retour à l'accueil"
-            aria-label="Retour à l'accueil"
+            title="Déconnexion"
+            aria-label="Déconnexion"
           >
-            🏠
+            <img
+              id="user-avatar"
+              class="user-avatar-in-btn"
+              src=""
+              alt="User Avatar"
+              style="display: none"
+            />
           </button>
         </header>
         <div class="message success" style="display: none" id="message-success"></div>
         <div class="message danger" style="display: none" id="message-danger"></div>
         <div class="message primary" style="display: none" id="message-primary"></div>
-
         <form class="form-container" id="pinForm">
           <div class="form-row date-row">
             <div class="form-group pin-group">

@@ -57,11 +57,12 @@
     // Manager App
     manager: {
       auth: {
-        loggedInView: document.getElementById('logged-in-view'),
-        userEmail: document.getElementById('user-email'),
-        signOutBtn: document.getElementById('sign-out-btn'),
+        // loggedInView: document.getElementById('logged-in-view'), // Supprimé car l'élément HTML n'existe plus
+        // userEmail: document.getElementById('user-email'),         // Supprimé
+        // signOutBtn: document.getElementById('sign-out-btn'),     // Supprimé
       },
       returnToGuestBtn: document.getElementById('returnToGuestButton'),
+      userAvatar: document.getElementById('user-avatar'),
       messages: {
         success: document.getElementById('message-success'),
         danger: document.getElementById('message-danger'),
@@ -531,20 +532,38 @@
     // Auth Handlers
     auth: {
       onAuthStateChanged: (user) => {
+        // DÉBUT du NOUVEAU code à l'intérieur de onAuthStateChanged
+
         if (user && user.email === config.adminEmail) {
-          dom.manager.auth.userEmail.textContent = user.email;
-          dom.manager.auth.loggedInView.style.display = 'block';
+          // dom.manager.auth.userEmail.textContent = user.email; // Supprimé
+          // dom.manager.auth.loggedInView.style.display = 'block'; // Supprimé
+
+          // Afficher le bouton entier (qui contient maintenant l'avatar)
+          dom.manager.returnToGuestBtn.style.display = 'flex'; // ou 'block', selon votre layout initial du bouton
+
+          if (user.photoURL) {
+            dom.manager.userAvatar.src = user.photoURL;
+            dom.manager.userAvatar.style.display = 'block'; // Afficher l'image de l'avatar
+          } else {
+            dom.manager.userAvatar.style.display = 'none'; // Cacher l'image si pas d'avatar
+          }
+
           ui.manager.showApp();
         } else {
+          // Cacher le bouton entier et l'image lors de la déconnexion ou accès non-admin
+          dom.manager.returnToGuestBtn.style.display = 'none';
+          dom.manager.userAvatar.style.display = 'none';
+          dom.manager.userAvatar.src = ''; // Effacer la source de l'image
+
           if (user) {
-            // If user is logged in but not admin
             auth.signOut();
             ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
           }
-          dom.manager.auth.loggedInView.style.display = 'none';
+          // dom.manager.auth.loggedInView.style.display = 'none'; // Supprimé
           ui.guest.showApp();
         }
-      },
+        // FIN du NOUVEAU code à l'intérieur de onAuthStateChanged
+      }, // <-- Cette ligne doit être la même après la modification
       signIn: () => {
         auth
           .signInWithPopup(googleProvider)
@@ -575,8 +594,8 @@
     dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
 
     // Manager Listeners
-    dom.manager.returnToGuestBtn.addEventListener('click', ui.guest.showApp);
-    dom.manager.auth.signOutBtn.addEventListener('click', handlers.auth.signOut);
+    dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut); // Le bouton (contenant l'avatar) déconnecte
+    // dom.manager.auth.signOutBtn.addEventListener('click', handlers.auth.signOut); // Supprimé
     dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
     dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
     Object.values(dom.manager.form).forEach((input) =>

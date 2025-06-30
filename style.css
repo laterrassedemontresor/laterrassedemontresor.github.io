@@ -84,9 +84,14 @@ body {
   display: flex;
   align-items: center;
   min-height: 36px;
-  justify-content: space-between; /* Pour espacer le titre et le bouton de retour */
+  justify-content: space-between;
+  /* Ajouts pour harmoniser avec le style global et le positionnement du bouton */
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  margin-bottom: 20px; /* Ajout d'une marge en bas pour l'espacement */
 }
-
 .header h1 {
   font-size: 14px;
   font-weight: 600;
@@ -768,28 +773,57 @@ input:-webkit-autofill:active {
   color: var(--text-muted);
 }
 
-/* Style for the return to guest button */
+/* Style for the button acting as avatar container */
 .return-to-guest-btn {
-  font-size: 24px; /* Larger icon */
+  /* position: absolute; */ /* Supprimé, le bouton est maintenant dans le header flex */
+  /* right: 20px; */ /* Supprimé */
+  /* top: 50%; */ /* Supprimé */
+  /* transform: translateY(-50%); */ /* Supprimé */
+  margin-left: auto; /* Pousse le bouton vers la droite dans le conteneur flex */
+
+  /* Styles de base du bouton */
   cursor: pointer;
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out; /* Smooth transition */
-  user-select: none; /* Prevent text selection */
+  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; /* Maintenir les transitions */
+  user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  /* Specific for this button as it's not a standard .btn */
+
+  /* Rendre le bouton invisible par défaut (seul l'avatar sera visible) */
   border: none;
-  background: none;
-  padding: 0;
-  color: var(--text-primary);
+  background: none; /* Fond transparent */
+  padding: 0; /* Pas de padding pour l'avatar */
+  color: transparent; /* Masquer l'icône si elle était encore là */
+
+  /* Ajoutez des dimensions pour le bouton lui-même s'il doit servir de zone de clic */
+  width: 40px; /* Taille de la zone cliquable du bouton */
+  height: 40px;
+  border-radius: 50%; /* Rendre la zone cliquable circulaire */
+  overflow: hidden; /* Important pour que l'image ne dépasse pas */
+  display: flex; /* Utiliser flex pour centrer l'image */
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm); /* Conserver l'ombre */
 }
+
 .return-to-guest-btn:hover {
-  transform: scale(1.1); /* Slightly enlarge on hover */
-  opacity: 0.8;
+  /* transform: translateY(-50%) scale(1.05); */ /* Ajusté */
+  transform: scale(1.05); /* Effet au survol */
+  box-shadow: var(--shadow-md); /* Augmenter l'ombre au survol */
+  opacity: 1; /* S'assurer qu'il est pleinement visible au survol */
 }
 .return-to-guest-btn:active {
-  transform: scale(0.9); /* Shrink on click */
-  opacity: 0.6;
+  /* transform: translateY(-50%) scale(0.95); */ /* Ajusté */
+  transform: scale(0.95); /* Effet au clic */
+  box-shadow: none; /* Enlever l'ombre au clic */
+}
+/* NOUVEAU: Style pour l'image de l'avatar à l'intérieur du bouton */
+.user-avatar-in-btn {
+  width: 100%; /* L'image remplit la taille du bouton parent */
+  height: 100%;
+  object-fit: cover; /* S'assurer que l'image couvre le cercle sans déformation */
+  border-radius: 50%; /* Rendre l'image circulaire */
+  display: block; /* S'assurer que l'image est un bloc pour occuper l'espace */
 }
 
 .pins-list::-webkit-scrollbar {
