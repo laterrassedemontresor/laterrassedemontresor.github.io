@@ -1,0 +1,807 @@
+:root {
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f5f5f5;
+  --bg-input: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  /* Muted grey for future/inactive */
+  --text-muted: #999999;
+  --border-color: #e0e0e0;
+  --border-color-hover: #d0d0d0;
+  --border-color-focus: #4a90e2;
+  --accent-primary: #4a90e2;
+  --accent-success: #16da1d;
+  --accent-danger: #f44336;
+  --accent-warning: #faad14;
+  --accent-orange: #ff9500;
+  --accent-blue: #1890ff;
+  --accent-fluo-orange: #ff8c00;
+  /* New fluorescent orange for title */
+  --accent-fluo-green: #39ff14;
+  /* New fluorescent green for result count */
+  --border-radius: 6px;
+  --border-radius-sm: 4px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --transition: 0.15s ease;
+  --btn-size: 28px;
+  --btn-gap: 8px; /* Valeur ajustée pour l'écartement par défaut entre les groupes et les boutons */
+  --highlight-green-border-light: #8bc34a;
+  --highlight-green-border-strong: #4caf50; /* Used for less flashy green */
+  --btn-reset-bg: #424242; /* Dark grey for reset button */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --bg-tertiary: #333333;
+    --bg-input: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    /* Muted grey for future/inactive in dark mode */
+    --text-muted: #999999;
+    --border-color: #444444;
+    --border-color-hover: #555555;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary); /* Changed to match background */
+  color: var(--text-primary);
+  line-height: 1.4;
+  padding: 12px;
+  font-size: 14px;
+  display: flex; /* Utilise flexbox pour centrer le conteneur principal */
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
+  min-height: 100vh; /* Prend au moins toute la hauteur de la fenêtre */
+}
+
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  border: none; /* Removed border */
+  box-shadow: none; /* Removed box-shadow */
+  overflow: hidden;
+  width: 100%; /* S'assure que le conteneur prend la largeur max-width */
+}
+
+.header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  justify-content: space-between; /* Pour espacer le titre et le bouton de retour */
+}
+
+.header h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-fluo-orange); /* Apply fluorescent orange color */
+  flex-grow: 1; /* Permet au titre de prendre l'espace disponible */
+  text-align: center; /* Centre le texte du titre */
+}
+
+/* Styles pour GUEST */
+.guest-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px; /* Reduced padding for compactness */
+  border-bottom: 1px solid var(--border-color);
+  background: transparent; /* MODIFIÉ : Fond transparent pour le header GUEST var(--bg-tertiary);*/
+}
+
+.logo-circle-wrapper {
+  /* New wrapper for the circular background */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%; /* Makes it a circle */
+  background-color: var(--highlight-green-border-strong); /* Less flashy green */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px; /* Reduced margin */
+  /* Removed cursor: pointer; and :active state */
+  user-select: none; /* Empêche la sélection de texte */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}
+
+.guest-logo {
+  font-size: 40px; /* Logo 40x40px */
+  /* No explicit width/height needed if font-size controls it for emoji */
+}
+
+.guest-title {
+  font-size: 18pt; /* Titre 18pt (réduit) */
+  font-weight: 700;
+  color: white; /* Titre blanc */
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 10px; /* Adjusted margin */
+}
+
+.guest-message {
+  padding: 12px 16px 8px 16px; /* Adjusted padding */
+  font-size: 12px; /* Taille 12px (réduite) */
+  font-weight: normal; /* Police fine */
+  display: flex; /* Use flexbox for alignment */
+  align-items: flex-end; /* Align text to bottom */
+  justify-content: center; /* Center text horizontally */
+  height: 2.8em; /* Ensure 2 lines height */
+  text-align: center; /* Fallback text align */
+  background-color: transparent; /* Removed background */
+  margin: 10px 0 0 0; /* Added margin-top to lower it by 5px */
+  border-radius: 0;
+  border: none; /* Explicitly remove border */
+  color: var(--text-primary); /* Default text color */
+}
+
+.guest-message.alert {
+  color: var(--accent-danger); /* Red text for alert */
+}
+
+.guest-message.success,
+.guest-message.info {
+  color: var(--accent-fluo-green); /* Fluorescent green text for success/info */
+}
+
+.guest-content-area {
+  /* New wrapper for both PIN entry and Portal controls */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  padding: 15px 0; /* Vertical padding only */
+  min-height: 150px; /* Ensure enough space, adjust as needed */
+  background: transparent; /*var(--bg-tertiary); Same background as header */
+  position: relative; /* For absolute positioning of inner states if needed */
+}
+
+.guest-state-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Take full width of parent */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+.guest-state-hidden {
+  display: none !important; /* Hide completely */
+}
+
+#guestPinInput {
+  width: 250px; /* Fixed width */
+  height: 60px; /* Fixed height (increased) */
+  padding: 5px 10px; /* Adjusted padding */
+  font-size: 30px; /* Adjusted font size for 60px height */
+  font-weight: bold; /* Bold */
+  text-align: center;
+  letter-spacing: 25px; /* Increased letter spacing */
+  background: black; /* Black background */
+  border: 3px solid var(--accent-orange); /* Orange border */
+  border-radius: var(--border-radius);
+  color: white; /* White text */
+  box-shadow: 0 0 8px var(--accent-orange); /* Reduced halo effect */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+#guestPinInput:focus {
+  outline: none;
+  border-color: var(--highlight-green-border-strong); /* Keep existing focus style */
+  box-shadow: 0 0 8px var(--highlight-green-border-strong); /* Adjust box-shadow on focus */
+}
+
+#guestPinInput::placeholder {
+  color: white; /* White placeholder */
+  font-weight: normal; /* Make placeholder not bold */
+}
+
+.guest-input-action-buttons {
+  /* Wrapper for backspace and check buttons */
+  display: flex;
+  gap: 8px; /* Gap between buttons */
+  margin-top: 15px; /* Place below input */
+  justify-content: center; /* Center the buttons */
+}
+
+.backspace-btn,
+.check-pin-btn,
+.reset-btn {
+  border: none; /* Remove default border */
+  border-radius: var(--border-radius-sm); /* Match MANAGER btn-sm */
+  font-size: 16px; /* Larger symbol size for 32px button */
+  width: 32px; /* Fixed button size (reduced) */
+  height: 32px; /* Fixed button size (reduced) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition);
+  color: white; /* White text/symbol color */
+}
+
+.backspace-btn {
+  background: var(--accent-danger); /* Matching MANAGER delete button */
+}
+.backspace-btn:hover {
+  background: #e53935; /* Darker red on hover */
+}
+
+.check-pin-btn {
+  background: var(--accent-success); /* Matching MANAGER success button */
+}
+.check-pin-btn:hover {
+  background: #4caf50; /* Darker green on hover */
+}
+.check-pin-btn:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+#portalBtn {
+  width: 250px; /* Fixed width to match input */
+  height: 60px; /* Fixed height to match input (increased) */
+  background: var(--highlight-green-border-strong); /* Less flashy green */
+  color: black; /* Black text for portal button */
+  border: 2px solid #388e3c; /* Added dark green border for the ring effect */
+  border-radius: var(--border-radius);
+  padding: 7px 15px 13px 15px; /* Adjusted padding for 60px height */
+  font-size: 20px; /* Adjusted font size for portal button */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease; /* For smooth 3D effect */
+  display: block;
+  margin-bottom: 15px; /* Space below portal button */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* Initial 3D effect */
+}
+#portalBtn:hover {
+  background: #12a818;
+}
+#portalBtn:active {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0px 1px rgba(0, 0, 0, 0.05); /* Pressed in effect */
+  transform: translateY(2px); /* Move down slightly */
+}
+#portalBtn:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none; /* No 3D effect when disabled */
+  transform: none; /* No transform when disabled */
+  border-color: var(--text-muted); /* Mute border when disabled */
+}
+
+#resetButton {
+  background: var(--btn-reset-bg); /* Dark grey */
+  color: white;
+  font-size: 16px; /* Larger symbol size */
+  width: 32px; /* Fixed size to match action buttons */
+  height: 32px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background var(--transition);
+  /* This button will implicitly be centered below portalBtn due to parent flex center */
+}
+#resetButton:hover {
+  background: #555555; /* Slightly lighter grey on hover */
+}
+
+/* Styles for MANAGER (mostly existing from your MANAGER.txt) */
+.message {
+  padding: 16px 16px 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  border-bottom: 1px solid var(--border-color);
+  border-left: none;
+  margin: 0;
+  border-radius: 0;
+}
+
+.message.success {
+  color: var(--accent-success);
+  background-color: rgba(76, 175, 80, 0.15);
+  border-left: 4px solid var(--accent-success);
+}
+
+.message.danger {
+  color: var(--accent-danger);
+  background-color: rgba(244, 67, 54, 0.15);
+  border-left: 4px solid var(--accent-danger);
+}
+
+.message.warning {
+  color: var(--accent-warning);
+  background-color: rgba(250, 173, 20, 0.15);
+  border-left: 4px solid var(--accent-warning);
+}
+
+.message.primary {
+  color: var(--accent-blue);
+  background-color: rgba(24, 144, 255, 0.15);
+  border-left: 4px solid var(--accent-blue);
+}
+
+.form-container {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.date-row {
+  align-items: stretch;
+}
+
+.pin-group {
+  flex: 0 0 100px;
+}
+
+.pin-input {
+  height: 72px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: monospace;
+}
+
+#form-pin-code {
+  font-size: 24pt;
+}
+
+.date-groups {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-date-label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.form-container .pin-date-label {
+  width: 24px;
+  text-align: right;
+}
+
+.pin-date-label.in {
+  color: var(--accent-success);
+}
+
+.pin-date-label.out {
+  color: var(--accent-danger);
+}
+
+.date-input {
+  flex: 1;
+  height: 32px;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(50%) sepia(100%) saturate(10000%) hue-rotate(0deg);
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  transition: border-color var(--transition);
+}
+
+.form-container.is-active .form-input {
+  border-color: var(--highlight-green-border-light);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--highlight-green-border-strong);
+}
+
+/* Prevent Chrome autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s; /* Longer transition to effectively remove the autofill background */
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  width: var(--btn-size);
+  height: var(--btn-size);
+  min-width: var(--btn-size);
+}
+/* ADDED: Visual styling for disabled buttons */
+.btn:disabled {
+  opacity: 0.5; /* Ajusté pour être moins estompé */
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
+.btn-success {
+  background: var(--accent-success);
+  border-color: var(--accent-success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: white;
+}
+
+.btn.disabled-visual {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-actions {
+  display: flex;
+  /* Make it a flex container */
+  align-items: center;
+  /* Vertically align items */
+  gap: var(--btn-gap);
+  /* Default gap between major groups */
+  margin-top: 8px;
+  /* padding: 0 12px; */ /* REMOVED FOR ALIGNMENT */
+  position: relative;
+}
+
+.form-actions-left-group,
+.form-actions-center-group {
+  display: flex;
+  gap: var(--btn-gap); /* Gap between buttons within these groups */
+  align-items: center;
+}
+
+#sortButton,
+#generatePinButton {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+@media (prefers-color-scheme: dark) {
+  #sortButton,
+  #generatePinButton {
+    color: white;
+  }
+}
+
+.sort-control,
+.generate-control {
+  position: relative;
+  /* Keep this for dropdown positioning */
+}
+
+/* Permanent search input styles */
+.permanent-search-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-input);
+  flex: 1;
+  /* Allow it to take available space */
+  position: relative;
+  min-width: 80px; /* Réduit le min-width pour plus de flexibilité */
+  height: var(--btn-size);
+  /* Match height of buttons */
+  margin-left: auto;
+  /* Poussera la searchbox à l'extrême droite, prendant l'espace restant */
+}
+
+.permanent-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 10px; /* Match form-input padding */
+  padding-right: 60px;
+  /* Increased space for count + clear button */
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 100%; /* Ensure it uses 100% of the wrapper's width */
+}
+
+.permanent-search-input:focus {
+  outline: none;
+  box-shadow: none; /* Remove default focus shadow */
+}
+
+.permanent-search-wrapper:focus-within {
+  border-color: var(--highlight-green-border-strong);
+}
+
+/* Clear search button */
+.clear-search-btn {
+  position: absolute;
+  right: 2px; /* Position close to the right edge */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  /* Larger 'x' */
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1; /* Keep it centered */
+  display: block;
+  /* ALWAYS visible now */
+  z-index: 2;
+  /* Ensure it's above the count when visible */
+  transition: opacity 0.15s ease;
+  /* For smooth opacity change when enabled/disabled */
+}
+.clear-search-btn:hover:not([disabled]) {
+  color: var(--accent-danger);
+}
+.clear-search-btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.4; /* Muted when disabled */
+}
+
+/* Search Results Count display */
+.search-results-count {
+  position: absolute;
+  right: 25px; /* Position to the left of the clear button */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted); /* Light gray, not fluo-green */
+  font-size: 12px;
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 20px;
+  text-align: center;
+  font-weight: normal; /* Normal text, not bold */
+  pointer-events: none;
+  /* Allow clicks to pass through to input */
+  z-index: 1;
+  /* Below clear button but above input */
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(var(--btn-size) + var(--btn-gap));
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  padding: 8px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+  left: 0;
+}
+
+.dropdown-menu.show {
+  display: flex;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  position: relative; /* Needed for ::before pseudo-element positioning */
+  padding-left: 20px;
+  /* Make space for the bullet point */
+}
+.dropdown-item:hover {
+  background: var(--bg-tertiary);
+}
+/* Style for the active sort criterion bullet point */
+.dropdown-item.active::before {
+  content: '•';
+  /* Bullet point character */
+  position: absolute;
+  left: 8px;
+  /* Position the bullet point */
+  color: var(--accent-fluo-orange);
+  /* Color of the bullet point */
+  font-size: 14px;
+  /* Size of the bullet point */
+  line-height: 1;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.pins-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+  border: 1px solid #444444;
+}
+
+.pin-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px 12px 8px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 12px;
+}
+
+.pin-code {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 14px;
+  width: 40px;
+  text-align: center;
+  /* Default color is var(--text-primary) */
+}
+
+/* PIN status colors */
+.pin-code.expired {
+  color: var(--accent-danger);
+  /* Red for expired */
+}
+
+.pin-code.active {
+  color: var(--accent-success);
+  /* Green for active */
+}
+
+.pin-code.future {
+  color: var(--text-secondary);
+  /* Muted grey for future/not yet active */
+}
+
+.pin-details {
+  flex: 1;
+}
+
+.pin-contact-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.pin-contact {
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.pin-phone {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.pin-dates {
+  display: flex;
+  gap: 12px;
+}
+
+.pin-date {
+  font-size: 11px;
+  /* color: var(--text-secondary);*/
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pin-actions {
+  display: flex;
+  /* Make it a flex container */
+  align-items: center;
+  /* Vertically align items within pin-actions */
+  gap: var(--btn-gap);
+  /* Add a gap between buttons, var(--btn-gap) is 4px */
+}
+
+/* Style for the return to guest button */
+.return-to-guest-btn {
+  font-size: 24px; /* Larger icon */
+  cursor: pointer;
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out; /* Smooth transition */
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* Specific for this button as it's not a standard .btn */
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text-primary);
+}
+.return-to-guest-btn:hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+  opacity: 0.8;
+}
+.return-to-guest-btn:active {
+  transform: scale(0.9); /* Shrink on click */
+  opacity: 0.6;
+}
+
+.pins-list::-webkit-scrollbar {
+  width: 6px;
+}
+.pins-list::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+.pins-list::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+
+/* Utility classes for showing/hiding apps */
+.app-hidden {
+  display: none !important;
+}
+
+/* Classe utilitaire pour cacher visuellement des éléments tout en les gardant accessibles */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

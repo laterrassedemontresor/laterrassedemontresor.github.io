@@ -1,1618 +1,211 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Terrasse de Montresor Gate Access</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
-  
-    <style>
-        :root {
-            --bg-primary: #fafafa;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f5f5f5;
-            --bg-input: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            /* Muted grey for future/inactive */
-            --text-muted: #999999;
-            --border-color: #e0e0e0;
-            --border-color-hover: #d0d0d0;
-            --border-color-focus: #4a90e2;
-            --accent-primary: #4a90e2;
-            --accent-success: #16da1d;
-            --accent-danger: #f44336;
-            --accent-warning: #faad14;
-            --accent-orange: #ff9500;
-            --accent-blue: #1890ff;
-            --accent-fluo-orange: #FF8C00;
-            /* New fluorescent orange for title */
-            --accent-fluo-green: #39FF14;
-            /* New fluorescent green for result count */
-            --border-radius: 6px;
-            --border-radius-sm: 4px;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-            --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
-            --transition: 0.15s ease;
-            --btn-size: 28px;
-            --btn-gap: 8px; /* Valeur ajustée pour l'écartement par défaut entre les groupes et les boutons */
-            --highlight-green-border-light: #8bc34a;
-            --highlight-green-border-strong: #4CAF50; /* Used for less flashy green */
-            --btn-reset-bg: #424242; /* Dark grey for reset button */
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #1a1a1a;
-                --bg-secondary: #2a2a2a;
-                --bg-tertiary: #333333;
-                --bg-input: #2a2a2a;
-                --text-primary: #ffffff;
-                --text-secondary: #cccccc;
-                /* Muted grey for future/inactive in dark mode */
-                --text-muted: #999999;
-                --border-color: #444444;
-                --border-color-hover: #555555;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary); /* Changed to match background */
-            color: var(--text-primary);
-            line-height: 1.4;
-            padding: 12px;
-            font-size: 14px;
-            display: flex; /* Utilise flexbox pour centrer le conteneur principal */
-            justify-content: center; /* Centre horizontalement */
-            align-items: center; /* Centre verticalement */
-            min-height: 100vh; /* Prend au moins toute la hauteur de la fenêtre */
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: var(--bg-primary);
-            border-radius: var(--border-radius);
-            border: none; /* Removed border */
-            box-shadow: none; /* Removed box-shadow */
-            overflow: hidden;
-            width: 100%; /* S'assure que le conteneur prend la largeur max-width */
-        }
-
-        .header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            min-height: 36px;
-            justify-content: space-between; /* Pour espacer le titre et le bouton de retour */
-        }
-
-        .header h1 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent-fluo-orange); /* Apply fluorescent orange color */
-            flex-grow: 1; /* Permet au titre de prendre l'espace disponible */
-            text-align: center; /* Centre le texte du titre */
-        }
-        
-        /* Styles pour GUEST */
-        .guest-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 16px; /* Reduced padding for compactness */
-            border-bottom: 1px solid var(--border-color);
-            background: transparent; /* MODIFIÉ : Fond transparent pour le header GUEST var(--bg-tertiary);*/
-        }
-
-        .logo-circle-wrapper { /* New wrapper for the circular background */
-            width: 60px;
-            height: 60px;
-            border-radius: 50%; /* Makes it a circle */
-            background-color: var(--highlight-green-border-strong); /* Less flashy green */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 5px; /* Reduced margin */
-            /* Removed cursor: pointer; and :active state */
-            user-select: none; /* Empêche la sélection de texte */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE/Edge */
-        }
-
-        .guest-logo {
-            font-size: 40px; /* Logo 40x40px */
-            /* No explicit width/height needed if font-size controls it for emoji */
-        }
-
-        .guest-title {
-            font-size: 18pt; /* Titre 18pt (réduit) */
-            font-weight: 700;
-            color: white; /* Titre blanc */
-            text-align: center;
-            line-height: 1.2;
-            margin-bottom: 10px; /* Adjusted margin */
-        }
-
-        .guest-message {
-            padding: 12px 16px 8px 16px; /* Adjusted padding */
-            font-size: 12px; /* Taille 12px (réduite) */
-            font-weight: normal; /* Police fine */
-            display: flex; /* Use flexbox for alignment */
-            align-items: flex-end; /* Align text to bottom */
-            justify-content: center; /* Center text horizontally */
-            height: 2.8em; /* Ensure 2 lines height */
-            text-align: center; /* Fallback text align */
-            background-color: transparent; /* Removed background */
-            margin: 10px 0 0 0; /* Added margin-top to lower it by 5px */
-            border-radius: 0;
-            border: none; /* Explicitly remove border */
-            color: var(--text-primary); /* Default text color */
-        }
-
-        .guest-message.alert {
-            color: var(--accent-danger); /* Red text for alert */
-        }
-
-        .guest-message.success,
-        .guest-message.info {
-            color: var(--accent-fluo-green); /* Fluorescent green text for success/info */
-        }
-
-        .guest-content-area { /* New wrapper for both PIN entry and Portal controls */
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center horizontally */
-            padding: 15px 0; /* Vertical padding only */
-            min-height: 150px; /* Ensure enough space, adjust as needed */
-            background: transparent;/*var(--bg-tertiary); Same background as header */
-            position: relative; /* For absolute positioning of inner states if needed */
-        }
-
-        .guest-state-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%; /* Take full width of parent */
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
-        }
-
-        .guest-state-hidden {
-            display: none !important; /* Hide completely */
-        }
-        
-        #guestPinInput {
-            width: 250px; /* Fixed width */
-            height: 60px; /* Fixed height (increased) */
-            padding: 5px 10px; /* Adjusted padding */
-            font-size: 30px; /* Adjusted font size for 60px height */
-            font-weight: bold; /* Bold */
-            text-align: center;
-            letter-spacing: 25px; /* Increased letter spacing */
-            background: black; /* Black background */
-            border: 3px solid var(--accent-orange); /* Orange border */
-            border-radius: var(--border-radius);
-            color: white; /* White text */
-            box-shadow: 0 0 8px var(--accent-orange); /* Reduced halo effect */
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-
-        #guestPinInput:focus {
-            outline: none;
-            border-color: var(--highlight-green-border-strong); /* Keep existing focus style */
-            box-shadow: 0 0 8px var(--highlight-green-border-strong); /* Adjust box-shadow on focus */
-        }
-
-        #guestPinInput::placeholder {
-            color: white; /* White placeholder */
-            font-weight: normal; /* Make placeholder not bold */
-        }
-
-        .guest-input-action-buttons { /* Wrapper for backspace and check buttons */
-            display: flex;
-            gap: 8px; /* Gap between buttons */
-            margin-top: 15px; /* Place below input */
-            justify-content: center; /* Center the buttons */
-        }
-
-        .backspace-btn, .check-pin-btn, .reset-btn {
-            border: none; /* Remove default border */
-            border-radius: var(--border-radius-sm); /* Match MANAGER btn-sm */
-            font-size: 16px; /* Larger symbol size for 32px button */
-            width: 32px; /* Fixed button size (reduced) */
-            height: 32px; /* Fixed button size (reduced) */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background var(--transition);
-            color: white; /* White text/symbol color */
-        }
-
-        .backspace-btn {
-            background: var(--accent-danger); /* Matching MANAGER delete button */
-        }
-        .backspace-btn:hover {
-            background: #e53935; /* Darker red on hover */
-        }
-
-        .check-pin-btn {
-            background: var(--accent-success); /* Matching MANAGER success button */
-        }
-        .check-pin-btn:hover {
-            background: #4CAF50; /* Darker green on hover */
-        }
-        .check-pin-btn:disabled {
-            background: var(--text-muted);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        #portalBtn {
-            width: 250px; /* Fixed width to match input */
-            height: 60px; /* Fixed height to match input (increased) */
-            background: var(--highlight-green-border-strong); /* Less flashy green */
-            color: black; /* Black text for portal button */
-            border: 2px solid #388e3c; /* Added dark green border for the ring effect */
-            border-radius: var(--border-radius);
-            padding: 7px 15px 13px 15px; /* Adjusted padding for 60px height */
-            font-size: 20px; /* Adjusted font size for portal button */
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease; /* For smooth 3D effect */
-            display: block;
-            margin-bottom: 15px; /* Space below portal button */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* Initial 3D effect */
-        }
-        #portalBtn:hover {
-            background: #12a818;
-        }
-        #portalBtn:active {
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0px 1px rgba(0, 0, 0, 0.05); /* Pressed in effect */
-            transform: translateY(2px); /* Move down slightly */
-        }
-        #portalBtn:disabled {
-            background: var(--text-muted);
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none; /* No 3D effect when disabled */
-            transform: none; /* No transform when disabled */
-            border-color: var(--text-muted); /* Mute border when disabled */
-        }
-
-        #resetButton {
-            background: var(--btn-reset-bg); /* Dark grey */
-            color: white;
-            font-size: 16px; /* Larger symbol size */
-            width: 32px; /* Fixed size to match action buttons */
-            height: 32px;
-            border: none;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            transition: background var(--transition);
-            /* This button will implicitly be centered below portalBtn due to parent flex center */
-        }
-        #resetButton:hover {
-            background: #555555; /* Slightly lighter grey on hover */
-        }
-
-        /* Styles for MANAGER (mostly existing from your MANAGER.txt) */
-        .message {
-            padding: 16px 16px 12px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            display: none;
-            border-bottom: 1px solid var(--border-color);
-            border-left: none;
-            margin: 0;
-            border-radius: 0;
-        }
-
-        .message.success {
-            color: var(--accent-success);
-            background-color: rgba(76, 175, 80, 0.15);
-            border-left: 4px solid var(--accent-success);
-        }
-
-        .message.danger {
-            color: var(--accent-danger);
-            background-color: rgba(244, 67, 54, 0.15);
-            border-left: 4px solid var(--accent-danger);
-        }
-
-        .message.warning {
-            color: var(--accent-warning);
-            background-color: rgba(250, 173, 20, 0.15);
-            border-left: 4px solid var(--accent-warning);
-        }
-
-        .message.primary {
-            color: var(--accent-blue);
-            background-color: rgba(24, 144, 255, 0.15);
-            border-left: 4px solid var(--accent-blue);
-        }
-
-        .form-container {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--bg-tertiary);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .form-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        .date-row {
-            align-items: stretch;
-        }
-
-        .pin-group {
-            flex: 0 0 100px;
-        }
-
-        .pin-input {
-            height: 72px;
-            font-weight: 700;
-            text-align: center;
-            text-transform: uppercase;
-            font-family: monospace;
-        }
-
-        #form-pin-code {
-            font-size: 24pt;
-        }
-
-        .date-groups {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .date-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pin-date-label {
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        .form-container .pin-date-label {
-            width: 24px;
-            text-align: right;
-        }
-
-        .pin-date-label.in {
-            color: var(--accent-success);
-        }
-
-        .pin-date-label.out {
-            color: var(--accent-danger);
-        }
-
-        .date-input {
-            flex: 1;
-            height: 32px;
-        }
-
-        .date-input::-webkit-calendar-picker-indicator {
-            filter: invert(50%) sepia(100%) saturate(10000%) hue-rotate(0deg);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 8px 10px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            color: var(--text-primary);
-            font-size: 13px;
-            transition: border-color var(--transition);
-        }
-
-        .form-container.is-active .form-input {
-            border-color: var(--highlight-green-border-light);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--highlight-green-border-strong);
-        }
-
-        /* Prevent Chrome autofill background color */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
-            -webkit-text-fill-color: var(--text-primary) !important;
-            transition: background-color 5000s ease-in-out 0s; /* Longer transition to effectively remove the autofill background */
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            background: var(--bg-input);
-            color: var(--text-primary);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition);
-            width: var(--btn-size);
-            height: var(--btn-size);
-            min-width: var(--btn-size);
-        }
-        /* ADDED: Visual styling for disabled buttons */
-        .btn:disabled {
-            opacity: 0.5; /* Ajusté pour être moins estompé */
-            cursor: not-allowed;
-        }
-
-        .btn-edit {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--accent-success);
-            border-color: var(--accent-success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--accent-danger);
-            border-color: var(--accent-danger);
-            color: white;
-        }
-
-        .btn.disabled-visual {
-            opacity: 0.4;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .form-actions {
-            display: flex;
-            /* Make it a flex container */
-            align-items: center;
-            /* Vertically align items */
-            gap: var(--btn-gap);
-            /* Default gap between major groups */
-            margin-top: 8px;
-            /* padding: 0 12px; */ /* REMOVED FOR ALIGNMENT */
-            position: relative;
-        }
-
-        .form-actions-left-group,
-        .form-actions-center-group {
-            display: flex;
-            gap: var(--btn-gap); /* Gap between buttons within these groups */
-            align-items: center;
-        }
-
-        #sortButton, #generatePinButton {
-            border-color: var(--accent-orange);
-            color: var(--accent-orange);
-        }
-        @media (prefers-color-scheme: dark) {
-            #sortButton, #generatePinButton {
-                color: white;
-            }
-        }
-
-        .sort-control, .generate-control {
-            position: relative;
-            /* Keep this for dropdown positioning */
-        }
-
-        /* Permanent search input styles */
-        .permanent-search-wrapper {
-            display: flex;
-            align-items: center;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            background: var(--bg-input);
-            flex: 1;
-            /* Allow it to take available space */
-            position: relative;
-            min-width: 80px; /* Réduit le min-width pour plus de flexibilité */
-            height: var(--btn-size);
-            /* Match height of buttons */
-            margin-left: auto;
-            /* Poussera la searchbox à l'extrême droite, prendant l'espace restant */
-        }
-
-        .permanent-search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 8px 10px; /* Match form-input padding */
-            padding-right: 60px;
-            /* Increased space for count + clear button */
-            color: var(--text-primary);
-            font-size: 13px;
-            width: 100%; /* Ensure it uses 100% of the wrapper's width */
-        }
-
-        .permanent-search-input:focus {
-            outline: none;
-            box-shadow: none; /* Remove default focus shadow */
-        }
-
-        .permanent-search-wrapper:focus-within {
-            border-color: var(--highlight-green-border-strong);
-        }
-
-        /* Clear search button */
-        .clear-search-btn {
-            position: absolute;
-            right: 2px; /* Position close to the right edge */
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 18px;
-            /* Larger 'x' */
-            cursor: pointer;
-            padding: 4px;
-            line-height: 1; /* Keep it centered */
-            display: block;
-            /* ALWAYS visible now */
-            z-index: 2;
-            /* Ensure it's above the count when visible */
-            transition: opacity 0.15s ease;
-            /* For smooth opacity change when enabled/disabled */
-        }
-        .clear-search-btn:hover:not([disabled]) {
-            color: var(--accent-danger);
-        }
-        .clear-search-btn[disabled] {
-            cursor: not-allowed;
-            opacity: 0.4; /* Muted when disabled */
-        }
-
-
-        /* Search Results Count display */
-        .search-results-count {
-            position: absolute;
-            right: 25px; /* Position to the left of the clear button */
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted); /* Light gray, not fluo-green */
-            font-size: 12px;
-            white-space: nowrap; /* Prevent text wrapping */
-            min-width: 20px;
-            text-align: center;
-            font-weight: normal; /* Normal text, not bold */
-            pointer-events: none;
-            /* Allow clicks to pass through to input */
-            z-index: 1;
-            /* Below clear button but above input */
-        }
-
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(var(--btn-size) + var(--btn-gap));
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--shadow-md);
-            z-index: 100;
-            padding: 8px;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 160px;
-            left: 0;
-        }
-
-        .dropdown-menu.show {
-            display: flex;
-        }
-
-        .dropdown-item {
-            width: 100%;
-            text-align: left;
-            padding: 6px 8px;
-            border: none;
-            background: none;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: background var(--transition);
-            border-radius: var(--border-radius-sm);
-            font-size: 12px;
-            position: relative; /* Needed for ::before pseudo-element positioning */
-            padding-left: 20px;
-            /* Make space for the bullet point */
-        }
-        .dropdown-item:hover {
-            background: var(--bg-tertiary);
-        }
-        /* Style for the active sort criterion bullet point */
-        .dropdown-item.active::before {
-            content: '•';
-            /* Bullet point character */
-            position: absolute;
-            left: 8px;
-            /* Position the bullet point */
-            color: var(--accent-fluo-orange);
-            /* Color of the bullet point */
-            font-size: 14px;
-            /* Size of the bullet point */
-            line-height: 1;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .pins-list {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 4px;
-            border: 1px solid #444444; 
-        }
-
-        .pin-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 8px 12px 8px;
-            border-bottom: 1px solid var(--border-color);
-            gap: 12px;
-        }
-
-        .pin-code {
-            font-family: monospace;
-            font-weight: 700;
-            font-size: 14px;
-            width: 40px;
-            text-align: center;
-            /* Default color is var(--text-primary) */
-        }
-
-        /* PIN status colors */
-        .pin-code.expired {
-            color: var(--accent-danger);
-            /* Red for expired */
-        }
-
-        .pin-code.active {
-            color: var(--accent-success);
-            /* Green for active */
-        }
-
-        .pin-code.future {
-            color: var(--text-secondary);
-            /* Muted grey for future/not yet active */
-        }
-
-
-        .pin-details {
-            flex: 1;
-        }
-
-        .pin-contact-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .pin-contact {
-            font-size: 13px;
-            font-weight: normal;
-        }
-
-        .pin-phone {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .pin-dates {
-            display: flex;
-            gap: 12px;
-        }
-
-        .pin-date {
-            font-size: 11px;
-           /* color: var(--text-secondary);*/
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .pin-actions {
-            display: flex;
-            /* Make it a flex container */
-            align-items: center;
-            /* Vertically align items within pin-actions */
-            gap: var(--btn-gap);
-            /* Add a gap between buttons, var(--btn-gap) is 4px */
-        }
-
-        /* Style for the return to guest button */
-        .return-to-guest-btn {
-            font-size: 24px; /* Larger icon */
-            cursor: pointer;
-            transition: transform 0.1s ease-out, opacity 0.1s ease-out; /* Smooth transition */
-            user-select: none; /* Prevent text selection */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-        .return-to-guest-btn:hover {
-            transform: scale(1.1); /* Slightly enlarge on hover */
-            opacity: 0.8;
-        }
-        .return-to-guest-btn:active {
-            transform: scale(0.9); /* Shrink on click */
-            opacity: 0.6;
-        }
-        
-
-        .pins-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .pins-list::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-        }
-        .pins-list::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 3px;
-        }
-
-        /* Utility classes for showing/hiding apps */
-        .app-hidden {
-            display: none !important;
-        }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-</head>
-<body>
-    <div class="container">
-        <div id="guest-app">
-            <div class="guest-header">
-                <div class="logo-circle-wrapper">
-                    <div class="guest-logo" id="guestLogo">🏠</div>
-                </div>
-                <h1 class="guest-title">Bienvenue à La Terrasse<br>de Montrésor</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>La Terrasse de Montrésor Gate Access</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>"
+    />
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js" defer></script>
+    <script
+      src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"
+      defer
+    ></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <section id="guest-app">
+        <header class="guest-header">
+          <div class="logo-circle-wrapper" title="Triple-clic pour accès manager">
+            <div class="guest-logo" id="guestLogo">🏠</div>
+          </div>
+          <h1 class="guest-title">
+            Bienvenue à La Terrasse
+            <br />
+            de Montrésor
+          </h1>
+        </header>
+        <div class="guest-message" id="guestMessage">Saisissez votre code d'accès</div>
+        <div class="guest-content-area">
+          <div id="guestPinEntry" class="guest-state-section">
+            <label for="guestPinInput" class="visually-hidden">Code PIN à 4 caractères</label>
+            <input
+              type="text"
+              id="guestPinInput"
+              maxlength="4"
+              placeholder="••••"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              inputmode="text"
+            />
+            <div class="guest-input-action-buttons">
+              <button
+                id="guestBackspaceButton"
+                class="backspace-btn"
+                aria-label="Effacer le dernier caractère"
+              >
+                &#9003;
+              </button>
+              <button id="guestCheckPinButton" class="check-pin-btn" aria-label="Valider le PIN">
+                ✓
+              </button>
             </div>
-            <div class="guest-message" id="guestMessage">Saisissez votre code d'accès</div>
-
-            <div class="guest-content-area"> 
-                <div id="guestPinEntry" class="guest-state-section">
-                    <input type="text" id="guestPinInput" maxlength="4" placeholder="••••" 
-                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                           inputmode="text">
-                    <div class="guest-input-action-buttons">
-                        <button id="guestBackspaceButton" class="backspace-btn">&#9003;</button>
-                        <button id="guestCheckPinButton" class="check-pin-btn">✓</button>
-                    </div>
-                </div>
-                <div id="dynamicGuestContent" class="guest-state-section app-hidden">
-                    <button id="portalBtn" class="portal-btn">Ouvrir / Fermer<br>le Portail</button>
-                    <button id="resetButton" class="reset-btn">&#x21BB;</button>
-                </div>
-                <div id="guestLoginContainer" class="guest-state-section app-hidden" style="margin-top: 20px;">
-                    <button id="google-sign-in-btn" class="action-button primary-button">Se connecter avec Google</button>
-                </div>
-            </div>
+          </div>
+          <div id="dynamicGuestContent" class="guest-state-section app-hidden">
+            <button id="portalBtn" class="portal-btn">
+              Ouvrir / Fermer
+              <br />
+              le Portail
+            </button>
+            <button id="resetButton" class="reset-btn" aria-label="Réinitialiser">&#x21BB;</button>
+          </div>
+          <div
+            id="guestLoginContainer"
+            class="guest-state-section app-hidden"
+            style="margin-top: 20px"
+          >
+            <button id="google-sign-in-btn" class="action-button primary-button">
+              Se connecter avec Google
+            </button>
+          </div>
         </div>
+      </section>
 
-        <div id="manager-app">
-            <div id="auth-controls" style="text-align: center; margin-bottom: 20px;">
-                <div id="logged-in-view" style="display: none;">
-                    <p>Connecté(e) en tant que: <span id="user-email" style="font-weight: bold;"></span></p>
-                    <button id="sign-out-btn" class="action-button danger-button">Déconnexion</button>
-                </div>
-            </div>
-            <div class="header">
-                <h1 id="header-title">PIN Code Manager - Montrésor</h1>
-                <div class="return-to-guest-btn guest-logo" id="returnToGuestButton" title="Retour à l'accueil">🏠</div>
-            </div>
-            <div class="message success" style="display: none;" id="message-success"></div>
-            <div class="message danger" style="display: none;" id="message-danger"></div>
-            <div class="message primary" style="display: none;" id="message-primary"></div>
-            <form class="form-container" id="pinForm">
-                <div class="form-row date-row">
-                    <div class="form-group pin-group">
-                        <input type="text" class="form-input pin-input" id="form-pin-code" maxlength="4" placeholder="PIN">
-                    </div>
-                    <div class="date-groups">
-                        <div class="date-group">
-                            <span class="pin-date-label in">IN</span>
-                            <input type="datetime-local" class="form-input date-input" id="form-date-in">
-                        </div>
-                        <div class="date-group">
-                            <span class="pin-date-label out">OUT</span>
-                            <input type="datetime-local" class="form-input date-input" id="form-date-out">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <input type="text" class="form-input" id="form-contact" placeholder="Contact">
-                    </div>
-                    <div class="form-group">
-                        <input type="tel" class="form-input" id="form-phone" placeholder="Téléphone">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <div class="form-actions-left-group">
-                        <button type="submit" class="btn btn-success" id="submitForm">✓</button>
-                        <button type="button" class="btn btn-danger" id="cancelForm">×</button>
-                    </div>
-                    <div class="form-actions-center-group">
-                        <div class="generate-control">
-                            <button type="button" class="btn" id="generatePinButton">✨</button>
-                        </div>
-                        <div class="sort-control">
-                            <button type="button" class="btn" id="sortButton">⇅</button>
-                            <div class="dropdown-menu" id="sortMenu">
-                                <button type="button" class="dropdown-item" data-sort-by="contact">Par Contact</button>
-                                <button type="button" class="dropdown-item" data-sort-by="pinCode">Par PIN code</button>
-                                <button type="button" class="dropdown-item" data-sort-by="dateIn">Par Date d'arrivée</button>
-                                <button type="button" class="dropdown-item" data-sort-by="dateOut">Par Date de départ</button>
-                                <button type="button" class="dropdown-item" data-sort-by="status">Par statut du PIN</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="permanent-search-wrapper" id="permanentSearchWrapper">
-                        <input type="text" class="form-input permanent-search-input" id="permanentSearchQuery" placeholder="Rechercher...">
-                        <span id="results-count" class="search-results-count"></span>
-                        <button type="button" class="clear-search-btn" id="clearSearchButton">×</button>
-                    </div>
-                </div>
-            </form>
-            <div class="pins-list" id="pinsList"> 
-            </div>
+      <section id="manager-app" class="app-hidden">
+        <div id="auth-controls" style="text-align: center; margin-bottom: 20px">
+          <div id="logged-in-view" style="display: none">
+            <p>
+              Connecté(e) en tant que:
+              <span id="user-email" style="font-weight: bold"></span>
+            </p>
+            <button id="sign-out-btn" class="action-button danger-button">Déconnexion</button>
+          </div>
         </div>
-    </div>
-    <script>
-        // --- Firebase Configuration (Shared) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAez8fncKVaNuOzrTfDXmacs_2K_ptZFQI",
-            authDomain: "poartailaccesspins.firebaseapp.com",
-            projectId: "poartailaccesspins",
-            storageBucket: "poartailaccesspins.appspot.com",
-            messagingSenderId: "248588255030",
-            appId: "1:248588255030:web:d1a50104cbc330412cbd97"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        <header class="header">
+          <h1 id="header-title">PIN Code Manager - Montrésor</h1>
+          <button
+            class="return-to-guest-btn"
+            id="returnToGuestButton"
+            title="Retour à l'accueil"
+            aria-label="Retour à l'accueil"
+          >
+            🏠
+          </button>
+        </header>
+        <div class="message success" style="display: none" id="message-success"></div>
+        <div class="message danger" style="display: none" id="message-danger"></div>
+        <div class="message primary" style="display: none" id="message-primary"></div>
 
-        // --- Global Elements ---
-        const guestApp = document.getElementById('guest-app');
-        const managerApp = document.getElementById('manager-app');
-        const returnToGuestButton = document.getElementById('returnToGuestButton');
-
-        // --- GUEST App Elements ---
-        const WEBHOOK_URL = "https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html";
-        const PIN_LENGTH = 4;
-        const guestLogo = document.getElementById('guestLogo');
-        const guestMessageEl = document.getElementById('guestMessage');
-        const guestPinInput = document.getElementById('guestPinInput');
-
-        // Renamed/re-structured elements
-        const guestPinEntry = document.getElementById('guestPinEntry'); // Container for PIN input and its buttons
-        // const guestInputActionButton = document.getElementById('guestInputActionButton'); // Cette variable semble non utilisée, je l'ai commentée
-        const dynamicGuestContent = document.getElementById('dynamicGuestContent'); // Now holds portalBtn and resetButton
-        const guestCheckPinButton = document.getElementById('guestCheckPinButton');
-        const guestBackspaceButton = document.getElementById('guestBackspaceButton');
-        const portalBtn = document.getElementById('portalBtn'); // Added ref to portalBtn
-        const resetButton = document.getElementById('resetButton'); // Added ref to resetButton
-        
-        // Nouvelle référence pour le conteneur de connexion Google dans l'app Guest
-        const guestLoginContainer = document.getElementById('guestLoginContainer'); 
-        // Référence pour le bouton Google Sign-In, maintenant dans l'app Guest
-        const googleSignInBtn = document.getElementById('google-sign-in-btn');
-
-
-        let currentGuestPin = null;
-        let guestExpirationDate = null;
-        let guestIntervalId = null;
-
-        // Variables pour la détection du triple clic
-        let tripleClickCount = 0;
-        let tripleClickTimer = null;
-        const TRIPLE_CLICK_THRESHOLD_MS = 500; // Fenêtre de temps pour le triple clic (en millisecondes)
-
-
-        // --- MANAGER App Elements ---
-        const pinForm = document.getElementById('pinForm');
-        const pinCodeInput = document.getElementById('form-pin-code');
-        const dateInInput = document.getElementById('form-date-in');
-        const dateOutInput = document.getElementById('form-date-out');
-        const contactInput = document.getElementById('form-contact');
-        const phoneInput = document.getElementById('form-phone');
-        const submitButton = document.getElementById('submitForm');
-        const cancelButton = document.getElementById('cancelForm');
-        const successMessage = document.getElementById('message-success');
-        const dangerMessage = document.getElementById('message-danger');
-        const primaryMessage = document.getElementById('message-primary');
-        const pinsList = document.getElementById('pinsList');
-        const sortButton = document.getElementById('sortButton');
-        const generatePinButton = document.getElementById('generatePinButton');
-        const sortMenu = document.getElementById('sortMenu');
-        const permanentSearchQueryInput = document.getElementById('permanentSearchQuery');
-        const resultsCountSpan = document.getElementById('results-count');
-        const clearSearchButton = document.getElementById('clearSearchButton');
-        const permanentSearchWrapper = document.getElementById('permanentSearchWrapper');
-
-        let currentEditingPinId = null;
-        let managerDebounceTimer;
-        let currentSortBy = 'dateOut'; // Variable pour stocker le critère de tri sélectionné
-        let currentSortOrder = 'asc'; // Variable pour stocker l'ordre de tri (ascendant par défaut)
-
-        // --- Utility Functions (shared or adapted) ---
-        function getCurrentDateTimeLocal() {
-            const now = new Date();
-            const year = String(now.getFullYear()).padStart(4, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
-
-        // XTOF01: Modification de formatDateDisplay pour prendre un objet Date et le formater
-        function formatDateDisplay(dateObject) {
-            if (!dateObject instanceof Date || isNaN(dateObject)) return ''; // XTOF01: Vérifie si c'est un objet Date valide
-            const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return dateObject.toLocaleDateString('fr-FR', options);
-        }
-
-        function showMessage(type, message, duration = 3000) {
-            let messageEl;
-            // Hide all messages first
-            successMessage.style.display = 'none';
-            dangerMessage.style.display = 'none';
-            primaryMessage.style.display = 'none';
-
-            // Determine which message element to use and display it
-            if (type === 'success') {
-                messageEl = successMessage;
-            } else if (type === 'danger') {
-                messageEl = dangerMessage;
-            } else if (type === 'info' || type === 'primary') { // 'info' maps to 'primary' class for visual consistency
-                messageEl = primaryMessage;
-            } else {
-                console.warn("Unknown message type:", type);
-                return;
-            }
-            
-            messageEl.textContent = message;
-            messageEl.style.display = 'block';
-
-            // Set a timeout to hide the message
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, duration);
-        }
-
-        // --- GUEST App Functions ---
-        function showGuestApp() {
-            managerApp.classList.add('app-hidden'); // Cache l'application Manager
-            guestApp.classList.remove('app-hidden'); // Affiche l'application Guest
-            
-            // Assure que le conteneur de connexion et le contenu dynamique sont cachés par défaut
-            guestLoginContainer.classList.add('app-hidden'); 
-            dynamicGuestContent.classList.add('app-hidden');
-            
-            // Assure que le champ de PIN est affiché par défaut
-            guestPinEntry.classList.remove('app-hidden'); 
-
-            resetGuestSystem(); // Réinitialise l'état du système Guest
-            guestMessageEl.textContent = "Saisissez votre code d'accès"; // Réinitialise le message
-            guestMessageEl.classList.remove('alert', 'success', 'info'); // Retire les classes de style
-        }
-
-
-        function updateGuestButtonStates() {
-            const isPinValidLength = guestPinInput.value.length === PIN_LENGTH;
-            guestCheckPinButton.disabled = !isPinValidLength;
-            guestBackspaceButton.disabled = guestPinInput.value.length === 0;
-        }
-
-        function generateRandomPin(length) {
-            let result = '';
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            const charactersLength = characters.length;
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
-            }
-            return result;
-        }
-
-        async function validateGuestPin() {
-            const enteredPin = guestPinInput.value.toUpperCase(); // Ensure uppercase for validation
-            guestPinInput.value = ''; // Clear input immediately
-            updateGuestButtonStates(); // Update button states after clearing
-
-            if (enteredPin.length !== PIN_LENGTH) {
-                displayGuestMessage('alert', "Code PIN invalide.");
-                return;
-            }
-
-            try {
-                // Query Firestore for the entered PIN
-                const querySnapshot = await db.collection('pins')
-                    .where('pinCode', '==', enteredPin)
-                    .limit(1)
-                    .get();
-
-                if (querySnapshot.empty) {
-                    displayGuestMessage('alert', "Code PIN incorrect.");
-                    return;
-                }
-
-                const pinDoc = querySnapshot.docs[0];
-                const pinData = pinDoc.data();
-                
-                const now = new Date();
-                // XTOF01: Conversion des Timestamps Firestore en objets Date JavaScript
-                const dateIn = pinData.dateIn ? pinData.dateIn.toDate() : null; // XTOF01
-                const dateOut = pinData.dateOut ? pinData.dateOut.toDate() : null; // XTOF01
-
-                if (dateIn && now < dateIn) {
-                    // PIN is for a future date
-                    displayGuestMessage('info', `Votre code sera actif à partir du ${formatDateDisplay(dateIn)}.`); // XTOF01: Utilisation de dateIn comme objet Date
-                    // Keep dynamicGuestContent hidden, allow PIN re-entry
-                    guestPinEntry.classList.remove('app-hidden');
-                    dynamicGuestContent.classList.add('app-hidden');
-                } else if (dateOut && now > dateOut) {
-                    // PIN has expired
-                    displayGuestMessage('alert', `Votre code PIN a expiré le ${formatDateDisplay(dateOut)}.`); // XTOF01: Utilisation de dateOut comme objet Date
-                    // Keep dynamicGuestContent hidden, allow PIN re-entry
-                    guestPinEntry.classList.remove('app-hidden');
-                    dynamicGuestContent.classList.add('app-hidden');
-                } else {
-                    // PIN is active
-                    currentGuestPin = enteredPin;
-                    guestExpirationDate = dateOut; // Set expiration date for active PIN
-                    startExpirationTimer(); // Start timer if active
-                    displayGuestMessage('success', "Code PIN actif. Bienvenue !");
-                    
-                    guestPinEntry.classList.add('app-hidden'); // Hide PIN entry
-                    dynamicGuestContent.classList.remove('app-hidden'); // Show portal buttons
-                }
-            } catch (error) {
-                console.error("Erreur lors de la validation du PIN:", error);
-                displayGuestMessage('danger', "Erreur de connexion. Réessayez.");
-            }
-        }
-
-        function displayGuestMessage(type, message) {
-            guestMessageEl.textContent = message;
-            guestMessageEl.classList.remove('alert', 'success', 'info');
-            guestMessageEl.classList.add(type);
-        }
-
-        function startExpirationTimer() {
-            if (guestIntervalId) {
-                clearInterval(guestIntervalId);
-            }
-
-            if (currentGuestPin && guestExpirationDate) {
-                guestIntervalId = setInterval(() => {
-                    const now = new Date();
-                    if (now >= guestExpirationDate) {
-                        clearInterval(guestIntervalId);
-                        resetGuestSystem();
-                        displayGuestMessage('alert', `Code PIN "${currentGuestPin}" expiré.`);
-                    }
-                }, 1000); // Check every second
-            }
-        }
-
-        function resetGuestSystem() {
-            if (guestIntervalId) {
-                clearInterval(guestIntervalId);
-                guestIntervalId = null;
-            }
-            currentGuestPin = null;
-            guestExpirationDate = null;
-            guestPinInput.value = '';
-            updateGuestButtonStates();
-            displayGuestMessage('info', "Saisissez votre code d'accès");
-            guestPinEntry.classList.remove('app-hidden'); // Show PIN entry
-            dynamicGuestContent.classList.add('app-hidden'); // Hide portal buttons
-            guestLoginContainer.classList.add('app-hidden'); // Hide Google login container
-            
-            // Réinitialiser le compteur de triple clic et le timer
-            tripleClickCount = 0;
-            if (tripleClickTimer) {
-                clearTimeout(tripleClickTimer);
-                tripleClickTimer = null;
-            }
-        }
-
-        async function triggerPortal() {
-        if (!currentGuestPin) {
-            displayGuestMessage('alert', "Aucun code PIN actif pour contrôler le portail.");
-            return;
-        }
-
-        try {
-            // Send request to webhook
-            const response = await fetch(WEBHOOK_URL);
-            const data = await response.text(); // Get raw response
-            if (response.ok && data.includes("Success")) { // Check for "Success" in the response body
-                displayGuestMessage('success', "Portail activé !");
-            } else {
-                // Ce bloc est exécuté si la réponse n'est pas "OK" (code statut 2xx)
-                // ou si le corps de la réponse ne contient pas "Success".
-                displayGuestMessage('danger', `Erreur portail: ${data || response.statusText}`);
-            }
-        } catch (error) {
-            // Ce bloc est exécuté si une erreur réseau fondamentale se produit (ex: TypeError).
-            console.error("Erreur lors du déclenchement du portail (détails techniques):", error); // Ajout de ce log
-            displayGuestMessage('danger', "En cas de dysfonctionnement veuillez vérifier votre connexion");
-        }
-        }
-
-        // --- MANAGER App Functions ---
-        // Déclarez et initialisez `pins` avant la fonction `loadPins` XTOF
-        let pins = []; // XTOF01: Déclaration globale pour stocker les pins après récupération
-
-        async function loadPins(sortBy = 'dateOut', sortOrder = 'asc', searchQuery = '') {
-            pinsList.innerHTML = ''; // Clear current list
-            let query = db.collection('pins');
-
-            // Apply sorting to the Firestore query for initial fetch order
-            // (if not sorting by status, which is done client-side)
-            if (sortBy !== 'status') { 
-                query = query.orderBy(sortBy, sortOrder);
-            }
-            
-            const querySnapshot = await query.get();
-            let fetchedPins = []; 
-                    const totalPinsCount = querySnapshot.size; // This captures the total number of documents fetched
-
-            querySnapshot.forEach(doc => {
-                fetchedPins.push({ id: doc.id, ...doc.data() });
-            });
-
-            // Apply client-side sorting for status if necessary
-            if (sortBy === 'status') {
-                const now = new Date();
-                fetchedPins.sort((a, b) => { 
-                    const dateInA = a.dateIn ? a.dateIn.toDate() : null; 
-                    const dateOutA = a.dateOut ? a.dateOut.toDate() : null; 
-                    const dateInB = b.dateIn ? b.dateIn.toDate() : null; 
-                    const dateOutB = b.dateOut ? b.dateOut.toDate() : null; 
-
-                    const statusA = getPinStatus({ dateIn: dateInA, dateOut: dateOutA }, now); 
-                    const statusB = getPinStatus({ dateIn: dateInB, dateOut: dateOutB }, now); 
-
-                    const statusOrder = { 'active': 1, 'future': 2, 'expired': 3 }; // Define order
-                    return (statusOrder[statusA] - statusOrder[statusB]) * (sortOrder === 'asc' ? 1 : -1);
-                });
-            }
-            
-            // Apply client-side search filtering using includes() for substring matching
-            let pinsToDisplay = fetchedPins; // Start with all fetched/sorted pins
-            if (searchQuery) {
-                const lowerCaseQuery = searchQuery.toLowerCase();
-                pinsToDisplay = fetchedPins.filter(pin => { 
-                    const codeMatch = pin.pinCode && pin.pinCode.toLowerCase().includes(lowerCaseQuery);
-                    const contactMatch = pin.contact && pin.contact.toLowerCase().includes(lowerCaseQuery);
-                    const phoneMatch = pin.phone && pin.phone.toLowerCase().includes(lowerCaseQuery);
-                    return codeMatch || contactMatch || phoneMatch;
-                });
-            }
-
-            pins = pinsToDisplay; // Update the global `pins` variable with the filtered list
-            pinsList.innerHTML = ''; // Clear existing list for display
-            pins.forEach(pin => {
-                addPinToManagerList(pin);
-            });
-
-// Update search results count
-        if (searchQuery) { // If there's an active search query
-            resultsCountSpan.textContent = `${pins.length}/${totalPinsCount}`;
-        } else { // If no search query, display the total count (if greater than 0)
-            resultsCountSpan.textContent = totalPinsCount > 0 ? `${totalPinsCount}` : '';
-        }
-        clearSearchButton.disabled = permanentSearchQueryInput.value.trim().length === 0;
-        permanentSearchWrapper.classList.toggle('is-active', searchQuery !== '');        }
-
-        function getPinStatus(pinData, now) {
-            // XTOF01: pinData.dateIn et pinData.dateOut sont déjà des objets Date ici
-            const dateIn = pinData.dateIn; 
-            const dateOut = pinData.dateOut;
-
-            if (dateIn && now < dateIn) {
-                return 'future';
-            } else if (dateOut && now > dateOut) {
-                return 'expired';
-            } else {
-                return 'active';
-            }
-        }
-
-
-       function addPinToManagerList(pin) {
-    const pinId = pin.id;
-    const now = new Date();
-
-    // XTOF01: Conversion des Timestamps Firestore en objets Date JavaScript
-    const dateIn = pin.dateIn ? pin.dateIn.toDate() : null; // XTOF01
-    const dateOut = pin.dateOut ? pin.dateOut.toDate() : null; // XTOF01
-
-    let pinCodeClass = '';
-    if (dateOut && now > dateOut) {
-        pinCodeClass = 'expired';
-    } else if (dateIn && now >= dateIn && (!dateOut || now < dateOut)) {
-        pinCodeClass = 'active';
-    } else {
-        pinCodeClass = 'future';
-    }
-
-    const pinItem = document.createElement('div');
-    pinItem.classList.add('pin-item');
-    pinItem.dataset.id = pinId;
-
-    pinItem.innerHTML = `
-        <div class="pin-code ${pinCodeClass}">${pin.pinCode}</div>
-        <div class="pin-details">
-            <div class="pin-contact-row">
-                <span class="pin-contact">${pin.contact || 'N/A'}</span>
-                <span class="pin-phone">${pin.phone || ''}</span>
+        <form class="form-container" id="pinForm">
+          <div class="form-row date-row">
+            <div class="form-group pin-group">
+              <label for="form-pin-code" class="visually-hidden">Code PIN</label>
+              <input
+                type="text"
+                class="form-input pin-input"
+                id="form-pin-code"
+                maxlength="4"
+                placeholder="PIN"
+              />
             </div>
-            <div class="pin-dates">
-                <span class="pin-date"><span class="pin-date-label in">IN</span>: ${formatDateDisplay(dateIn)}</span>
-            <span class="pin-date"><span class="pin-date-label out">OUT</span>: ${formatDateDisplay(dateOut)}</span>
+            <div class="date-groups">
+              <div class="date-group">
+                <label for="form-date-in" class="pin-date-label in">IN</label>
+                <input type="datetime-local" class="form-input date-input" id="form-date-in" />
+              </div>
+              <div class="date-group">
+                <label for="form-date-out" class="pin-date-label out">OUT</label>
+                <input type="datetime-local" class="form-input date-input" id="form-date-out" />
+              </div>
             </div>
-        </div>
-        <div class="pin-actions">
-            <button class="btn btn-edit" data-action="edit">✎</button>
-            <button class="btn btn-danger" data-action="delete">🗑</button>
-        </div>
-    `;
-
-    pinsList.appendChild(pinItem);
-    }
-        // XTOF01: Déplacé la fonction resetForm ici pour une meilleure clarté
-        function resetForm() { // XTOF01: Ajout de la fonction resetForm
-            pinForm.reset();
-            pinCodeInput.value = ''; // Ensure PIN input is cleared explicitly
-            dateInInput.value = '';
-            dateOutInput.value = '';
-            contactInput.value = '';
-            phoneInput.value = '';
-            currentEditingPinId = null;
-            submitButton.textContent = '✓';
-            submitButton.classList.replace('btn-edit', 'btn-success'); // Reset to success style
-            updateManagerButtonStates(); // Update button states
-            pinForm.classList.remove('is-active'); // Remove active state from form
-            pinCodeInput.focus();
-        }
-        
-
-        function updateManagerButtonStates() {
-            const isPinCodeValid = pinCodeInput.value.length === PIN_LENGTH;
-            const isContactValid = contactInput.value.trim().length > 0;
-            // XTOF01: Vérifie si les champs date sont remplis, la validité réelle sera faite à la soumission
-            const isDateInValid = dateInInput.value !== '';
-            const isDateOutValid = dateOutInput.value !== '';
-
-            // Enable submit if editing or all fields for new pin are valid
-            const canSubmit = currentEditingPinId || (isPinCodeValid && isContactValid && isDateInValid && isDateOutValid);
-            submitButton.disabled = !canSubmit;
-
-            // Enable cancel if any field has content or in editing mode
-            const canCancel = currentEditingPinId || pinCodeInput.value || contactInput.value || phoneInput.value || dateInInput.value || dateOutInput.value;
-            cancelButton.disabled = !canCancel;
-
-            // Add/remove 'is-active' class to form-container based on input validity
-            if (isPinCodeValid && isContactValid && isDateInValid && isDateOutValid) {
-                pinForm.classList.add('is-active');
-            } else {
-                pinForm.classList.remove('is-active');
-            }
-        }
-
-
-        // Generate a random PIN for Manager
-        generatePinButton.addEventListener('click', () => {
-            const newPin = generateRandomPin(PIN_LENGTH);
-            pinCodeInput.value = newPin;
-            updateManagerButtonStates();
-            pinCodeInput.focus(); // Keep focus on PIN input
-        });
-
-
-        // --- Event Listeners ---
-        document.addEventListener('DOMContentLoaded', () => {
-            showGuestApp(); // Start with the guest application
-
-            // Manager Authentication Listeners
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    // User is signed in. Check if they are the admin.
-                    const adminEmail = "cunrug@gmail.com";
-                    if (user.email === adminEmail) {
-                        document.getElementById('user-email').textContent = user.email;
-                        document.getElementById('logged-in-view').style.display = 'block';
-                        // document.getElementById('logged-out-view').style.display = 'none'; // No longer needed here
-                        managerApp.classList.remove('app-hidden');
-                        guestApp.classList.add('app-hidden'); // Ensure guest app is hidden
-                        loadPins(currentSortBy, currentSortOrder); // Load pins for manager
-                    } else {
-                        // Not an admin, sign them out and show error
-                        auth.signOut();
-                        showMessage('danger', "Accès refusé. Vous n'êtes pas l'administrateur.");
-                        showGuestApp(); // Return to guest app for non-admin
-                    }
-                } else {
-                    // User is signed out. Show guest app.
-                    document.getElementById('logged-in-view').style.display = 'none';
-                    // document.getElementById('logged-out-view').style.display = 'block'; // No longer needed here
-                    showGuestApp();
-                }
-            });
-
-            googleSignInBtn.addEventListener('click', () => {
-                auth.signInWithPopup(googleProvider)
-                    .catch(error => {
-                        console.error("Google Sign-In Error:", error);
-                        showMessage('danger', `Erreur de connexion: ${error.message}`, 5000);
-                    });
-            });
-
-            document.getElementById('sign-out-btn').addEventListener('click', () => {
-                auth.signOut().then(() => {
-                    showMessage('info', "Déconnexion réussie.", 3000);
-                }).catch(error => {
-                    console.error("Sign Out Error:", error);
-                    showMessage('danger', `Erreur de déconnexion: ${error.message}`, 5000);
-                });
-            });
-
-            // Return to guest app button
-            returnToGuestButton.addEventListener('click', () => {
-                showGuestApp();
-            });
-
-            // GUEST App Event Listeners
-
-            // Triple-click logic for guestLogo to reveal Google login
-            guestLogo.addEventListener('click', () => {
-                tripleClickCount++; // Incrémente le compteur de clics
-
-                // Efface tout timeout précédent pour redémarrer la séquence de clics
-                if (tripleClickTimer) {
-                    clearTimeout(tripleClickTimer);
-                }
-
-                // Définit un nouveau timeout pour réinitialiser tripleClickCount si aucun autre clic ne se produit rapidement
-                tripleClickTimer = setTimeout(() => {
-                    tripleClickCount = 0; // Réinitialise le compteur si le temps s'écoule
-                }, TRIPLE_CLICK_THRESHOLD_MS);
-
-                if (tripleClickCount === 3) {
-                    clearTimeout(tripleClickTimer); // Efface le timeout immédiatement après le triple clic
-                    tripleClickCount = 0; // Réinitialise le compteur après avoir atteint 3 clics
-
-                    // Action pour le triple clic : Afficher le conteneur de connexion
-                    guestLoginContainer.classList.remove('app-hidden'); // Rend le conteneur de connexion visible
-                    guestPinEntry.classList.add('app-hidden'); // Cache le champ de PIN
-                    dynamicGuestContent.classList.add('app-hidden'); // Cache les boutons Ouvrir/Fermer Portail
-
-                    displayGuestMessage('info', "Accès Manager activé. Veuillez vous connecter avec Google."); // Utilise la fonction dédiée aux messages Guest
-                }
-            });
-
-
-            guestBackspaceButton.onclick = () => {
-                guestPinInput.value = guestPinInput.value.slice(0, -1);
-                updateGuestButtonStates();
-            }
-
-            guestCheckPinButton.onclick = validateGuestPin;
-            portalBtn.onclick = triggerPortal; // Event listener for the portal button
-            resetButton.onclick = resetGuestSystem; // Event listener for the reset button
-
-            guestPinInput.addEventListener('input', () => {
-                guestPinInput.value = guestPinInput.value.toUpperCase();
-                updateGuestButtonStates();
-            });
-            guestPinInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && guestPinInput.value.length === PIN_LENGTH) validateGuestPin();
-            });
-
-
-            // MANAGER App Event Listeners
-            pinForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const pinCode = pinCodeInput.value.toUpperCase();
-                // XTOF01: Convertir les chaînes datetime-local en objets Date puis en Timestamps
-                const dateIn = dateInInput.value ? firebase.firestore.Timestamp.fromDate(new Date(dateInInput.value)) : null; // XTOF01
-                const dateOut = dateOutInput.value ? firebase.firestore.Timestamp.fromDate(new Date(dateOutInput.value)) : null; // XTOF01
-                
-                const contact = contactInput.value.trim();
-                const phone = phoneInput.value.trim();
-                // Keep searchableKeywords generation as it might be used for other purposes
-                // or if you later decide to re-implement server-side substring search with a more advanced method
-                const searchableKeywords = `${pinCode} ${contact} ${phone}`.toLowerCase().split(' ').filter(word => word.length > 0);
-
-                if (!pinCode || !dateIn || !dateOut || !contact) {
-                    showMessage('danger', "Veuillez remplir tous les champs obligatoires (PIN, Dates, Contact).", 5000);
-                    return;
-                }
-
-                try {
-                    if (currentEditingPinId) {
-                        // Update existing PIN
-                        await db.collection('pins').doc(currentEditingPinId).update({
-                            pinCode, dateIn, dateOut, contact, phone, searchableKeywords
-                        });
-                        showMessage('success', "PIN mis à jour avec succès !", 3000);
-                    } else {
-                        // Check if PIN already exists for new entry
-                        const existingPin = await db.collection('pins').where('pinCode', '==', pinCode).get();
-                        if (!existingPin.empty) {
-                            showMessage('danger', "Un PIN avec ce code existe déjà. Veuillez en choisir un autre.", 5000);
-                            return;
-                        }
-
-                        // Add new PIN
-                        await db.collection('pins').add({
-                            pinCode, dateIn, dateOut, contact, phone, searchableKeywords,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp() // Timestamp for creation (already correct)
-                        });
-                        showMessage('success', "PIN ajouté avec succès !", 3000);
-                    }
-                    resetForm();
-                    loadPins(currentSortBy, currentSortOrder, permanentSearchQueryInput.value.trim()); // Reload pins with current sort and search
-                } catch (error) {
-                    console.error("Erreur Firestore:", error);
-                    showMessage('danger', `Erreur: ${error.message}`, 5000);
-                }
-            });
-
-            cancelButton.addEventListener('click', () => {
-                resetForm();
-                showMessage('info', "Formulaire réinitialisé.");
-            });
-
-            pinsList.addEventListener('click', async (e) => {
-                const target = e.target;
-                const pinItem = target.closest('.pin-item');
-                if (!pinItem) return;
-
-                const pinId = pinItem.dataset.id;
-
-                if (target.dataset.action === 'edit') {
-                    const pinDoc = await db.collection('pins').doc(pinId).get();
-                    if (pinDoc.exists) {
-                        const pinData = pinDoc.data();
-                        pinCodeInput.value = pinData.pinCode;
-                        // XTOF01: Conversion des Timestamps en objets Date pour les champs datetime-local
-                        dateInInput.value = pinData.dateIn ? pinData.dateIn.toDate().toISOString().slice(0, 16) : ''; // XTOF01
-                        dateOutInput.value = pinData.dateOut ? pinData.dateOut.toDate().toISOString().slice(0, 16) : ''; // XTOF01
-                        contactInput.value = pinData.contact;
-                        phoneInput.value = pinData.phone;
-                        currentEditingPinId = pinId;
-                        
-                        // Correction pour le bouton de validation en mode modification
-                        submitButton.textContent = '✓'; 
-                        submitButton.classList.remove('btn-edit'); 
-                        submitButton.classList.add('btn-success');  
-
-                        updateManagerButtonStates(); // Update button states
-                        pinForm.classList.add('is-active'); // Add active state
-                        pinCodeInput.focus();
-                    }
-                } else if (target.dataset.action === 'delete') {
-                    if (confirm("Êtes-vous sûr de vouloir supprimer ce PIN ?")) {
-                        try {
-                            await db.collection('pins').doc(pinId).delete();
-                            showMessage('success', "PIN supprimé avec succès !", 3000);
-                            loadPins(currentSortBy, currentSortOrder, permanentSearchQueryInput.value.trim()); // Reload pins
-                            resetForm(); // Reset form in case deleted pin was being edited
-                        } catch (error) {
-                            console.error("Erreur lors de la suppression:", error);
-                            showMessage('danger', `Erreur de suppression: ${error.message}`, 5000);
-                        }
-                    }
-                }
-            });
-
-            // Input event listeners for form validation
-            pinCodeInput.addEventListener('input', updateManagerButtonStates);
-            dateInInput.addEventListener('input', updateManagerButtonStates);
-            dateOutInput.addEventListener('input', updateManagerButtonStates);
-            contactInput.addEventListener('input', updateManagerButtonStates);
-            phoneInput.addEventListener('input', updateManagerButtonStates);
-
-            // Close dropdowns when clicking outside
-            function closeAllDropdowns() {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-            }
-
-            // Sort menu toggle
-            sortButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent document click from closing immediately
-                closeAllDropdowns(); // Close other dropdowns
-                sortMenu.classList.toggle('show');
-                updateSortMenuDisplay(); // Update bullet point on sort menu
-            });
-
-            function updateSortMenuDisplay() {
-                sortMenu.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.dataset.sortBy === currentSortBy) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-            document.addEventListener('click', closeAllDropdowns);
-
-            sortMenu.addEventListener('click', (event) => {
-                const selectedSortBy = event.target.dataset.sortBy;
-                if (selectedSortBy) {
-                    currentSortBy = selectedSortBy;
-                    currentSortOrder = 'asc'; // Default to ascending for simplicity, can be toggled
-                    loadPins(currentSortBy, currentSortOrder, permanentSearchQueryInput.value.trim());
-                    updateSortMenuDisplay();
-                    closeAllDropdowns();
-                }
-            });
-
-            permanentSearchQueryInput.addEventListener('input', () => {
-                // Mettre à jour l'état du bouton d'effacement immédiatement
-                clearSearchButton.disabled = permanentSearchQueryInput.value.trim().length === 0;
-
-                clearTimeout(managerDebounceTimer);
-                managerDebounceTimer = setTimeout(() => {
-                    loadPins(currentSortBy, currentSortOrder, permanentSearchQueryInput.value.trim());
-                }, 300);
-            });
-
-            clearSearchButton.addEventListener('click', () => {
-                if (!clearSearchButton.disabled) {
-                    permanentSearchQueryInput.value = '';
-                    loadPins(currentSortBy, currentSortOrder, '');
-                    permanentSearchQueryInput.focus();
-                }
-            });
-        });
-    </script>
-</body>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="form-contact" class="visually-hidden">Nom du contact</label>
+              <input type="text" class="form-input" id="form-contact" placeholder="Contact" />
+            </div>
+            <div class="form-group">
+              <label for="form-phone" class="visually-hidden">Téléphone</label>
+              <input type="tel" class="form-input" id="form-phone" placeholder="Téléphone" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <div class="form-actions-left-group">
+              <button
+                type="submit"
+                class="btn btn-success"
+                id="submitForm"
+                aria-label="Sauvegarder"
+              >
+                ✓
+              </button>
+              <button type="button" class="btn btn-danger" id="cancelForm" aria-label="Annuler">
+                ×
+              </button>
+            </div>
+            <div class="form-actions-center-group">
+              <button
+                type="button"
+                class="btn"
+                id="generatePinButton"
+                aria-label="Générer un PIN aléatoire"
+              >
+                ✨
+              </button>
+              <div class="sort-control">
+                <button type="button" class="btn" id="sortButton" aria-label="Trier la liste">
+                  ⇅
+                </button>
+                <div class="dropdown-menu" id="sortMenu">
+                  <button type="button" class="dropdown-item" data-sort-by="contact">
+                    Par Contact
+                  </button>
+                  <button type="button" class="dropdown-item" data-sort-by="pinCode">
+                    Par PIN code
+                  </button>
+                  <button type="button" class="dropdown-item" data-sort-by="dateIn">
+                    Par Date d'arrivée
+                  </button>
+                  <button type="button" class="dropdown-item" data-sort-by="dateOut">
+                    Par Date de départ
+                  </button>
+                  <button type="button" class="dropdown-item" data-sort-by="status">
+                    Par statut du PIN
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="permanent-search-wrapper" id="permanentSearchWrapper">
+              <label for="permanentSearchQuery" class="visually-hidden">
+                Rechercher dans les PINs
+              </label>
+              <input
+                type="text"
+                class="form-input permanent-search-input"
+                id="permanentSearchQuery"
+                placeholder="Rechercher..."
+              />
+              <span id="results-count" class="search-results-count"></span>
+              <button
+                type="button"
+                class="clear-search-btn"
+                id="clearSearchButton"
+                aria-label="Effacer la recherche"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </form>
+        <div class="pins-list" id="pinsList"></div>
+      </section>
+    </main>
+  </body>
 </html>
