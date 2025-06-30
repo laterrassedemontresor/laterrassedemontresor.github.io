@@ -214,26 +214,23 @@
         const pinItem = document.createElement('div');
         pinItem.className = `pin-item status-${status}`;
         pinItem.dataset.id = pin.id;
+
+        // Structure à 4 colonnes
         pinItem.innerHTML = `
-                    <div class="pin-code ${status}">${pin.pinCode}</div>
-                    <div class="pin-details">
-                        <div class="pin-contact-row">
-                            <span class="pin-contact">${pin.contact || 'N/A'}</span>
-                            <span class="pin-phone">${pin.phone || ''}</span>
-                        </div>
-                        <div class="pin-dates">
-                            <span class="pin-date"><span class="pin-date-label in">IN</span>: ${utils.formatDateDisplay(
-                              dateIn
-                            )}</span>
-                            <span class="pin-date"><span class="pin-date-label out">OUT</span>: ${utils.formatDateDisplay(
-                              dateOut
-                            )}</span>
-                        </div>
-                    </div>
-                    <div class="pin-actions">
-                        <button class="btn btn-edit" data-action="edit" aria-label="Modifier">✎</button>
-                        <button class="btn btn-danger" data-action="delete" aria-label="Supprimer">🗑</button>
-                    </div>`;
+            <div class="pin-code ${status}">${pin.pinCode}</div>
+            <div class="pin-contact-info">
+                <span class="pin-contact">${pin.contact || ''}</span>
+                <span class="pin-phone">${pin.phone || ''}</span>
+            </div>
+            <div class="pin-dates-display">
+                <span class="pin-date-in-display">${utils.formatDateDisplay(dateIn)}</span>
+                <span class="pin-date-out-display">${utils.formatDateDisplay(dateOut)}</span>
+            </div>
+            <div class="pin-actions">
+                <button class="btn btn-edit" data-action="edit" aria-label="Modifier">✎</button>
+                <button class="btn btn-danger" data-action="delete" aria-label="Supprimer">🗑</button>
+            </div>
+        `;
         dom.manager.pinsList.appendChild(pinItem);
       },
       updateButtonStates: () => {
@@ -360,7 +357,7 @@
           }
         } catch (error) {
           console.error('Erreur webhook:', error);
-          ui.guest.displayMessage('danger', 'action en cours...');
+          ui.guest.displayMessage('danger', 'Vérifiez votre connexion internet.');
         }
       },
       handleLogoClick: () => {

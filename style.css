@@ -678,79 +678,94 @@ input:-webkit-autofill:active {
   border: 1px solid #444444;
 }
 
+/* Updated pin-item for 4-column layout */
 .pin-item {
   display: flex;
-  align-items: center;
-  padding: 12px 8px 12px 8px;
+  align-items: center; /* Vertical centering of items in the row */
+  padding: 8px; /* Slightly reduced padding */
   border-bottom: 1px solid var(--border-color);
-  gap: 12px;
+  gap: 6px; /* Réduit l'écartement entre les colonnes */
 }
 
-.pin-code {
+/* Column 1: PIN Code */
+.pin-item .pin-code {
+  flex: 0 0 50px; /* Réduit la largeur fixe pour le PIN */
   font-family: monospace;
   font-weight: 700;
-  font-size: 14px;
-  width: 40px;
+  font-size: 14px; /* Keep current font size */
   text-align: center;
-  /* Default color is var(--text-primary) */
+  display: flex; /* Use flex to perfectly center content */
+  justify-content: center;
+  align-items: center;
+  height: 40px; /* Ensure vertical centering even if content is single line */
+}
+
+/* Column 2: Contact Info */
+.pin-item .pin-contact-info {
+  flex: 1.5; /* Priorise cette colonne en lui donnant plus de "flexibility" */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center content */
+  text-align: left; /* Align text to the left */
+  min-width: 0; /* Allow content to shrink if needed */
+  font-size: 12px; /* Match Column 3 font size */
+}
+.pin-item .pin-contact,
+.pin-item .pin-phone {
+  font-size: 12px; /* Explicitly set font size for consistency */
+  line-height: 1.2; /* Adjust line height for better spacing */
+  white-space: nowrap; /* Prevent wrapping for contact info */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
+}
+.pin-item .pin-phone {
+  color: var(--text-secondary);
+}
+
+/* Column 3: Dates */
+.pin-item .pin-dates-display {
+  flex: 0 0 100px; /* Réduit la largeur fixe pour les dates (dd/mm/aaaa hh:mm ~ 16-17 chars) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center content */
+  text-align: left; /* Align text to the left */
+  font-size: 12px; /* Match Column 2 font size */
+  line-height: 1.2; /* Adjust line height for better spacing */
+}
+.pin-item .pin-date-in-display {
+  color: var(--accent-success); /* Green for IN date */
+  white-space: nowrap;
+}
+.pin-item .pin-date-out-display {
+  color: var(--accent-danger); /* Red for OUT date */
+  white-space: nowrap;
+}
+
+/* Column 4: Actions */
+.pin-item .pin-actions {
+  flex: 0 0 auto; /* Content-based width */
+  display: flex;
+  gap: 4px; /* Réduit l'écartement entre les boutons d'édition et de suppression */
+  align-items: center; /* Vertically center buttons */
+}
+.pin-item .btn-edit,
+.pin-item .btn-danger {
+  width: var(--btn-size);
+  height: var(--btn-size);
+  font-size: 14px; /* Adjust button icon size */
 }
 
 /* PIN status colors */
-.pin-code.expired {
+.pin-item .pin-code.expired {
   color: var(--accent-danger);
-  /* Red for expired */
 }
 
-.pin-code.active {
+.pin-item .pin-code.active {
   color: var(--accent-success);
-  /* Green for active */
 }
 
-.pin-code.future {
-  color: var(--text-secondary);
-  /* Muted grey for future/not yet active */
-}
-
-.pin-details {
-  flex: 1;
-}
-
-.pin-contact-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.pin-contact {
-  font-size: 13px;
-  font-weight: normal;
-}
-
-.pin-phone {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.pin-dates {
-  display: flex;
-  gap: 12px;
-}
-
-.pin-date {
-  font-size: 11px;
-  /* color: var(--text-secondary);*/
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pin-actions {
-  display: flex;
-  /* Make it a flex container */
-  align-items: center;
-  /* Vertically align items within pin-actions */
-  gap: var(--btn-gap);
-  /* Add a gap between buttons, var(--btn-gap) is 4px */
+.pin-item .pin-code.future {
+  color: var(--text-muted);
 }
 
 /* Style for the return to guest button */
