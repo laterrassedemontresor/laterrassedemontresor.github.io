@@ -191,7 +191,7 @@ body {
   font-size: 30px; /* Adjusted font size for 60px height */
   font-weight: bold; /* Bold */
   text-align: center;
-  letter-spacing: 25px; /* Increased letter spacing */
+  /*letter-spacing: 25px; /* Increased letter spacing */
   background: black; /* Black background */
   border: 3px solid var(--accent-orange); /* Orange border */
   border-radius: var(--border-radius);
