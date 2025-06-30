@@ -360,7 +360,7 @@
           }
         } catch (error) {
           console.error('Erreur webhook:', error);
-          ui.guest.displayMessage('danger', 'Vérifiez votre connexion internet.');
+          ui.guest.displayMessage('danger', 'action en cours...');
         }
       },
       handleLogoClick: () => {
