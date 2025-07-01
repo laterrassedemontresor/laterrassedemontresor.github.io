@@ -1,5 +1,18 @@
 'use strict';
 
+// Enregistrement du Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker enregistré avec succès avec le scope :', registration.scope);
+      })
+      .catch((error) => {
+        console.error("Échec de l'enregistrement du Service Worker :", error);
+      });
+  });
+}
 // Encapsulation de tout le script pour éviter la pollution de l'espace global
 (() => {
   // --- 1. CONFIGURATION ---
