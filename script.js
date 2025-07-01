@@ -32,43 +32,7 @@ if ('serviceWorker' in navigator) {
     tripleClickThresholdMs: 500,
     managerPinCode: 'XTOF', // NOUVEAU : Ajout du code PIN spécial pour l'accès Manager
   };
-  // insere le nouveau code ici
-  // Constantes pour les clés localStorage
-  const LOCAL_STORAGE_KEYS = {
-    REMEMBERED_PIN: 'rememberedPin',
-    PIN_EXPIRATION: 'pinExpirationDate',
-  };
 
-  // Fonctions utilitaires pour localStorage
-  const localStorageUtil = {
-    setPinData: (pin, expirationDate) => {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEYS.REMEMBERED_PIN, pin);
-        localStorage.setItem(LOCAL_STORAGE_KEYS.PIN_EXPIRATION, expirationDate);
-      } catch (e) {
-        console.error("Erreur lors de l'enregistrement dans localStorage:", e);
-      }
-    },
-    getPinData: () => {
-      try {
-        const pin = localStorage.getItem(LOCAL_STORAGE_KEYS.REMEMBERED_PIN);
-        const expirationDate = localStorage.getItem(LOCAL_STORAGE_KEYS.PIN_EXPIRATION);
-        return { pin, expirationDate };
-      } catch (e) {
-        console.error('Erreur lors de la lecture depuis localStorage:', e);
-        return { pin: null, expirationDate: null };
-      }
-    },
-    clearPinData: () => {
-      try {
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.REMEMBERED_PIN);
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.PIN_EXPIRATION);
-      } catch (e) {
-        console.error('Erreur lors de la suppression dans localStorage:', e);
-      }
-    },
-  };
-  // fin de la modification
   // --- 2. ÉTAT DE L'APPLICATION ---
   const state = {
     currentEditingPinId: null,
@@ -198,7 +162,7 @@ if ('serviceWorker' in navigator) {
       showApp: () => {
         dom.managerApp.classList.add('app-hidden');
         dom.guestApp.classList.remove('app-hidden');
-        // ui.guest.resetSystem(); // Supprimé pour éviter une réinitialisation indésirable
+        ui.guest.resetSystem();
       },
       displayMessage: (type, message) => {
         dom.guest.message.textContent = message;
@@ -383,9 +347,6 @@ if ('serviceWorker' in navigator) {
               `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`
             );
           } else {
-            // insere le nouveau code ici
-            localStorageUtil.setPinData(enteredPin, dateOut);
-            // fin de la modification
             state.guest.pin = enteredPin;
             state.guest.expirationDate = dateOut;
             ui.guest.startExpirationTimer();
@@ -612,10 +573,7 @@ if ('serviceWorker' in navigator) {
             ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
           }
           // dom.manager.auth.loggedInView.style.display = 'none'; // Supprimé
-          // insere le nouveau code ici
-          ui.guest.showApp(); // S'assure que l'application "Guest" est visible
-          ui.guest.resetSystem(); // Force l'affichage de la saisie du PIN
-          // fin de la modification
+          ui.guest.showApp();
         }
         // FIN du NOUVEAU code à l'intérieur de onAuthStateChanged
       }, // <-- Cette ligne doit être la même après la modification
@@ -631,60 +589,7 @@ if ('serviceWorker' in navigator) {
   };
 
   // --- 8. INITIALISATION ---
-  const init = async () => {const init = async () => {
-  // insere le nouveau code ici
-  // Tentative de chargement d'un PIN précédemment validé
-  const { pin: rememberedPin, expirationDate: rememberedExpirationDate } = localStorageUtil.getPinData();
-
-  if (rememberedPin && rememberedExpirationDate) {
-    const now = new Date();
-    const storedExpirationDate = new Date(rememberedExpirationDate);
-
-    if (storedExpirationDate > now) {
-      // XTOF debut modif
-      try {
-        const querySnapshot = await db
-          .collection('pins')
-          .where('pinCode', '==', rememberedPin)
-          .limit(1)
-          .get();
-
-        if (querySnapshot.empty) {
-          localStorageUtil.clearPinData();
-          ui.guest.displayMessage('info', 'Votre code PIN a expiré ou a été supprimé. Veuillez en saisir un nouveau.');
-        } else {
-          const pinData = querySnapshot.docs[0].data();
-          const dateIn = pinData.dateIn ? pinData.dateIn.toDate() : null;
-          const dateOut = pinData.dateOut ? pinData.dateOut.toDate() : null;
-
-          if (dateIn && now < dateIn) {
-            localStorageUtil.clearPinData();
-            ui.guest.displayMessage('info', `Votre code sera actif à partir du ${utils.formatDateDisplay(dateIn)}.`);
-          } else if (dateOut && now > dateOut) {
-            localStorageUtil.clearPinData();
-            ui.guest.displayMessage('alert', `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`);
-          } else {
-            state.guest.pin = rememberedPin;
-            state.guest.expirationDate = dateOut;
-            ui.guest.startExpirationTimer();
-            dom.guest.pinEntry.classList.add('app-hidden');
-            dom.guest.dynamicContent.classList.remove('app-hidden');
-            ui.guest.displayMessage('success', `Bienvenue de retour avec le code PIN "${rememberedPin}" !`);
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la vérification du PIN stocké :', error);
-        localStorageUtil.clearPinData();
-        ui.guest.displayMessage('danger', 'Erreur de connexion. Veuillez saisir à nouveau votre code PIN.');
-      }
-      // XTOF fin modif
-    } else {
-      localStorageUtil.clearPinData();
-      ui.guest.displayMessage('info', 'Votre code PIN précédent a expiré. Veuillez en saisir un nouveau.');
-    }
-  }
-
-    // fin de la modification
+  const init = () => {
     // General Listeners
     auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
     document.addEventListener('click', () =>
@@ -731,7 +636,7 @@ if ('serviceWorker' in navigator) {
     );
 
     // Initial state
-    //ui.guest.showApp();// Cette ligne est maintenant gérée par la logique de validation du PIN au démarrage ou par resetSystem
+    ui.guest.showApp();
   };
 
   // Lancer l'application une fois le DOM chargé (géré par l'attribut defer)
