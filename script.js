@@ -198,7 +198,7 @@ if ('serviceWorker' in navigator) {
       showApp: () => {
         dom.managerApp.classList.add('app-hidden');
         dom.guestApp.classList.remove('app-hidden');
-        ui.guest.resetSystem();
+        // ui.guest.resetSystem(); // Supprimé pour éviter une réinitialisation indésirable
       },
       displayMessage: (type, message) => {
         dom.guest.message.textContent = message;
@@ -612,7 +612,10 @@ if ('serviceWorker' in navigator) {
             ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
           }
           // dom.manager.auth.loggedInView.style.display = 'none'; // Supprimé
-          ui.guest.showApp();
+          // insere le nouveau code ici
+          ui.guest.showApp(); // S'assure que l'application "Guest" est visible
+          ui.guest.resetSystem(); // Force l'affichage de la saisie du PIN
+          // fin de la modification
         }
         // FIN du NOUVEAU code à l'intérieur de onAuthStateChanged
       }, // <-- Cette ligne doit être la même après la modification
