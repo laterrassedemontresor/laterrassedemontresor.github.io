@@ -1,4 +1,7 @@
-const CACHE_NAME = 'my-app-cache-v1';
+// Xtof debut modif
+const CACHE_VERSION = '2025-07-01'; // Incrémentez cette version à chaque modification
+const CACHE_NAME = `my-app-cache-${CACHE_VERSION}`;
+// Xtof fin modif
 const urlsToCache = [
   '/',
   '/index.html',
@@ -12,6 +15,9 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Xtof debut modif
+  self.skipWaiting(); // Force l'activation immédiate du nouveau SW
+  // Xtof fin modif
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Opened cache');
@@ -20,20 +26,25 @@ self.addEventListener('install', (event) => {
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  // Xtof debut modif
-  // Ignorer les requêtes vers le webhook pour éviter les problèmes CORS
-  if (event.request.url.includes('virtualsmarthome.xyz')) {
-    return; // Laisser la requête passer normalement sans interception du service worker
-  }
-  // Xtof fin modif
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Le cache répond en premier
-      if (response) {
-        return response;
-      }
-      return fetch(event.request);
-    })
+// Xtof debut modif
+// Nettoyer les anciens caches lors de l'activation
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        return self.clients.claim(); // Prend le contrôle immédiatement
+      })
   );
 });
+// Xtof fin modif
