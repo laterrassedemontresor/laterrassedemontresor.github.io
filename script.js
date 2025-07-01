@@ -631,37 +631,59 @@ if ('serviceWorker' in navigator) {
   };
 
   // --- 8. INITIALISATION ---
-  const init = async () => {
-    // insere le nouveau code ici
-    // Tentative de chargement d'un PIN précédemment validé
-    const { pin: rememberedPin, expirationDate: rememberedExpirationDate } =
-      localStorageUtil.getPinData();
+  const init = async () => {const init = async () => {
+  // insere le nouveau code ici
+  // Tentative de chargement d'un PIN précédemment validé
+  const { pin: rememberedPin, expirationDate: rememberedExpirationDate } = localStorageUtil.getPinData();
 
-    if (rememberedPin && rememberedExpirationDate) {
-      const now = new Date();
-      const storedExpirationDate = new Date(rememberedExpirationDate);
+  if (rememberedPin && rememberedExpirationDate) {
+    const now = new Date();
+    const storedExpirationDate = new Date(rememberedExpirationDate);
 
-      // Vérifier si le PIN stocké est toujours actif localement
-      if (storedExpirationDate > now) {
-        // Le PIN est potentiellement encore valide, tenter de le valider auprès de Firebase
-        state.guest.pin = rememberedPin;
-        state.guest.expirationDate = storedExpirationDate;
-        ui.guest.startExpirationTimer();
-        dom.guest.pinEntry.classList.add('app-hidden');
-        dom.guest.dynamicContent.classList.remove('app-hidden');
-        ui.guest.displayMessage(
-          'success',
-          `Bienvenue de retour avec le code PIN "${rememberedPin}" !`
-        );
-      } else {
-        // Le PIN stocké a expiré, le supprimer du localStorage
+    if (storedExpirationDate > now) {
+      // XTOF debut modif
+      try {
+        const querySnapshot = await db
+          .collection('pins')
+          .where('pinCode', '==', rememberedPin)
+          .limit(1)
+          .get();
+
+        if (querySnapshot.empty) {
+          localStorageUtil.clearPinData();
+          ui.guest.displayMessage('info', 'Votre code PIN a expiré ou a été supprimé. Veuillez en saisir un nouveau.');
+        } else {
+          const pinData = querySnapshot.docs[0].data();
+          const dateIn = pinData.dateIn ? pinData.dateIn.toDate() : null;
+          const dateOut = pinData.dateOut ? pinData.dateOut.toDate() : null;
+
+          if (dateIn && now < dateIn) {
+            localStorageUtil.clearPinData();
+            ui.guest.displayMessage('info', `Votre code sera actif à partir du ${utils.formatDateDisplay(dateIn)}.`);
+          } else if (dateOut && now > dateOut) {
+            localStorageUtil.clearPinData();
+            ui.guest.displayMessage('alert', `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`);
+          } else {
+            state.guest.pin = rememberedPin;
+            state.guest.expirationDate = dateOut;
+            ui.guest.startExpirationTimer();
+            dom.guest.pinEntry.classList.add('app-hidden');
+            dom.guest.dynamicContent.classList.remove('app-hidden');
+            ui.guest.displayMessage('success', `Bienvenue de retour avec le code PIN "${rememberedPin}" !`);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du PIN stocké :', error);
         localStorageUtil.clearPinData();
-        ui.guest.displayMessage(
-          'info',
-          'Votre code PIN précédent a expiré. Veuillez en saisir un nouveau.'
-        );
+        ui.guest.displayMessage('danger', 'Erreur de connexion. Veuillez saisir à nouveau votre code PIN.');
       }
+      // XTOF fin modif
+    } else {
+      localStorageUtil.clearPinData();
+      ui.guest.displayMessage('info', 'Votre code PIN précédent a expiré. Veuillez en saisir un nouveau.');
     }
+  }
+
     // fin de la modification
     // General Listeners
     auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
