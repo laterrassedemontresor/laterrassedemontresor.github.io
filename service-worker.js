@@ -1,3 +1,4 @@
+// Update du 1er juillet 2025 - V1.1
 const CACHE_NAME = 'my-app-cache-v1';
 const urlsToCache = [
   '/',
