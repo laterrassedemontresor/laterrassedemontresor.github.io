@@ -13,6 +13,7 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
 // Encapsulation de tout le script pour éviter la pollution de l'espace global
 (() => {
   // --- 1. CONFIGURATION ---
@@ -71,8 +72,8 @@ if ('serviceWorker' in navigator) {
     manager: {
       auth: {
         // loggedInView: document.getElementById('logged-in-view'), // Supprimé car l'élément HTML n'existe plus
-        // userEmail: document.getElementById('user-email'),         // Supprimé
-        // signOutBtn: document.getElementById('sign-out-btn'),     // Supprimé
+        // userEmail: document.getElementById('user-email'), // Supprimé
+        // signOutBtn: document.getElementById('sign-out-btn'), // Supprimé
       },
       returnToGuestBtn: document.getElementById('returnToGuestButton'),
       userAvatar: document.getElementById('user-avatar'),
@@ -111,18 +112,6 @@ if ('serviceWorker' in navigator) {
 
   // --- 5. FONCTIONS UTILITAIRES ---
   const utils = {
-    // Xtof debut modif
-    getStoredPin: () => {
-      const stored = localStorage.getItem('validPin');
-      return stored ? JSON.parse(stored) : null;
-    },
-    storePin: (pin, expiration) => {
-      localStorage.setItem('validPin', JSON.stringify({ pin, expiration }));
-    },
-    clearStoredPin: () => {
-      localStorage.removeItem('validPin');
-    },
-    // Xtof fin modif
     formatDateDisplay: (dateObject) => {
       if (!dateObject instanceof Date || isNaN(dateObject)) return '';
       const options = {
@@ -161,14 +150,12 @@ if ('serviceWorker' in navigator) {
       else if (type === 'danger') messageEl = dom.manager.messages.danger;
       else if (type === 'info' || type === 'primary') messageEl = dom.manager.messages.primary;
       else return;
-
       messageEl.textContent = message;
       messageEl.style.display = 'block';
       setTimeout(() => {
         messageEl.style.display = 'none';
       }, duration);
     },
-
     // Fonctions spécifiques au Guest
     guest: {
       showApp: () => {
@@ -187,18 +174,17 @@ if ('serviceWorker' in navigator) {
         dom.guest.backspaceButton.disabled = pinLength === 0;
       },
       resetSystem: () => {
+        // Xtof debut modif
+        localStorage.removeItem('guestPin');
+        // Xtof fin modif
         if (state.guest.intervalId) clearInterval(state.guest.intervalId);
         Object.assign(state.guest, {
-          // Xtof debut modif
-          // Ne pas réinitialiser pin et expirationDate s'ils sont valides
           pin: null,
           expirationDate: null,
-          // Xtof fin modif
           intervalId: null,
           tripleClickCount: 0,
         });
         if (state.guest.tripleClickTimer) clearTimeout(state.guest.tripleClickTimer);
-
         dom.guest.pinInput.value = '';
         ui.guest.updateButtonStates();
         ui.guest.displayMessage('info', "Saisissez votre code d'accès");
@@ -218,7 +204,6 @@ if ('serviceWorker' in navigator) {
         }
       },
     },
-
     // Fonctions spécifiques au Manager
     manager: {
       showApp: () => {
@@ -239,441 +224,286 @@ if ('serviceWorker' in navigator) {
         const dateIn = pin.dateIn ? pin.dateIn.toDate() : null;
         const dateOut = pin.dateOut ? pin.dateOut.toDate() : null;
         const status = utils.getPinStatus({ dateIn, dateOut }, now);
-
         const pinItem = document.createElement('div');
         pinItem.className = `pin-item status-${status}`;
         pinItem.dataset.id = pin.id;
-
         // Structure à 4 colonnes
         pinItem.innerHTML = `
-            <div class="pin-code ${status}">${pin.pinCode}</div>
-            <div class="pin-contact-info">
-                <span class="pin-contact">${pin.contact || ''}</span>
-                <span class="pin-phone">${pin.phone || ''}</span>
-            </div>
-            <div class="pin-dates-display">
-                <span class="pin-date-in-display">${utils.formatDateDisplay(dateIn)}</span>
-                <span class="pin-date-out-display">${utils.formatDateDisplay(dateOut)}</span>
-            </div>
-            <div class="pin-actions">
-                <button class="btn btn-edit" data-action="edit" aria-label="Modifier">✎</button>
-                <button class="btn btn-danger" data-action="delete" aria-label="Supprimer">🗑</button>
-            </div>
-        `;
+                    <div class="pin-col pin-code">${pin.pinCode}</div>
+                    <div class="pin-col pin-dateIn">${
+                      dateIn ? utils.formatDateDisplay(dateIn) : ''
+                    }</div>
+                    <div class="pin-col pin-dateOut">${
+                      dateOut ? utils.formatDateDisplay(dateOut) : ''
+                    }</div>
+                    <div class="pin-col pin-contact">${pin.contact || ''}</div>
+                    <div class="pin-col pin-phone">${pin.phone || ''}</div>
+                    <div class="pin-col pin-actions">
+                        <button class="edit-btn" title="Modifier">✎</button>
+                        <button class="delete-btn" title="Supprimer">🗑️</button>
+                    </div>
+                `;
         dom.manager.pinsList.appendChild(pinItem);
       },
       updateButtonStates: () => {
-        const {
-          pinCodeInput,
-          contactInput,
-          dateInInput,
-          dateOutInput,
-          submitButton,
-          cancelButton,
-        } = dom.manager.form;
-        const isPinCodeValid = pinCodeInput.value.length === config.pinLength;
-        const isContactValid = contactInput.value.trim().length > 0;
-        const isDateInValid = dateInInput.value !== '';
-        const isDateOutValid = dateOutInput.value !== '';
-
-        const canSubmit =
-          state.currentEditingPinId ||
-          (isPinCodeValid && isContactValid && isDateInValid && isDateOutValid);
-        submitButton.disabled = !canSubmit;
-        cancelButton.disabled =
-          !state.currentEditingPinId &&
-          !pinCodeInput.value &&
-          !contactInput.value &&
-          !dateInInput.value &&
-          !dateOutInput.value;
-      },
-      updateSortMenu: () => {
-        dom.manager.controls.sortMenu.querySelectorAll('.dropdown-item').forEach((item) => {
-          item.classList.toggle('active', item.dataset.sortBy === state.currentSortBy);
-        });
+        const isEditing = !!state.currentEditingPinId;
+        dom.manager.form.submitButton.disabled =
+          !dom.manager.form.pinCodeInput.value ||
+          !dom.manager.form.dateInInput.value ||
+          !dom.manager.form.dateOutInput.value;
+        dom.manager.form.cancelButton.disabled = !isEditing;
       },
     },
   };
 
-  // --- 7. GESTIONNAIRES D'ÉVÉNEMENTS (LOGIQUE APPLICATIVE) ---
-  const handlers = {
-    // Guest Handlers
-    guest: {
-      handlePinInput: () => {
-        dom.guest.pinInput.value = dom.guest.pinInput.value.toUpperCase();
-        ui.guest.updateButtonStates();
-      },
-      handlePinKeydown: (e) => {
-        if (e.key === 'Enter' && dom.guest.pinInput.value.length === config.pinLength) {
-          handlers.guest.validatePin();
-        }
-      },
-      handleBackspace: () => {
-        dom.guest.pinInput.value = dom.guest.pinInput.value.slice(0, -1);
-        ui.guest.updateButtonStates();
-      },
-      validatePin: async () => {
-        const enteredPin = dom.guest.pinInput.value.toUpperCase();
-        dom.guest.pinInput.value = ''; // Efface l'entrée
-        ui.guest.updateButtonStates();
+  // Xtof debut modif
+  // Restauration automatique du PIN invité si présent dans le localStorage
+  document.addEventListener('DOMContentLoaded', () => {
+    const storedPin = localStorage.getItem('guestPin');
+    if (storedPin) {
+      dom.guest.pinInput.value = storedPin;
+      ui.guest.updateButtonStates();
+      handlers.guest.checkPin(true); // true = appel auto
+    }
+  });
+  // Xtof fin modif
 
-        if (enteredPin.length !== config.pinLength) {
-          ui.guest.displayMessage(
-            'alert',
-            `Le code PIN doit contenir ${config.pinLength} caractères.`
-          );
+  // --- 7. HANDLERS (Gestionnaires d'événements) ---
+  const handlers = {
+    guest: {
+      // Xtof debut modif
+      checkPin: async (auto = false) => {
+        // Xtof fin modif
+        const pin = dom.guest.pinInput.value.trim().toUpperCase();
+        if (pin.length !== config.pinLength) {
+          ui.guest.displayMessage('danger', 'Code PIN incomplet.');
           return;
         }
-
-        // NOUVEAU : Vérification du code PIN Manager 'XTOF'
-        if (enteredPin === config.managerPinCode) {
-          dom.guest.loginContainer.classList.remove('app-hidden');
-          dom.guest.pinEntry.classList.add('app-hidden');
-          dom.guest.dynamicContent.classList.add('app-hidden');
-          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
-          return; // Arrête l'exécution pour ne pas valider via Firebase
-        }
-        // FIN NOUVEAU
-
+        // Recherche du PIN dans Firestore
         try {
           const querySnapshot = await db
             .collection('pins')
-            .where('pinCode', '==', enteredPin)
+            .where('pinCode', '==', pin)
             .limit(1)
             .get();
           if (querySnapshot.empty) {
-            ui.guest.displayMessage('alert', 'Code PIN incorrect.');
+            ui.guest.displayMessage('danger', 'Code PIN invalide.');
+            // Xtof debut modif
+            localStorage.removeItem('guestPin');
+            if (auto) ui.guest.resetSystem();
+            // Xtof fin modif
             return;
           }
-
-          const pinData = querySnapshot.docs[0].data();
+          const pinDoc = querySnapshot.docs[0];
+          const pinData = pinDoc.data();
           const now = new Date();
           const dateIn = pinData.dateIn ? pinData.dateIn.toDate() : null;
           const dateOut = pinData.dateOut ? pinData.dateOut.toDate() : null;
-
-          if (dateIn && now < dateIn) {
-            ui.guest.displayMessage(
-              'info',
-              `Votre code sera actif à partir du ${utils.formatDateDisplay(dateIn)}.`
-            );
-          } else if (dateOut && now > dateOut) {
-            ui.guest.displayMessage(
-              'alert',
-              `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`
-            );
-          } else {
-            state.guest.pin = enteredPin;
-            state.guest.expirationDate = dateOut;
+          if ((dateIn && now < dateIn) || (dateOut && now > dateOut)) {
+            ui.guest.displayMessage('alert', `Code PIN "${pin}" expiré.`);
             // Xtof debut modif
-            utils.storePin(enteredPin, dateOut); // Stocker le PIN valide
+            localStorage.removeItem('guestPin');
+            if (auto) ui.guest.resetSystem();
             // Xtof fin modif
-            ui.guest.startExpirationTimer();
-            ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
-            dom.guest.pinEntry.classList.add('app-hidden');
-            dom.guest.dynamicContent.classList.remove('app-hidden');
+            return;
           }
+          // PIN valide
+          state.guest.pin = pin;
+          state.guest.expirationDate = dateOut;
+          dom.guest.pinEntry.classList.add('app-hidden');
+          dom.guest.dynamicContent.classList.remove('app-hidden');
+          ui.guest.displayMessage('success', `Bienvenue !`);
+          ui.guest.startExpirationTimer();
+          // Xtof debut modif
+          if (!auto) {
+            localStorage.setItem('guestPin', pin);
+          }
+          // Xtof fin modif
         } catch (error) {
-          console.error('Erreur de validation du PIN:', error);
-          ui.guest.displayMessage('danger', 'Erreur de connexion. Réessayez.');
+          ui.guest.displayMessage('danger', 'Erreur réseau.');
+          // Xtof debut modif
+          if (auto) ui.guest.resetSystem();
+          // Xtof fin modif
         }
       },
-      triggerPortal: async () => {
-        if (!state.guest.pin) return;
+      handleInput: (e) => {
+        const input = e.target;
+        input.value = input.value
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '')
+          .slice(0, config.pinLength);
+        ui.guest.updateButtonStates();
+      },
+      handleBackspace: () => {
+        const input = dom.guest.pinInput;
+        input.value = input.value.slice(0, -1);
+        ui.guest.updateButtonStates();
+      },
+      handlePortalOpen: async () => {
+        dom.guest.portalButton.disabled = true;
         try {
-          const response = await fetch(config.webhookUrl);
-          const data = await response.text();
-          if (response.ok && data.includes('Success')) {
-            ui.guest.displayMessage('success', 'Portail activé !');
-          } else {
-            ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
-          }
-        } catch (error) {
-          console.error('Erreur webhook:', error);
-          ui.guest.displayMessage('danger', 'commande éxécutée');
+          await fetch(config.webhookUrl, { method: 'POST' });
+          ui.guest.displayMessage('success', 'Portail ouvert !');
+        } catch (e) {
+          ui.guest.displayMessage('danger', "Erreur lors de l'ouverture du portail.");
         }
+        setTimeout(() => {
+          dom.guest.portalButton.disabled = false;
+        }, 2000);
       },
-      handleLogoClick: () => {
+      handleReset: () => {
+        ui.guest.resetSystem();
+      },
+      handleTripleClick: () => {
         state.guest.tripleClickCount++;
-        if (state.guest.tripleClickTimer) clearTimeout(state.guest.tripleClickTimer);
-
-        state.guest.tripleClickTimer = setTimeout(() => {
-          state.guest.tripleClickCount = 0;
-        }, config.tripleClickThresholdMs);
-
+        if (state.guest.tripleClickCount === 1) {
+          state.guest.tripleClickTimer = setTimeout(() => {
+            state.guest.tripleClickCount = 0;
+          }, config.tripleClickThresholdMs);
+        }
         if (state.guest.tripleClickCount === 3) {
-          clearTimeout(state.guest.tripleClickTimer);
           state.guest.tripleClickCount = 0;
           dom.guest.loginContainer.classList.remove('app-hidden');
-          dom.guest.pinEntry.classList.add('app-hidden');
-          dom.guest.dynamicContent.classList.add('app-hidden');
-          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
+        }
+      },
+      handleManagerLogin: async () => {
+        try {
+          await auth.signInWithPopup(googleProvider);
+          ui.manager.showApp();
+        } catch (error) {
+          ui.guest.displayMessage('danger', "Échec de l'authentification Google.");
         }
       },
     },
-
-    // Manager Handlers
     manager: {
-      handleFormSubmit: async (e) => {
-        e.preventDefault();
-        const { pinCodeInput, dateInInput, dateOutInput, contactInput, phoneInput } =
-          dom.manager.form;
-
-        const dateIn = new Date(dateInInput.value);
-        const dateOut = new Date(dateOutInput.value);
-
-        // Validation de la cohérence des dates
-        if (dateIn > dateOut) {
-          ui.showMessage('danger', 'Erreur de date : IN est postérieure à OUT');
-          return; // Empêche la soumission du formulaire
-        }
-
-        const pinData = {
-          pinCode: pinCodeInput.value.toUpperCase(),
-          dateIn: firebase.firestore.Timestamp.fromDate(dateIn),
-          dateOut: firebase.firestore.Timestamp.fromDate(dateOut),
-          contact: contactInput.value.trim(),
-          phone: phoneInput.value.trim(),
-        };
-
-        try {
-          if (state.currentEditingPinId) {
-            await db.collection('pins').doc(state.currentEditingPinId).update(pinData);
-            ui.showMessage('success', 'PIN mis à jour !');
-          } else {
-            const existingPin = await db
-              .collection('pins')
-              .where('pinCode', '==', pinData.pinCode)
-              .get();
-            if (!existingPin.empty) {
-              ui.showMessage('danger', 'Ce code PIN existe déjà.');
-              return;
-            }
-            await db
-              .collection('pins')
-              .add({ ...pinData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            ui.showMessage('success', 'PIN ajouté avec succès !');
-          }
-          ui.manager.resetForm();
-          handlers.manager.loadPins();
-        } catch (error) {
-          console.error('Erreur Firestore:', error);
-          ui.showMessage('danger', `Erreur: ${error.message}`);
-        }
-      },
       loadPins: async () => {
         dom.manager.pinsList.innerHTML = '';
-        const searchQuery = dom.manager.controls.searchQueryInput.value.trim().toLowerCase();
+        const now = new Date();
         let query = db.collection('pins');
-
-        if (state.currentSortBy !== 'status') {
+        if (state.currentSortBy) {
           query = query.orderBy(state.currentSortBy, state.currentSortOrder);
         }
-
         const snapshot = await query.get();
-        let pins = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        if (state.currentSortBy === 'status') {
-          const now = new Date();
-          const statusOrder = { active: 1, future: 2, expired: 3 };
-          pins.sort((a, b) => {
-            const statusA = utils.getPinStatus(
-              { dateIn: a.dateIn?.toDate(), dateOut: a.dateOut?.toDate() },
-              now
-            );
-            const statusB = utils.getPinStatus(
-              { dateIn: b.dateIn?.toDate(), dateOut: b.dateOut?.toDate() },
-              now
-            );
-            return (
-              (statusOrder[statusA] - statusOrder[statusB]) *
-              (state.currentSortOrder === 'asc' ? 1 : -1)
-            );
+        snapshot.forEach((doc) => {
+          const pin = { id: doc.id, ...doc.data() };
+          ui.manager.addPinToDOM(pin);
+        });
+      },
+      handleFormSubmit: async (e) => {
+        e.preventDefault();
+        const pinCode = dom.manager.form.pinCodeInput.value.trim().toUpperCase();
+        const dateIn = new Date(dom.manager.form.dateInInput.value);
+        const dateOut = new Date(dom.manager.form.dateOutInput.value);
+        const contact = dom.manager.form.contactInput.value.trim();
+        const phone = dom.manager.form.phoneInput.value.trim();
+        if (state.currentEditingPinId) {
+          await db.collection('pins').doc(state.currentEditingPinId).update({
+            pinCode,
+            dateIn,
+            dateOut,
+            contact,
+            phone,
+          });
+        } else {
+          await db.collection('pins').add({
+            pinCode,
+            dateIn,
+            dateOut,
+            contact,
+            phone,
           });
         }
-
-        const filteredPins = searchQuery
-          ? pins.filter(
-              (pin) =>
-                pin.pinCode?.toLowerCase().includes(searchQuery) ||
-                pin.contact?.toLowerCase().includes(searchQuery) ||
-                pin.phone?.toLowerCase().includes(searchQuery)
-            )
-          : pins;
-
-        filteredPins.forEach(ui.manager.addPinToDOM);
-        dom.manager.controls.resultsCount.textContent = searchQuery
-          ? `${filteredPins.length}/${pins.length}`
-          : `${pins.length}`;
+        ui.manager.resetForm();
+        handlers.manager.loadPins();
       },
-      handlePinListClick: async (e) => {
-        const button = e.target.closest('button[data-action]');
-        if (!button) return;
-
-        const pinItem = button.closest('.pin-item');
-        const pinId = pinItem.dataset.id;
-        const action = button.dataset.action;
-
-        if (action === 'delete') {
-          if (confirm('Supprimer ce PIN ?')) {
-            await db.collection('pins').doc(pinId).delete();
-            ui.showMessage('success', 'PIN supprimé.');
-            handlers.manager.loadPins();
-            if (state.currentEditingPinId === pinId) ui.manager.resetForm();
-          }
-        } else if (action === 'edit') {
-          const doc = await db.collection('pins').doc(pinId).get();
-          if (!doc.exists) return;
-
-          const data = doc.data();
-          const { pinCodeInput, dateInInput, dateOutInput, contactInput, phoneInput } =
-            dom.manager.form;
-
-          pinCodeInput.value = data.pinCode;
-          dateInInput.value = data.dateIn.toDate().toISOString().slice(0, 16);
-          dateOutInput.value = data.dateOut.toDate().toISOString().slice(0, 16);
-          contactInput.value = data.contact;
-          phoneInput.value = data.phone || '';
-          state.currentEditingPinId = pinId;
-
-          ui.manager.updateButtonStates();
-          dom.manager.form.form.classList.add('is-active');
-          pinCodeInput.focus();
-        }
+      handleEditPin: (id) => {
+        state.currentEditingPinId = id;
+        const pinItem = document.querySelector(`.pin-item[data-id="${id}"]`);
+        dom.manager.form.pinCodeInput.value = pinItem.querySelector('.pin-code').textContent;
+        dom.manager.form.dateInInput.value = pinItem.querySelector('.pin-dateIn').textContent;
+        dom.manager.form.dateOutInput.value = pinItem.querySelector('.pin-dateOut').textContent;
+        dom.manager.form.contactInput.value = pinItem.querySelector('.pin-contact').textContent;
+        dom.manager.form.phoneInput.value = pinItem.querySelector('.pin-phone').textContent;
+        dom.manager.form.submitButton.textContent = 'Modifier';
+        dom.manager.form.form.classList.add('is-active');
       },
-      handleSortMenuClick: (e) => {
-        const sortBy = e.target.dataset.sortBy;
-        if (sortBy) {
+      handleDeletePin: async (id) => {
+        await db.collection('pins').doc(id).delete();
+        handlers.manager.loadPins();
+      },
+      handleCancelEdit: () => {
+        ui.manager.resetForm();
+      },
+      handleGeneratePin: () => {
+        dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
+        ui.manager.updateButtonStates();
+      },
+      handleSort: (sortBy) => {
+        if (state.currentSortBy === sortBy) {
+          state.currentSortOrder = state.currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
           state.currentSortBy = sortBy;
-          handlers.manager.loadPins();
-          ui.manager.updateSortMenu();
-          dom.manager.controls.sortMenu.classList.remove('show');
+          state.currentSortOrder = 'asc';
         }
+        handlers.manager.loadPins();
       },
-      handleSearchInput: () => {
-        clearTimeout(state.debounceTimer);
-        state.debounceTimer = setTimeout(handlers.manager.loadPins, 300);
+      handleSearch: async () => {
+        const query = dom.manager.controls.searchQueryInput.value.trim().toUpperCase();
+        dom.manager.pinsList.innerHTML = '';
+        let pinsRef = db.collection('pins');
+        if (query) {
+          pinsRef = pinsRef.where('pinCode', '==', query);
+        }
+        const snapshot = await pinsRef.get();
+        snapshot.forEach((doc) => {
+          const pin = { id: doc.id, ...doc.data() };
+          ui.manager.addPinToDOM(pin);
+        });
       },
       handleClearSearch: () => {
         dom.manager.controls.searchQueryInput.value = '';
         handlers.manager.loadPins();
-        dom.manager.controls.searchQueryInput.focus();
-      },
-    },
-
-    // Auth Handlers
-    auth: {
-      onAuthStateChanged: (user) => {
-        // DÉBUT du NOUVEAU code à l'intérieur de onAuthStateChanged
-
-        if (user && user.email === config.adminEmail) {
-          // dom.manager.auth.userEmail.textContent = user.email; // Supprimé
-          // dom.manager.auth.loggedInView.style.display = 'block'; // Supprimé
-
-          // Afficher le bouton entier (qui contient maintenant l'avatar)
-          dom.manager.returnToGuestBtn.style.display = 'flex'; // ou 'block', selon votre layout initial du bouton
-
-          if (user.photoURL) {
-            dom.manager.userAvatar.src = user.photoURL;
-            dom.manager.userAvatar.style.display = 'block'; // Afficher l'image de l'avatar
-          } else {
-            dom.manager.userAvatar.style.display = 'none'; // Cacher l'image si pas d'avatar
-          }
-
-          ui.manager.showApp();
-        } else {
-          // Cacher le bouton entier et l'image lors de la déconnexion ou accès non-admin
-          dom.manager.returnToGuestBtn.style.display = 'none';
-          dom.manager.userAvatar.style.display = 'none';
-          dom.manager.userAvatar.src = ''; // Effacer la source de l'image
-
-          if (user) {
-            auth.signOut();
-            ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
-          }
-          // dom.manager.auth.loggedInView.style.display = 'none'; // Supprimé
-          ui.guest.showApp();
-        }
-        // FIN du NOUVEAU code à l'intérieur de onAuthStateChanged
-      }, // <-- Cette ligne doit être la même après la modification
-      signIn: () => {
-        auth
-          .signInWithPopup(googleProvider)
-          .catch((err) => ui.showMessage('danger', `Erreur: ${err.message}`));
-      },
-      signOut: () => {
-        auth.signOut().then(() => ui.showMessage('info', 'Déconnexion réussie.'));
       },
     },
   };
 
-  // --- 8. INITIALISATION ---
-  const init = () => {
-    // Xtof debut modif
-    // Vérifier si un PIN valide est stocké
-    const storedPin = utils.getStoredPin();
-    if (storedPin) {
-      const now = new Date();
-      if (now < new Date(storedPin.expiration)) {
-        state.guest.pin = storedPin.pin;
-        state.guest.expirationDate = new Date(storedPin.expiration);
-        ui.guest.startExpirationTimer();
-        ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
-        dom.guest.pinEntry.classList.add('app-hidden');
-        dom.guest.dynamicContent.classList.remove('app-hidden');
-      } else {
-        utils.clearStoredPin();
-      }
+  // --- 8. ÉVÉNEMENTS ---
+
+  // Guest events
+  dom.guest.pinInput.addEventListener('input', handlers.guest.handleInput);
+  dom.guest.checkPinButton.addEventListener('click', () => handlers.guest.checkPin());
+  dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
+  dom.guest.portalButton.addEventListener('click', handlers.guest.handlePortalOpen);
+  dom.guest.resetButton.addEventListener('click', handlers.guest.handleReset);
+  dom.guest.logo.addEventListener('click', handlers.guest.handleTripleClick);
+  dom.guest.googleSignInBtn.addEventListener('click', handlers.guest.handleManagerLogin);
+
+  // Manager events
+  dom.manager.returnToGuestBtn.addEventListener('click', ui.guest.showApp);
+  dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
+  dom.manager.form.cancelButton.addEventListener('click', handlers.manager.handleCancelEdit);
+  dom.manager.controls.generatePinBtn.addEventListener('click', handlers.manager.handleGeneratePin);
+  dom.manager.controls.sortBtn.addEventListener('click', () => {
+    dom.manager.controls.sortMenu.classList.toggle('app-hidden');
+  });
+  dom.manager.controls.sortMenu.addEventListener('click', (e) => {
+    if (e.target.dataset.sortBy) {
+      handlers.manager.handleSort(e.target.dataset.sortBy);
     }
-    // Xtof fin modif
-    // General Listeners
-    auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
-    document.addEventListener('click', () =>
-      dom.manager.controls.sortMenu.classList.remove('show')
-    );
+  });
+  dom.manager.controls.searchQueryInput.addEventListener('input', handlers.manager.handleSearch);
+  dom.manager.controls.clearSearchBtn.addEventListener('click', handlers.manager.handleClearSearch);
+  dom.manager.pinsList.addEventListener('click', (e) => {
+    const pinItem = e.target.closest('.pin-item');
+    if (!pinItem) return;
+    const id = pinItem.dataset.id;
+    if (e.target.classList.contains('edit-btn')) {
+      handlers.manager.handleEditPin(id);
+    } else if (e.target.classList.contains('delete-btn')) {
+      handlers.manager.handleDeletePin(id);
+    }
+  });
 
-    // Guest Listeners
-    dom.guest.pinInput.addEventListener('input', handlers.guest.handlePinInput);
-    dom.guest.pinInput.addEventListener('keydown', handlers.guest.handlePinKeydown);
-    dom.guest.checkPinButton.addEventListener('click', handlers.guest.validatePin);
-    dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
-    dom.guest.portalButton.addEventListener('click', handlers.guest.triggerPortal);
-    dom.guest.resetButton.addEventListener('click', ui.guest.resetSystem);
-    dom.guest.logo.addEventListener('click', handlers.guest.handleLogoClick);
-    dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
-
-    // Manager Listeners
-    dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut); // Le bouton (contenant l'avatar) déconnecte
-    // dom.manager.auth.signOutBtn.addEventListener('click', handlers.auth.signOut); // Supprimé
-    dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
-    dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
-    Object.values(dom.manager.form).forEach((input) =>
-      input.addEventListener?.('input', ui.manager.updateButtonStates)
-    );
-    dom.manager.pinsList.addEventListener('click', handlers.manager.handlePinListClick);
-
-    dom.manager.controls.generatePinBtn.addEventListener('click', () => {
-      dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
-      ui.manager.updateButtonStates();
-    });
-    dom.manager.controls.sortBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dom.manager.controls.sortMenu.classList.toggle('show');
-      ui.manager.updateSortMenu();
-    });
-    dom.manager.controls.sortMenu.addEventListener('click', handlers.manager.handleSortMenuClick);
-    dom.manager.controls.searchQueryInput.addEventListener(
-      'input',
-      handlers.manager.handleSearchInput
-    );
-    dom.manager.controls.clearSearchBtn.addEventListener(
-      'click',
-      handlers.manager.handleClearSearch
-    );
-
-    // Initial state
-    ui.guest.showApp();
-  };
-
-  // Lancer l'application une fois le DOM chargé (géré par l'attribut defer)
-  init();
+  // --- 9. INITIALISATION ---
+  ui.guest.showApp();
 })();
