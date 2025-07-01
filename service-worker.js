@@ -1,6 +1,6 @@
 // Update du 1er juillet 2025 - V1.1
 // Modifie le nom du cache à chaque nouvelle version de ton app
-const CACHE_NAME = 'my-app-cache-v3'; // <-- Change 'v2' à 'v3' ou plus
+const CACHE_NAME = 'my-app-cache-v4'; // <-- Change 'v2' à 'v3' ou plus
 const urlsToCache = [
   '/',
   '/index.html',
