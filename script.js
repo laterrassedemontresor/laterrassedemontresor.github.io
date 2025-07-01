@@ -60,6 +60,9 @@ if ('serviceWorker' in navigator) {
       pinInput: document.getElementById('guestPinInput'),
       pinEntry: document.getElementById('guestPinEntry'),
       dynamicContent: document.getElementById('dynamicGuestContent'),
+      // Xtof debut modif
+      dateOut: document.getElementById('guestDateOut'),
+      // Xtof fin modif
       checkPinButton: document.getElementById('guestCheckPinButton'),
       backspaceButton: document.getElementById('guestBackspaceButton'),
       portalButton: document.getElementById('portalBtn'),
@@ -250,6 +253,16 @@ if ('serviceWorker' in navigator) {
 
             ui.guest.startExpirationTimer();
             ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
+            // XTO1 debut modif
+            if (dateOut) {
+              dom.guest.dateOut.textContent =
+                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
+              dom.guest.dateOut.style.display = '';
+            } else {
+              dom.guest.dateOut.textContent = '';
+              dom.guest.dateOut.style.display = 'none';
+            }
+            // XTO1 fin modif
             dom.guest.pinEntry.classList.add('app-hidden');
             dom.guest.dynamicContent.classList.remove('app-hidden');
           }
@@ -279,6 +292,12 @@ if ('serviceWorker' in navigator) {
       },
       resetSystem: () => {
         if (state.guest.intervalId) clearInterval(state.guest.intervalId);
+        // XTO1 debut modif
+        if (dom.guest.dateOut) {
+          dom.guest.dateOut.textContent = '';
+          dom.guest.dateOut.style.display = 'none';
+        }
+        // XTO1 fin modif
         // Xtof debut modif
         utils.storage.clearPinData();
         // Xtof fin modif
