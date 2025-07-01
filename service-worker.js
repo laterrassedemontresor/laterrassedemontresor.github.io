@@ -1,15 +1,13 @@
 // Update du 1er juillet 2025 - V1.1
-const CACHE_NAME = 'my-app-cache-v1';
+// Modifie le nom du cache à chaque nouvelle version de ton app
+const CACHE_NAME = 'my-app-cache-v3'; // <-- Change 'v2' à 'v3' ou plus
 const urlsToCache = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  // Ajoutez ici votre fichier JSON existant
-  //'/package.json', utilisé par Netlify pendant le Build donc pas utile ici
   '/manifest.json',
-  // Si vous avez d'autres fichiers importants (images, polices, etc.), ajoutez-les ici aussi
-  // Exemple : '/images/mon-logo.png', '/fonts/ma-police.woff'
+  // Ajoute ici tes autres fichiers importants si nécessaire
 ];
 
 self.addEventListener('install', (event) => {
@@ -19,16 +17,37 @@ self.addEventListener('install', (event) => {
       return cache.addAll(urlsToCache);
     })
   );
+  // Optionnel : Forcer l'activation immédiate du nouveau service worker.
+  // Utilise ceci avec prudence car ça peut potentiellement interrompre les utilisateurs.
+  // self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Le cache répond en premier
       if (response) {
         return response;
       }
       return fetch(event.request);
     })
   );
+});
+
+// --- Nettoyage des anciens caches ---
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  // Optionnel : Prendre immédiatement le contrôle des clients existants.
+  // À utiliser avec self.skipWaiting() dans l'événement 'install' pour un effet immédiat.
+  // event.waitUntil(clients.claim());
 });
