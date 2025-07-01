@@ -482,6 +482,16 @@ if ('serviceWorker' in navigator) {
             // Xtof fin modif
             ui.guest.startExpirationTimer();
             ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
+            // XTO1 debut modif
+            if (dateOut) {
+              dom.guest.dateOut.textContent =
+                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
+              dom.guest.dateOut.style.display = '';
+            } else {
+              dom.guest.dateOut.textContent = '';
+              dom.guest.dateOut.style.display = 'none';
+            }
+            // XTO1 fin modif
             dom.guest.pinEntry.classList.add('app-hidden');
             dom.guest.dynamicContent.classList.remove('app-hidden');
           }
