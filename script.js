@@ -111,6 +111,18 @@ if ('serviceWorker' in navigator) {
 
   // --- 5. FONCTIONS UTILITAIRES ---
   const utils = {
+    // Xtof debut modif
+    getStoredPin: () => {
+      const stored = localStorage.getItem('validPin');
+      return stored ? JSON.parse(stored) : null;
+    },
+    storePin: (pin, expiration) => {
+      localStorage.setItem('validPin', JSON.stringify({ pin, expiration }));
+    },
+    clearStoredPin: () => {
+      localStorage.removeItem('validPin');
+    },
+    // Xtof fin modif
     formatDateDisplay: (dateObject) => {
       if (!dateObject instanceof Date || isNaN(dateObject)) return '';
       const options = {
@@ -177,8 +189,11 @@ if ('serviceWorker' in navigator) {
       resetSystem: () => {
         if (state.guest.intervalId) clearInterval(state.guest.intervalId);
         Object.assign(state.guest, {
+          // Xtof debut modif
+          // Ne pas réinitialiser pin et expirationDate s'ils sont valides
           pin: null,
           expirationDate: null,
+          // Xtof fin modif
           intervalId: null,
           tripleClickCount: 0,
         });
@@ -349,6 +364,9 @@ if ('serviceWorker' in navigator) {
           } else {
             state.guest.pin = enteredPin;
             state.guest.expirationDate = dateOut;
+            // Xtof debut modif
+            utils.storePin(enteredPin, dateOut); // Stocker le PIN valide
+            // Xtof fin modif
             ui.guest.startExpirationTimer();
             ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
             dom.guest.pinEntry.classList.add('app-hidden');
@@ -590,6 +608,23 @@ if ('serviceWorker' in navigator) {
 
   // --- 8. INITIALISATION ---
   const init = () => {
+    // Xtof debut modif
+    // Vérifier si un PIN valide est stocké
+    const storedPin = utils.getStoredPin();
+    if (storedPin) {
+      const now = new Date();
+      if (now < new Date(storedPin.expiration)) {
+        state.guest.pin = storedPin.pin;
+        state.guest.expirationDate = new Date(storedPin.expiration);
+        ui.guest.startExpirationTimer();
+        ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
+        dom.guest.pinEntry.classList.add('app-hidden');
+        dom.guest.dynamicContent.classList.remove('app-hidden');
+      } else {
+        utils.clearStoredPin();
+      }
+    }
+    // Xtof fin modif
     // General Listeners
     auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
     document.addEventListener('click', () =>
