@@ -5,7 +5,8 @@ const urlsToCache = [
   '/style.css',
   '/script.js',
   // Ajoutez ici votre fichier JSON existant
-  '/package.json', // REMPLACEZ ceci par le nom exact de votre fichier JSON
+  //'/package.json', utilisé par Netlify pendant le Build donc pas utile ici
+  '/manifest.json',
   // Si vous avez d'autres fichiers importants (images, polices, etc.), ajoutez-les ici aussi
   // Exemple : '/images/mon-logo.png', '/fonts/ma-police.woff'
 ];
