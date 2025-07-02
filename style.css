@@ -203,7 +203,7 @@ body {
 .guest-input-action-buttons {
   /* Wrapper for backspace and check buttons */
   display: flex;
-  gap: 8px; /* Gap between buttons */
+  gap: 15px; /* Gap between buttons */
   margin-top: 15px; /* Place below input */
   justify-content: center; /* Center the buttons */
 }
