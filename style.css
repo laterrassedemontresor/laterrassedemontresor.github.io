@@ -124,7 +124,7 @@ body {
 }
 
 .guest-title {
-  font-size: 18pt; /* Titre 18pt (réduit) */
+  font-size: 20pt; /* Titre 18pt (réduit) */
   font-weight: 700;
   color: white; /* Titre blanc */
   text-align: center;
@@ -134,7 +134,7 @@ body {
 
 .guest-message {
   padding: 12px 16px 8px 16px; /* Adjusted padding */
-  font-size: 12px; /* Taille 12px (réduite) */
+  font-size: 18px; /* Taille 12px (réduite) */
   font-weight: normal; /* Police fine */
   display: flex; /* Use flexbox for alignment */
   align-items: flex-end; /* Align text to bottom */
