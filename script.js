@@ -560,6 +560,21 @@ if ('serviceWorker' in navigator) {
 
         try {
           if (state.currentEditingPinId) {
+            // insere le nouveau code ici
+            // Vérifier si le nouveau pinCode existe déjà pour un autre document
+            const existingPinQuery = await db
+              .collection('pins')
+              .where('pinCode', '==', pinData.pinCode)
+              .get();
+
+            if (
+              !existingPinQuery.empty &&
+              existingPinQuery.docs[0].id !== state.currentEditingPinId
+            ) {
+              ui.showMessage('danger', 'Ce code PIN existe déjà pour un autre enregistrement.');
+              return; // Arrête la soumission si le PIN est un doublon
+            }
+            // fin de la modification
             await db.collection('pins').doc(state.currentEditingPinId).update(pinData);
             ui.showMessage('success', 'PIN mis à jour !');
           } else {
