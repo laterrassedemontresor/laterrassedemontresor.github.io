@@ -29,7 +29,14 @@
   --highlight-green-border-strong: #4caf50;
   --btn-reset-bg: #424242;
 }
-
+/* Xtof Avant */
+html,
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+/* Xtof apres */
 /* La section @media (prefers-color-scheme: dark) est supprimée */
 * {
   margin: 0;
