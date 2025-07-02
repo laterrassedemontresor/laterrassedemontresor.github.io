@@ -1,5 +1,5 @@
 // Xtof debut modif
-const CACHE_VERSION = '2025-07-02n'; // Incrémentez cette version à chaque modification
+const CACHE_VERSION = '2025-07-02o'; // Incrémentez cette version à chaque modification
 const CACHE_NAME = `my-app-cache-${CACHE_VERSION}`;
 // Xtof fin modif
 const urlsToCache = [
