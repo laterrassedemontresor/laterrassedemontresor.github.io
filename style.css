@@ -58,14 +58,21 @@ body {
   min-height: 100vh;
 }
 
-/* Layout */
+/* Container principal - Responsive */
 .container {
-  max-width: 400px;
+  max-width: 400px; /* Largeur maximale sur PC */
+  width: 100%;
   margin: 0 auto;
   background: var(--bg-primary);
   border-radius: var(--border-radius);
   overflow: hidden;
-  width: 100%;
+  
+  /* Adaptation mobile */
+  @media (max-width: 768px) {
+    max-width: 100%;
+    border-radius: 0;
+    min-height: 100vh;
+  }
 }
 
 /* Utilitaires */
@@ -107,22 +114,30 @@ body {
   background: transparent;
 }
 
+/* Modification du wrapper du logo - sans fond rond */
 .logo-circle-wrapper {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: var(--highlight-green-border-strong);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 5px;
   user-select: none;
+  background-color: transparent !important;
+  width: auto;
+  height: auto;
+  border-radius: 0;
 }
 
+/* Logo plus grand */
 .guest-logo {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  
+  @media (max-width: 480px) {
+    width: 70px;
+    height: 70px;
+  }
 }
 
 .guest-title {
@@ -132,6 +147,10 @@ body {
   text-align: center;
   line-height: 1.2;
   margin-bottom: 10px;
+  
+  @media (max-width: 480px) {
+    font-size: 18pt;
+  }
 }
 
 .guest-message {
@@ -146,6 +165,10 @@ body {
   background-color: transparent;
   margin: 10px 0 0 0;
   color: var(--text-primary);
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+  }
 }
 
 .guest-message.alert {
@@ -161,10 +184,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 0;
-  min-height: 150px;
-  background: transparent;
-  position: relative;
+  padding: 15px;
+  
+  @media (min-width: 769px) {
+    padding: 15px 40px;
+  }
 }
 
 .guest-state-section {
@@ -176,7 +200,8 @@ body {
 }
 
 #guestPinInput {
-  width: 250px;
+  width: 100%;
+  max-width: 250px;
   height: 60px;
   padding: 5px 10px;
   font-size: 30px;
@@ -188,6 +213,11 @@ body {
   color: white;
   box-shadow: 0 0 8px var(--accent-orange);
   flex-shrink: 0;
+  
+  @media (max-width: 480px) {
+    height: 50px;
+    font-size: 24px;
+  }
 }
 
 #guestPinInput:focus {
@@ -262,7 +292,8 @@ body {
 }
 
 #portalBtn {
-  width: 250px;
+  width: 100%;
+  max-width: 250px;
   height: 60px;
   background: var(--highlight-green-border-strong);
   color: black;
@@ -276,6 +307,11 @@ body {
   display: block;
   margin-bottom: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  
+  @media (max-width: 480px) {
+    height: 50px;
+    font-size: 18px;
+  }
 }
 
 #portalBtn:hover {
@@ -352,12 +388,21 @@ body {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-tertiary);
+  
+  @media (max-width: 768px) {
+    padding: 12px 8px;
+  }
 }
 
 .form-row {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 .form-row:last-child {
@@ -374,6 +419,11 @@ body {
 
 .pin-group {
   flex: 0 0 100px;
+  
+  @media (max-width: 480px) {
+    flex: 1 0 auto;
+    margin-bottom: 10px;
+  }
 }
 
 .pin-input {
@@ -638,6 +688,10 @@ input:-webkit-autofill:active {
   overflow-y: auto;
   padding-right: 4px;
   border: 1px solid var(--border-color);
+  
+  @media (max-width: 768px) {
+    max-height: 50vh;
+  }
 }
 
 .pin-item {
@@ -646,6 +700,11 @@ input:-webkit-autofill:active {
   padding: 8px;
   border-bottom: 1px solid var(--border-color);
   gap: 6px;
+  
+  @media (max-width: 480px) {
+    padding: 8px 4px;
+    gap: 4px;
+  }
 }
 
 .pin-item .pin-code {
@@ -691,6 +750,11 @@ input:-webkit-autofill:active {
   text-align: left;
   font-size: 12px;
   line-height: 1.2;
+  
+  @media (max-width: 480px) {
+    flex: 0 0 80px;
+    font-size: 11px;
+  }
 }
 
 .pin-item .pin-date-in-display {
@@ -778,4 +842,36 @@ input:-webkit-autofill:active {
 .pins-list::-webkit-scrollbar-thumb {
   background: var(--text-muted);
   border-radius: 3px;
+}
+
+/* Adaptations spécifiques pour petits écrans */
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    font-size: 16px;
+  }
+  
+  .container {
+    border-radius: 0;
+  }
+  
+  .guest-header,
+  .header {
+    padding: 10px 8px;
+  }
+  
+  .form-container {
+    padding: 8px;
+  }
+  
+  .form-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .permanent-search-wrapper {
+    order: 1;
+    width: 100%;
+    margin-top: 8px;
+  }
 }
