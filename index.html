@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>La Terrasse de Montrésor Gate Access</title>
-    <meta name="description" content="Système de gestion d'accès pour La Terrasse de Montrésor">
+    <meta name="description" content="Système de gestion d'accès pour La Terrasse de Montrésor" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
@@ -12,7 +12,10 @@
     <link rel="icon" href="/icons/favicon.ico" />
     <link rel="stylesheet" href="style.css" />
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js" defer></script>
+    <script
+      src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"
+      defer
+    ></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js" defer></script>
     <script src="script.js" defer></script>
   </head>
@@ -20,8 +23,13 @@
     <main class="container">
       <section id="guest-app">
         <header class="guest-header">
-          <div class="logo-circle-wrapper" title="v1.0 ©kunu2025">
-            <img src="/icons/guest_logo.png" class="guest-logo" id="guestLogo" alt="Logo La Terrasse" />
+          <div class="guest-logo-container">
+            <img
+              src="/icons/guest_logo.png"
+              class="guest-logo"
+              id="guestLogo"
+              alt="v1.4 ©kunu2025"
+            />
           </div>
           <h1 class="guest-title">
             Bienvenue
@@ -29,7 +37,9 @@
             à la Terrasse de Montrésor
           </h1>
         </header>
-        <div class="guest-message" id="guestMessage" aria-live="polite">Saisissez votre code d'accès</div>
+        <div class="guest-message" id="guestMessage" aria-live="polite">
+          Saisissez votre code d'accès
+        </div>
         <div class="guest-content-area">
           <div id="guestPinEntry" class="guest-state-section">
             <label for="guestPinInput" class="visually-hidden">Code PIN à 4 caractères</label>
@@ -52,9 +62,9 @@
               >
                 &#9003;
               </button>
-              <button 
-                id="guestCheckPinButton" 
-                class="action-btn action-btn--success" 
+              <button
+                id="guestCheckPinButton"
+                class="action-btn action-btn--success"
                 aria-label="Valider le PIN"
                 disabled
               >
@@ -74,7 +84,13 @@
               <br />
               le Portail
             </button>
-            <button id="resetButton" class="action-btn action-btn--reset" aria-label="Réinitialiser">&#x21BB;</button>
+            <button
+              id="resetButton"
+              class="action-btn action-btn--reset"
+              aria-label="Réinitialiser"
+            >
+              &#x21BB;
+            </button>
           </div>
           <div
             id="guestLoginContainer"
@@ -97,18 +113,27 @@
             title="Déconnexion"
             aria-label="Déconnexion"
           >
-            <img
-              id="user-avatar"
-              class="user-avatar-in-btn"
-              src=""
-              alt=""
-              style="display: none"
-            />
+            <img id="user-avatar" class="user-avatar-in-btn" src="" alt="" style="display: none" />
           </button>
         </header>
-        <div class="message success" style="display: none" id="message-success" aria-live="assertive"></div>
-        <div class="message danger" style="display: none" id="message-danger" aria-live="assertive"></div>
-        <div class="message primary" style="display: none" id="message-primary" aria-live="polite"></div>
+        <div
+          class="message success"
+          style="display: none"
+          id="message-success"
+          aria-live="assertive"
+        ></div>
+        <div
+          class="message danger"
+          style="display: none"
+          id="message-danger"
+          aria-live="assertive"
+        ></div>
+        <div
+          class="message primary"
+          style="display: none"
+          id="message-primary"
+          aria-live="polite"
+        ></div>
         <form class="form-container" id="pinForm">
           <div class="form-row date-row">
             <div class="form-group pin-group">
@@ -126,19 +151,19 @@
             <div class="date-groups">
               <div class="date-group">
                 <label for="form-date-in" class="pin-date-label in">IN</label>
-                <input 
-                  type="datetime-local" 
-                  class="form-input date-input" 
-                  id="form-date-in" 
+                <input
+                  type="datetime-local"
+                  class="form-input date-input"
+                  id="form-date-in"
                   aria-label="Date et heure d'arrivée"
                 />
               </div>
               <div class="date-group">
                 <label for="form-date-out" class="pin-date-label out">OUT</label>
-                <input 
-                  type="datetime-local" 
-                  class="form-input date-input" 
-                  id="form-date-out" 
+                <input
+                  type="datetime-local"
+                  class="form-input date-input"
+                  id="form-date-out"
                   aria-label="Date et heure de départ"
                 />
               </div>
@@ -147,10 +172,10 @@
           <div class="form-row">
             <div class="form-group">
               <label for="form-contact" class="visually-hidden">Nom du contact</label>
-              <input 
-                type="text" 
-                class="form-input" 
-                id="form-contact" 
+              <input
+                type="text"
+                class="form-input"
+                id="form-contact"
                 placeholder="Nom et Prénom"
                 aria-required="true"
               />
@@ -191,20 +216,41 @@
                 ✨
               </button>
               <div class="sort-control">
-                <button type="button" class="btn" id="sortButton" aria-label="Trier la liste" aria-haspopup="true">
+                <button
+                  type="button"
+                  class="btn"
+                  id="sortButton"
+                  aria-label="Trier la liste"
+                  aria-haspopup="true"
+                >
                   ⇅
                 </button>
                 <div class="dropdown-menu" id="sortMenu" role="menu">
-                  <button type="button" class="dropdown-item" data-sort-by="contact" role="menuitem">
+                  <button
+                    type="button"
+                    class="dropdown-item"
+                    data-sort-by="contact"
+                    role="menuitem"
+                  >
                     Par Contact
                   </button>
-                  <button type="button" class="dropdown-item" data-sort-by="pinCode" role="menuitem">
+                  <button
+                    type="button"
+                    class="dropdown-item"
+                    data-sort-by="pinCode"
+                    role="menuitem"
+                  >
                     Par PIN code
                   </button>
                   <button type="button" class="dropdown-item" data-sort-by="dateIn" role="menuitem">
                     Par Date d'arrivée
                   </button>
-                  <button type="button" class="dropdown-item" data-sort-by="dateOut" role="menuitem">
+                  <button
+                    type="button"
+                    class="dropdown-item"
+                    data-sort-by="dateOut"
+                    role="menuitem"
+                  >
                     Par Date de départ
                   </button>
                   <button type="button" class="dropdown-item" data-sort-by="status" role="menuitem">
