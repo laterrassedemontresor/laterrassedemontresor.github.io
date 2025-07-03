@@ -60,7 +60,7 @@ body {
 
 /* Layout */
 .container {
-  max-width: 600px;
+  max-width: 400px;
   margin: 0 auto;
   background: var(--bg-primary);
   border-radius: var(--border-radius);
