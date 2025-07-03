@@ -110,26 +110,33 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 16px; /* Espacement augmenté */
+  padding: 20px 16px; /* Augmenté de 10px 16px */
   border-bottom: 1px solid var(--border-color);
   background: transparent;
 }
 
 .logo-circle-wrapper {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px; /* Augmenté de 5px */
+  user-select: none;
+  background-color: transparent !important; /* Fond transparent */
+  width: auto; /* Supprime la largeur fixe */
+  height: auto; /* Supprime la hauteur fixe */
+  border-radius: 0; /* Supprime le cercle */
 }
-.guest-logo-container {
-  margin-bottom: 16px;
-  text-align: center;
-}
+
 .guest-logo {
-  width: 96px; /* 1.5x la taille originale pour netteté */
-  height: 96px;
+  width: 120px; /* Taille augmentée */
+  height: 120px;
   object-fit: contain;
-  image-rendering: -webkit-optimize-contrast; /* Meilleur rendu pour agrandissement */
-  image-rendering: crisp-edges;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  /* Supprimer les propriétés de cercle si elles existent */
+  border-radius: 0;
+  background-color: transparent;
 }
+
 .guest-title {
   font-size: 24pt; /* Augmenté de 20pt */
   font-weight: 700;
@@ -440,8 +447,8 @@ body {
   }
 
   .guest-logo {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 
   .guest-title {
@@ -482,8 +489,8 @@ body {
   }
 
   .guest-logo {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
   }
 
   .guest-title {
