@@ -1,6 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
+    <!-- MISTRAL DEBUT -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .form-input {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          flex-direction: column;
+        }
+        .button {
+          width: 100%;
+          padding: 12px;
+        }
+      }
+    </style>
+    <!-- MISTRAL FIN -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>La Terrasse de Montrésor Gate Access</title>
@@ -23,12 +61,12 @@
     <main class="container">
       <section id="guest-app">
         <header class="guest-header">
-          <div class="guest-logo-container">
+          <div class="logo-circle-wrapper" title="v1.0 ©kunu2025">
             <img
               src="/icons/guest_logo.png"
               class="guest-logo"
               id="guestLogo"
-              alt="v1.4 ©kunu2025"
+              alt="Logo La Terrasse"
             />
           </div>
           <h1 class="guest-title">
