@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2025-07-03e'; // Version mise à jour
+const CACHE_VERSION = '2025-07-03';
 const CACHE_NAME = `montresor-gate-cache-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   '/',
@@ -15,104 +15,66 @@ const ASSETS_TO_CACHE = [
   '/icons/favicon.ico',
 ];
 
-// Installation du Service Worker
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches
+      .open(CACHE_NAME)
       .then((cache) => {
-        console.log(`Cache ouvert pour version: ${CACHE_VERSION}`);
-        return cache.addAll(ASSETS_TO_CACHE)
-          .catch((err) => {
-            console.error('Erreur lors du cache des assets:', err);
-            throw err; // Propage l'erreur pour échouer l'installation
-          });
+        console.log('Cache ouvert pour version:', CACHE_VERSION);
+        return cache.addAll(ASSETS_TO_CACHE);
       })
       .catch((err) => {
-        console.error("Échec de l'installation du cache:", err);
-        throw err; // Important pour que l'installation échoue clairement
+        console.error("Erreur lors de l'installation du cache:", err);
       })
   );
 });
 
-// Activation du Service Worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName.startsWith('montresor-gate-cache-')) {
+            if (cacheName !== CACHE_NAME) {
               console.log("Suppression de l'ancien cache:", cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
-      .then(() => {
-        console.log('Service Worker activé et anciens caches nettoyés');
-        return self.clients.claim();
-      })
-      .catch((err) => {
-        console.error('Erreur lors de l\'activation:', err);
-        throw err;
-      })
+      .then(() => self.clients.claim())
   );
 });
 
-// Gestion des requêtes réseau
 self.addEventListener('fetch', (event) => {
-  // Ne traiter que les requêtes GET
   if (event.request.method !== 'GET') return;
 
-  const requestUrl = new URL(event.request.url);
-
-  // Ne pas mettre en cache les requêtes chrome-extension ou autres schémas spéciaux
-  if (!['http:', 'https:'].includes(requestUrl.protocol)) {
-    return;
-  }
+  // On ignore les requêtes qui ne sont pas en http/https (ex: chrome-extension://)
+  if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // Renvoyer la réponse en cache si disponible
-        if (cachedResponse) {
-          console.log('Ressource servie depuis le cache:', event.request.url);
-          return cachedResponse;
-        }
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
 
-        // Sinon, faire la requête réseau
-        return fetch(event.request)
-          .then((response) => {
-            // Vérifier si la réponse est valide pour la mise en cache
-            if (!response || 
-                response.status !== 200 || 
-                response.type !== 'basic' ||
-                requestUrl.protocol !== 'http:' && requestUrl.protocol !== 'https:') {
-              return response;
-            }
-
-            // Cloner la réponse pour la mettre en cache
-            const responseToCache = response.clone();
-            
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache)
-                  .then(() => {
-                    console.log('Ressource mise en cache:', event.request.url);
-                  })
-                  .catch((err) => {
-                    console.warn('Échec de la mise en cache:', event.request.url, err);
-                  });
-              });
-
-            return response;
-          })
-          .catch((err) => {
-            console.error('Échec de la requête fetch:', event.request.url, err);
-            // Vous pourriez retourner une page de fallback ici si vous en avez une
-            throw err;
+      return fetch(event.request).then((response) => {
+        // Ne mettre en cache que les réponses valides http/https
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === 'basic' &&
+          event.request.url.startsWith('http')
+        ) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
           });
-      })
+        }
+        return response;
+      });
+    })
   );
 });
