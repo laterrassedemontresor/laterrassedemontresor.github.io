@@ -63,22 +63,20 @@ body {
 
 /* Conteneur racine de l'application pour la taille fixe et la mise à l'échelle */
 #app-wrapper {
-  width: 400px; /* Largeur de base de votre design (400px) */
-  height: 650px; /* Hauteur de base de votre design (650px) */
-  width: min(100vw, 100vh * (400 / 650)); /* Largeur s'adapte au viewport, respectant ratio */
-  height: min(100vh, 100vw * (650 / 400)); /* Hauteur s'adapte au viewport, respectant ratio */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px; /* La largeur de base de votre design */
+  height: 650px; /* La hauteur de base de votre design */
 
-  max-width: 400px; /* Ne dépasse jamais la largeur de design */
-  max-height: 650px; /* Ne dépasse jamais la hauteur de design */
-
-  /* Optionnel, pour s'assurer que le ratio est toujours respecté */
-  aspect-ratio: 400 / 650; /* Spécifie un ratio de 400px de large pour 650px de haut */
+  /* Le transform: translate sera toujours là, mais le scale sera ajouté par JS */
+  transform: translate(-50%, -50%);
+  transform-origin: center center; /* Point d'origine de la transformation */
 
   background: var(--bg-primary);
   border-radius: var(--border-radius);
   overflow: hidden; /* Important pour cacher tout ce qui dépasse */
   box-shadow: var(--shadow-md);
-  flex-shrink: 0; /* Empêche le conteneur de rétrécir sous flexbox */
 
   /* Logique de mise à l'échelle pour s'adapter "plein écran" en gardant les proportions */
   /* Calcule le facteur d'échelle basé sur la dimension la plus restrictive du viewport */

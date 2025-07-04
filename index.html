@@ -33,7 +33,7 @@
               />
             </div>
             <h1 class="guest-title">
-              Bienvenue v.ah
+              Bienvenue v.ag
               <br />
               à la Terrasse de Montrésor
             </h1>
@@ -304,5 +304,37 @@
         </section>
       </main>
     </div>
+    <script>
+      // Variables pour les dimensions de base de votre design
+      const DESIGN_WIDTH = 400;
+      const DESIGN_HEIGHT = 650;
+
+      const appWrapper = document.getElementById('app-wrapper');
+
+      function applyScaling() {
+        // Dimensions de la fenêtre visible (viewport)
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Calcul du facteur d'échelle pour que l'application rentre dans l'écran
+        const scaleX = viewportWidth / DESIGN_WIDTH;
+        const scaleY = viewportHeight / DESIGN_HEIGHT;
+        const scaleFactor = Math.min(scaleX, scaleY); // Prend le plus petit facteur pour maintenir les proportions
+
+        // Applique la transformation (centrage + mise à l'échelle)
+        // On conserve le translate(-50%, -50%) du CSS pour le centrage
+        // Et on ajoute le scale() calculé par JS
+        appWrapper.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+      }
+
+      // Appliquer la mise à l'échelle dès le chargement de la page
+      applyScaling();
+
+      // Réappliquer la mise à l'échelle si la fenêtre est redimensionnée (pour les ordinateurs)
+      window.addEventListener('resize', applyScaling);
+
+      // Pour les appareils mobiles, l'événement 'orientationchange' est parfois plus fiable que 'resize'
+      window.addEventListener('orientationchange', applyScaling);
+    </script>
   </body>
 </html>
