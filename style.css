@@ -39,33 +39,67 @@
 
 html,
 body {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  /* Supprimez width: 100%; max-width: 100vw; et overflow-x: hidden; du body */
+  /* pour permettre la mise à l'échelle et le centrage global */
   min-height: 100vh;
+  /* Ajoutez ces lignes pour le centrage vertical */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Cache le défilement si le scaling est plus grand que l'écran */
+  background: var(--bg-primary); /* Assurez-vous que le body a la couleur de fond */
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.4;
-  padding: 12px;
+  /* padding: 12px; Supprimé car le padding sera géré par la mise à l'échelle */
   font-size: 14px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+}
+
+/* Nouveau conteneur racine pour la mise à l'échelle */
+#app-wrapper {
+  position: relative; /* Nécessaire pour le centrage */
+  width: 400px; /* Largeur de base de votre design */
+  height: 650px; /* Hauteur de base de votre design */
+  background: var(--bg-primary); /* Appliquez la couleur de fond ici */
+  border-radius: var(--border-radius);
+  overflow: hidden; /* Important pour cacher tout ce qui dépasse des dimensions fixes */
+  box-shadow: var(--shadow-md); /* Un peu d'ombre pour un meilleur rendu */
+
+  /* Centrage du wrapper et mise à l'échelle */
+  position: absolute; /* Permet le centrage avec top/left/transform */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centrage parfait */
+
+  /* Logique de mise à l'échelle pour s'adapter à la largeur/hauteur de l'écran */
+  /* Le calcul de l'échelle est basé sur la plus petite proportion pour que tout rentre */
+  transform: translate(-50%, -50%) scale(min(1, calc(100vw / 400px), calc(100vh / 650px)));
+  transform-origin: center center; /* Centre la transformation */
+
+  /* Assurez-vous que le conteneur ne soit pas trop grand si l'écran est plus petit */
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 /* Layout */
 .container {
-  max-width: 400px;
-  margin: 0 auto;
-  background: var(--bg-primary);
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  width: 100%;
+  /* Le .container devient un wrapper interne, il ne gère plus la taille max */
+  /* et sa largeur doit correspondre à la largeur de #app-wrapper pour éviter le dédoublement */
+  width: 100%; /* Prend toute la largeur de #app-wrapper (400px) */
+  height: 100%; /* Prend toute la hauteur de #app-wrapper (650px) */
+  margin: 0; /* Plus besoin de margin auto, #app-wrapper gère le centrage */
+  background: var(
+    --bg-primary
+  ); /* Maintenez la couleur de fond si nécessaire, mais #app-wrapper a déjà une */
+  border-radius: var(--border-radius); /* Peut être maintenu ou déplacé vers #app-wrapper */
+  overflow: hidden; /* Important */
+  padding: 12px; /* Conserve le padding interne que vous aviez sur le body */
+  display: flex; /* Permet à son contenu de s'étirer si nécessaire */
+  flex-direction: column; /* Organise le contenu en colonne */
+  justify-content: flex-start; /* Aligne le contenu en haut */
 }
 
 /* Utilitaires */
@@ -166,6 +200,9 @@ body {
   min-height: 150px;
   background: transparent;
   position: relative;
+  /* Flex-grow pour prendre l'espace restant dans .container */
+  flex-grow: 1;
+  justify-content: flex-start; /* Aligner le contenu en haut si espace */
 }
 
 .guest-state-section {
@@ -353,6 +390,7 @@ body {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-tertiary);
+  flex-shrink: 0; /* Empêche le formulaire de rétrécir si l'espace est limité */
 }
 
 .form-row {
@@ -491,6 +529,8 @@ input:-webkit-autofill:active {
   gap: var(--btn-gap);
   margin-top: 8px;
   position: relative;
+  flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si l'écran est petit */
+  justify-content: center; /* Centre les éléments si le wrap se produit */
 }
 
 .form-actions-left-group,
@@ -635,10 +675,11 @@ input:-webkit-autofill:active {
 }
 
 .pins-list {
-  max-height: 400px;
+  max-height: 400px; /* Conservez cette hauteur maximale, elle sera mise à l'échelle avec le reste */
   overflow-y: auto;
   padding-right: 4px;
   border: 1px solid var(--border-color);
+  flex-grow: 1; /* Permet à la liste de prendre l'espace restant */
 }
 
 .pin-item {
