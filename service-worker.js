@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2025-07-03ak';
+const CACHE_VERSION = '2025-07-03aL';
 const CACHE_NAME = `montresor-gate-cache-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   '/',
