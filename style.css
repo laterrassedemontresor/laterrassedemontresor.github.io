@@ -111,6 +111,7 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 50%;
+  /*background-color: var(--highlight-green-border-strong);*/
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,26 +227,33 @@ body {
 .action-btn--danger {
   background: var(--accent-danger);
 }
+
 .action-btn--danger:hover {
   background: #e53935;
 }
+
 .action-btn--success {
   background: var(--accent-success);
 }
+
 .action-btn--success:hover {
   background: #4caf50;
 }
+
 .action-btn--success:disabled {
   background: var(--text-muted);
   cursor: not-allowed;
   opacity: 0.6;
 }
+
 .action-btn--reset {
   background: var(--btn-reset-bg);
 }
+
 .action-btn--reset:hover {
   background: #555555;
 }
+
 .action-btn--primary {
   background: var(--accent-primary);
   padding: 8px 16px;
@@ -270,13 +278,16 @@ body {
   margin-bottom: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
 #portalBtn:hover {
   background: #12a818;
 }
+
 #portalBtn:active {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0px 1px rgba(0, 0, 0, 0.05);
   transform: translateY(2px);
 }
+
 #portalBtn:disabled {
   background: var(--text-muted);
   cursor: not-allowed;
@@ -301,6 +312,7 @@ body {
   border-top-right-radius: var(--border-radius);
   margin-bottom: 20px;
 }
+
 .header h1 {
   font-size: 14px;
   font-weight: 600;
@@ -318,16 +330,19 @@ body {
   margin: 0;
   border-radius: 0;
 }
+
 .message.success {
   color: var(--accent-success);
   background-color: rgba(76, 175, 80, 0.15);
   border-left: 4px solid var(--accent-success);
 }
+
 .message.danger {
   color: var(--accent-danger);
   background-color: rgba(244, 67, 54, 0.15);
   border-left: 4px solid var(--accent-danger);
 }
+
 .message.primary {
   color: var(--accent-blue);
   background-color: rgba(24, 144, 255, 0.15);
@@ -339,20 +354,29 @@ body {
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-tertiary);
 }
+
 .form-row {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
 }
+
 .form-row:last-child {
   margin-bottom: 0;
 }
+
 .form-group {
   flex: 1;
 }
+
+.date-row {
+  align-items: stretch;
+}
+
 .pin-group {
   flex: 0 0 100px;
 }
+
 .pin-input {
   height: 72px;
   font-weight: 700;
@@ -360,30 +384,37 @@ body {
   text-transform: uppercase;
   font-family: monospace;
 }
+
 #form-pin-code {
   font-size: 24pt;
 }
+
 .date-groups {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .date-group {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 .pin-date-label {
   font-size: 10px;
   color: var(--text-muted);
 }
+
 .pin-date-label.in {
   color: var(--accent-success);
 }
+
 .pin-date-label.out {
   color: var(--accent-danger);
 }
+
 .form-input {
   width: 100%;
   padding: 8px 10px;
@@ -394,13 +425,16 @@ body {
   font-size: 13px;
   transition: border-color var(--transition);
 }
+
 .form-container.is-active .form-input {
   border-color: var(--highlight-green-border-light);
 }
+
 .form-input:focus {
   outline: none;
   border-color: var(--highlight-green-border-strong);
 }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -409,6 +443,7 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: var(--text-primary) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -426,25 +461,30 @@ input:-webkit-autofill:active {
   height: var(--btn-size);
   min-width: var(--btn-size);
 }
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .btn-edit {
   background: var(--accent-blue);
   border-color: var(--accent-blue);
   color: white;
 }
+
 .btn-success {
   background: var(--accent-success);
   border-color: var(--accent-success);
   color: white;
 }
+
 .btn-danger {
   background: var(--accent-danger);
   border-color: var(--accent-danger);
   color: white;
 }
+
 .form-actions {
   display: flex;
   align-items: center;
@@ -452,21 +492,25 @@ input:-webkit-autofill:active {
   margin-top: 8px;
   position: relative;
 }
+
 .form-actions-left-group,
 .form-actions-center-group {
   display: flex;
   gap: var(--btn-gap);
   align-items: center;
 }
+
 #sortButton,
 #generatePinButton {
   border-color: var(--accent-orange);
   color: var(--accent-orange);
 }
+
 .sort-control,
 .generate-control {
   position: relative;
 }
+
 .permanent-search-wrapper {
   display: flex;
   align-items: center;
@@ -479,6 +523,7 @@ input:-webkit-autofill:active {
   height: var(--btn-size);
   margin-left: auto;
 }
+
 .permanent-search-input {
   flex: 1;
   border: none;
@@ -489,12 +534,15 @@ input:-webkit-autofill:active {
   font-size: 13px;
   width: 100%;
 }
+
 .permanent-search-input:focus {
   outline: none;
 }
+
 .permanent-search-wrapper:focus-within {
   border-color: var(--highlight-green-border-strong);
 }
+
 .clear-search-btn {
   position: absolute;
   right: 2px;
@@ -511,13 +559,16 @@ input:-webkit-autofill:active {
   z-index: 2;
   transition: opacity 0.15s ease;
 }
+
 .clear-search-btn:hover:not([disabled]) {
   color: var(--accent-danger);
 }
+
 .clear-search-btn[disabled] {
   cursor: not-allowed;
   opacity: 0.4;
 }
+
 .search-results-count {
   position: absolute;
   right: 25px;
@@ -532,6 +583,7 @@ input:-webkit-autofill:active {
   pointer-events: none;
   z-index: 1;
 }
+
 .dropdown-menu {
   display: none;
   position: absolute;
@@ -547,9 +599,11 @@ input:-webkit-autofill:active {
   min-width: 160px;
   left: 0;
 }
+
 .dropdown-menu.show {
   display: flex;
 }
+
 .dropdown-item {
   width: 100%;
   text-align: left;
@@ -564,9 +618,11 @@ input:-webkit-autofill:active {
   position: relative;
   padding-left: 20px;
 }
+
 .dropdown-item:hover {
   background: var(--bg-tertiary);
 }
+
 .dropdown-item.active::before {
   content: '•';
   position: absolute;
@@ -577,12 +633,14 @@ input:-webkit-autofill:active {
   top: 50%;
   transform: translateY(-50%);
 }
+
 .pins-list {
   max-height: 400px;
   overflow-y: auto;
   padding-right: 4px;
   border: 1px solid var(--border-color);
 }
+
 .pin-item {
   display: flex;
   align-items: center;
@@ -590,6 +648,7 @@ input:-webkit-autofill:active {
   border-bottom: 1px solid var(--border-color);
   gap: 6px;
 }
+
 .pin-item .pin-code {
   flex: 0 0 50px;
   font-family: monospace;
@@ -601,6 +660,7 @@ input:-webkit-autofill:active {
   align-items: center;
   height: 40px;
 }
+
 .pin-item .pin-contact-info {
   flex: 1.5;
   display: flex;
@@ -610,6 +670,7 @@ input:-webkit-autofill:active {
   min-width: 0;
   font-size: 12px;
 }
+
 .pin-item .pin-contact,
 .pin-item .pin-phone {
   font-size: 12px;
@@ -618,9 +679,11 @@ input:-webkit-autofill:active {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .pin-item .pin-phone {
   color: var(--text-secondary);
 }
+
 .pin-item .pin-dates-display {
   flex: 0 0 100px;
   display: flex;
@@ -630,35 +693,43 @@ input:-webkit-autofill:active {
   font-size: 12px;
   line-height: 1.2;
 }
+
 .pin-item .pin-date-in-display {
   color: var(--accent-success);
   white-space: nowrap;
 }
+
 .pin-item .pin-date-out-display {
   color: var(--accent-danger);
   white-space: nowrap;
 }
+
 .pin-item .pin-actions {
   flex: 0 0 auto;
   display: flex;
   gap: 4px;
   align-items: center;
 }
+
 .pin-item .btn-edit,
 .pin-item .btn-danger {
   width: var(--btn-size);
   height: var(--btn-size);
   font-size: 14px;
 }
+
 .pin-item .pin-code.expired {
   color: var(--accent-danger);
 }
+
 .pin-item .pin-code.active {
   color: var(--accent-success);
 }
+
 .pin-item .pin-code.future {
   color: var(--text-muted);
 }
+
 .return-to-guest-btn {
   margin-left: auto;
   cursor: pointer;
@@ -677,15 +748,18 @@ input:-webkit-autofill:active {
   justify-content: center;
   box-shadow: var(--shadow-sm);
 }
+
 .return-to-guest-btn:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow-md);
   opacity: 1;
 }
+
 .return-to-guest-btn:active {
   transform: scale(0.95);
   box-shadow: none;
 }
+
 .user-avatar-in-btn {
   width: 100%;
   height: 100%;
@@ -693,102 +767,16 @@ input:-webkit-autofill:active {
   border-radius: 50%;
   display: block;
 }
+
 .pins-list::-webkit-scrollbar {
   width: 6px;
 }
+
 .pins-list::-webkit-scrollbar-track {
   background: var(--bg-tertiary);
 }
+
 .pins-list::-webkit-scrollbar-thumb {
   background: var(--text-muted);
   border-radius: 3px;
-}
-
-/* Responsive corrections */
-@media (min-width: 600px) {
-  body {
-    font-size: 18px;
-    padding: 24px;
-  }
-  .container {
-    max-width: 95vw; /* Correction clé pour Xiaomi et écrans larges */
-  }
-  .guest-title {
-    font-size: 32pt;
-  }
-  .guest-message {
-    font-size: 26px;
-  }
-  #guestPinInput {
-    width: 350px;
-    font-size: 44px;
-  }
-  .action-btn {
-    font-size: 22px;
-    width: 44px;
-    height: 44px;
-  }
-  .action-btn--primary {
-    padding: 12px 24px;
-    font-size: 22px;
-    height: auto;
-    width: auto;
-  }
-  #portalBtn {
-    width: 350px;
-    height: 80px;
-    font-size: 28px;
-  }
-  .message {
-    font-size: 18px;
-    padding: 20px 24px 16px 24px;
-  }
-  .pins-list .pin-item .pin-code {
-    font-size: 20px;
-  }
-  .pins-list .pin-item .pin-contact-info,
-  .pins-list .pin-item .pin-contact,
-  .pins-list .pin-item .pin-phone,
-  .pins-list .pin-item .pin-dates-display {
-    font-size: 16px;
-  }
-  .form-input {
-    font-size: 18px;
-    padding: 14px 16px;
-  }
-  .pin-input {
-    font-size: 26px;
-    height: 88px;
-  }
-  #form-pin-code {
-    font-size: 32pt;
-  }
-  .btn,
-  .btn-edit,
-  .btn-success,
-  .btn-danger {
-    font-size: 16px;
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-  }
-  .permanent-search-input {
-    font-size: 18px;
-    padding: 12px 14px;
-  }
-  .search-results-count {
-    font-size: 16px;
-  }
-  .dropdown-item {
-    font-size: 16px;
-    padding: 10px 12px;
-  }
-  .return-to-guest-btn,
-  .user-avatar-in-btn {
-    width: 56px;
-    height: 56px;
-  }
-  .pins-list::-webkit-scrollbar {
-    width: 12px;
-  }
 }
