@@ -20,15 +20,6 @@
   --accent-fluo-green: #39ff14;
   --border-radius: 6px;
   --border-radius-sm: 4px;
-
-  /* Variables responsives mobiles */
-  --mobile-padding: clamp(12px, 4vw, 20px);
-  --mobile-gap: clamp(8px, 2vw, 15px);
-  --mobile-font-size: clamp(14px, 3.5vw, 18px);
-  --mobile-input-height: clamp(60px, 14vw, 80px);
-  --mobile-btn-size: clamp(44px, 10vw, 64px);
-
-  /* Autres variables */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
   --transition: 0.15s ease;
@@ -37,37 +28,6 @@
   --highlight-green-border-light: #8bc34a;
   --highlight-green-border-strong: #4caf50;
   --btn-reset-bg: #424242;
-}
-
-/* Media queries pour les écrans ultra-petits (moins de 280px) */
-@media (max-width: 280px) {
-  :root {
-    --mobile-padding: 8px;
-    --mobile-gap: 6px;
-    --mobile-font-size: 12px;
-    --mobile-input-height: 45px;
-    --mobile-btn-size: 24px;
-  }
-}
-
-/* Media queries pour les écrans en mode paysage sur mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-  :root {
-    --mobile-padding: 10px;
-    --mobile-gap: 6px;
-    --mobile-input-height: 40px;
-    --mobile-btn-size: 26px;
-  }
-}
-/* Media queries pour cibler les écrans très hauts ou très denses  */
-@media (min-height: 1800px), (min-device-pixel-ratio: 2.5) {
-  .action-btn,
-  #portalBtn,
-  #guestPinInput {
-    min-width: 60px !important;
-    min-height: 60px !important;
-    font-size: 24px !important;
-  }
 }
 
 /* Reset et base */
@@ -81,63 +41,33 @@ html,
 body {
   width: 100%;
   max-width: 100vw;
-  /* CLAUDE DEBUT */
   overflow-x: hidden;
   min-height: 100vh;
-  min-height: 100dvh;
-  /*-webkit-overflow-scrolling: touch; obsolète*/
-  /* CLAUDE FIN */
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
-  /* CLAUDE DEBUT */
   line-height: 1.4;
-  padding: var(--mobile-padding);
-  font-size: var(--mobile-font-size);
-  /* CLAUDE FIN */
+  padding: 12px;
+  font-size: 14px;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
 }
 
 /* Layout */
 .container {
   max-width: 400px;
   margin: 0 auto;
-  /* CLAUDE DEBUT */
-  position: relative;
-  isolation: isolate;
   background: var(--bg-primary);
   border-radius: var(--border-radius);
   overflow: hidden;
   width: 100%;
-  min-width: 280px;
-  max-width: min(400px, 100vw - 2 * var(--mobile-padding));
-  /* CLAUDE FIN */
-}
-/* CLAUDE DEBUT */
-/* Media queries pour les très petits écrans */
-@media (max-width: 320px) {
-  .container {
-    max-width: 100%;
-    margin: 0;
-  }
-
-  body {
-    padding: 8px;
-  }
 }
 
-@media (max-height: 600px) {
-  body {
-    align-items: flex-start;
-    padding-top: 10px;
-  }
-}
-/* CLAUDE FIN */
 /* Utilitaires */
 .util-flex-center {
   display: flex;
@@ -172,9 +102,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding) 16px;
-  /* CLAUDE FIN */
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border-color);
   background: transparent;
 }
@@ -183,10 +111,7 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  /* CLAUDE DEBUT */
-  width: clamp(50px, 15vw, 70px);
-  height: clamp(50px, 15vw, 70px);
-  /* CLAUDE FIN */
+  /*background-color: var(--highlight-green-border-strong);*/
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,20 +122,14 @@ body {
 .guest-logo {
   width: 64px;
   height: 64px;
-  /* CLAUDE DEBUT */
-  width: clamp(54px, 16vw, 74px);
-  height: clamp(54px, 16vw, 74px);
-  /* CLAUDE FIN */
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .guest-title {
+  font-size: 20pt;
   font-weight: 700;
   color: white;
-  /* CLAUDE DEBUT */
-  font-size: clamp(18px, 5vw, 20px);
-  /* CLAUDE FIN */
   text-align: center;
   line-height: 1.2;
   margin-bottom: 10px;
@@ -220,10 +139,6 @@ body {
   padding: 12px 16px 8px 16px;
   font-size: 18px;
   font-weight: normal;
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding) 16px 8px 16px;
-  font-size: clamp(16px, 4.5vw, 20px);
-  /* CLAUDE FIN */
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -247,10 +162,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding) 0;
-  min-height: clamp(150px, 35vh, 200px);
-  /* CLAUDE FIN */
+  padding: 15px 0;
+  min-height: 150px;
   background: transparent;
   position: relative;
 }
@@ -267,12 +180,7 @@ body {
   width: 250px;
   height: 60px;
   padding: 5px 10px;
-  /* CLAUDE DEBUT */
-  width: clamp(200px, 60vw, 280px);
-  height: var(--mobile-input-height);
-  padding: clamp(5px, 1.5vw, 10px) clamp(8px, 2.5vw, 12px);
-  font-size: clamp(24px, 7vw, 32px);
-  /* CLAUDE FIN */
+  font-size: 30px;
   font-weight: bold;
   text-align: center;
   background: black;
@@ -298,10 +206,6 @@ body {
   display: flex;
   gap: 15px;
   margin-top: 15px;
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  margin-top: var(--mobile-gap);
-  /* CLAUDE FIN */
   justify-content: center;
 }
 
@@ -309,11 +213,9 @@ body {
 .action-btn {
   border: none;
   border-radius: var(--border-radius-sm);
-  /* CLAUDE DEBUT */
-  font-size: clamp(18px, 5vw, 24px);
-  width: var(--mobile-btn-size);
-  height: var(--mobile-btn-size);
-  /* CLAUDE FIN */
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,27 +260,17 @@ body {
   width: auto;
   height: auto;
   border-radius: var(--border-radius);
-  /* CLAUDE DEBUT */
-  padding: clamp(6px, 2vw, 10px) clamp(12px, 4vw, 20px);
-  font-size: clamp(12px, 3.5vw, 16px);
-  min-width: clamp(80px, 20vw, 120px);
-  /* CLAUDE FIN */
 }
 
 #portalBtn {
   width: 250px;
   height: 60px;
   background: var(--highlight-green-border-strong);
-  /* CLAUDE DEBUT */
-  width: clamp(200px, 60vw, 280px);
-  height: var(--mobile-input-height);
-  padding: clamp(5px, 1.5vw, 10px) clamp(10px, 3vw, 15px) clamp(8px, 2vw, 13px)
-    clamp(10px, 3vw, 15px);
-  font-size: clamp(18px, 5vw, 22px);
-  /* CLAUDE FIN */
   color: black;
   border: 2px solid #388e3c;
   border-radius: var(--border-radius);
+  padding: 7px 15px 13px 15px;
+  font-size: 20px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -410,9 +302,6 @@ body {
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-tertiary);
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding) 16px;
-  /* CLAUDE FIN */
   display: flex;
   align-items: center;
   min-height: 36px;
@@ -428,9 +317,6 @@ body {
   font-size: 14px;
   font-weight: 600;
   color: var(--accent-fluo-orange);
-  /* CLAUDE DEBUT */
-  font-size: clamp(12px, 3.5vw, 16px);
-  /* CLAUDE FIN */
   flex-grow: 1;
   text-align: center;
 }
@@ -439,10 +325,6 @@ body {
   padding: 16px 16px 12px 16px;
   font-size: 13px;
   font-weight: 500;
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding) 16px calc(var(--mobile-padding) - 4px) 16px;
-  font-size: clamp(12px, 3.2vw, 14px);
-  /* CLAUDE FIN */
   display: none;
   border-bottom: 1px solid var(--border-color);
   margin: 0;
@@ -470,9 +352,6 @@ body {
 .form-container {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
-  /* CLAUDE DEBUT */
-  padding: var(--mobile-padding);
-  /* CLAUDE FIN */
   background: var(--bg-tertiary);
 }
 
@@ -480,10 +359,6 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  margin-bottom: var(--mobile-gap);
-  /* CLAUDE FIN */
 }
 
 .form-row:last-child {
@@ -496,25 +371,15 @@ body {
 
 .date-row {
   align-items: stretch;
-  /* CLAUDE DEBUT */
-  flex-direction: column;
-  gap: var(--mobile-gap);
-  /* CLAUDE FIN */
 }
 
 .pin-group {
   flex: 0 0 100px;
-  /* CLAUDE DEBUT */
-  flex: 1;
-  /* CLAUDE FIN */
 }
 
 .pin-input {
   height: 72px;
   font-weight: 700;
-  /* CLAUDE DEBUT */
-  height: clamp(60px, 15vw, 80px);
-  /* CLAUDE FIN */
   text-align: center;
   text-transform: uppercase;
   font-family: monospace;
@@ -522,9 +387,6 @@ body {
 
 #form-pin-code {
   font-size: 24pt;
-  /* CLAUDE DEBUT */
-  font-size: clamp(18px, 5vw, 28px);
-  /* CLAUDE FIN */
 }
 
 .date-groups {
@@ -532,18 +394,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  /* CLAUDE FIN */
 }
 
 .date-group {
   display: flex;
   align-items: center;
   gap: 6px;
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  /* CLAUDE FIN */
 }
 
 .pin-date-label {
@@ -563,14 +419,10 @@ body {
   width: 100%;
   padding: 8px 10px;
   background: var(--bg-input);
-  /* CLAUDE DEBUT */
-  min-height: clamp(36px, 9vw, 44px);
-  touch-action: manipulation;
-  /* CLAUDE FIN */
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   color: var(--text-primary);
-  font-size: clamp(11px, 3vw, 14px);
+  font-size: 13px;
   transition: border-color var(--transition);
 }
 
@@ -582,17 +434,7 @@ body {
   outline: none;
   border-color: var(--highlight-green-border-strong);
 }
-/* CLAUDE DEBUT */
-@media (max-width: 400px) {
-  .date-row {
-    flex-direction: column;
-  }
 
-  .pin-group {
-    flex: 1;
-  }
-}
-/* CLAUDE FIN */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -607,13 +449,6 @@ input:-webkit-autofill:active {
   align-items: center;
   justify-content: center;
   padding: 8px;
-  /* CLAUDE DEBUT */
-  padding: clamp(6px, 2vw, 10px);
-  font-size: clamp(11px, 3vw, 13px);
-  width: var(--mobile-btn-size);
-  height: var(--mobile-btn-size);
-  min-width: var(--mobile-btn-size);
-  /* CLAUDE FIN */
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   background: var(--bg-input);
@@ -622,6 +457,9 @@ input:-webkit-autofill:active {
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
+  width: var(--btn-size);
+  height: var(--btn-size);
+  min-width: var(--btn-size);
 }
 
 .btn:disabled {
@@ -652,11 +490,6 @@ input:-webkit-autofill:active {
   align-items: center;
   gap: var(--btn-gap);
   margin-top: 8px;
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  margin-top: var(--mobile-gap);
-  flex-wrap: wrap;
-  /* CLAUDE FIN */
   position: relative;
 }
 
@@ -664,9 +497,6 @@ input:-webkit-autofill:active {
 .form-actions-center-group {
   display: flex;
   gap: var(--btn-gap);
-  /* CLAUDE DEBUT */
-  gap: var(--mobile-gap);
-  /* CLAUDE FIN */
   align-items: center;
 }
 
@@ -691,10 +521,6 @@ input:-webkit-autofill:active {
   position: relative;
   min-width: 80px;
   height: var(--btn-size);
-  /* CLAUDE DEBUT */
-  height: var(--mobile-btn-size);
-  min-width: clamp(80px, 20vw, 120px);
-  /* CLAUDE FIN */
   margin-left: auto;
 }
 
@@ -704,11 +530,6 @@ input:-webkit-autofill:active {
   background: transparent;
   padding: 8px 10px;
   padding-right: 60px;
-  /* CLAUDE DEBUT */
-  padding: clamp(6px, 2vw, 10px) clamp(8px, 2.5vw, 12px);
-  padding-right: clamp(50px, 12vw, 70px);
-  font-size: clamp(11px, 3vw, 13px);
-  /* CLAUDE FIN */
   color: var(--text-primary);
   font-size: 13px;
   width: 100%;
@@ -731,12 +552,6 @@ input:-webkit-autofill:active {
   border: none;
   color: var(--text-muted);
   font-size: 18px;
-  /* CLAUDE DEBUT */
-  font-size: clamp(16px, 4.5vw, 20px);
-  padding: clamp(3px, 1vw, 6px);
-  width: clamp(24px, 6vw, 32px);
-  height: clamp(24px, 6vw, 32px);
-  /* CLAUDE FIN */
   cursor: pointer;
   padding: 4px;
   line-height: 1;
@@ -753,24 +568,7 @@ input:-webkit-autofill:active {
   cursor: not-allowed;
   opacity: 0.4;
 }
-/* CLAUDE DEBUT */
-@media (max-width: 350px) {
-  .form-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
 
-  .permanent-search-wrapper {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .form-actions-left-group,
-  .form-actions-center-group {
-    justify-content: center;
-  }
-}
-/* CLAUDE FIN */
 .search-results-count {
   position: absolute;
   right: 25px;
@@ -778,10 +576,6 @@ input:-webkit-autofill:active {
   transform: translateY(-50%);
   color: var(--text-muted);
   font-size: 12px;
-  /* CLAUDE DEBUT */
-  right: clamp(22px, 6vw, 30px);
-  font-size: clamp(10px, 2.8vw, 12px);
-  /* CLAUDE FIN */
   white-space: nowrap;
   min-width: 20px;
   text-align: center;
@@ -795,15 +589,11 @@ input:-webkit-autofill:active {
   position: absolute;
   top: calc(var(--btn-size) + var(--btn-gap));
   background: var(--bg-secondary);
-  /* CLAUDE DEBUT */
-  top: calc(var(--mobile-btn-size) + var(--mobile-gap));
-  padding: clamp(6px, 2vw, 10px);
-  min-width: clamp(140px, 35vw, 180px);
-  /* CLAUDE FIN */
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-md);
   z-index: 100;
+  padding: 8px;
   flex-direction: column;
   gap: 4px;
   min-width: 160px;
@@ -817,19 +607,16 @@ input:-webkit-autofill:active {
 .dropdown-item {
   width: 100%;
   text-align: left;
+  padding: 6px 8px;
   border: none;
-  padding: clamp(8px, 2.5vw, 12px) clamp(28px, 2.5vw + 20px, 32px) clamp(8px, 2.5vw, 12px)
-    clamp(8px, 2.5vw, 12px);
-  font-size: clamp(11px, 3vw, 14px);
-  min-height: clamp(36px, 9vw, 44px);
-  display: flex;
-  align-items: center;
   background: none;
   color: var(--text-primary);
   cursor: pointer;
   transition: background var(--transition);
   border-radius: var(--border-radius-sm);
+  font-size: 12px;
   position: relative;
+  padding-left: 20px;
 }
 
 .dropdown-item:hover {
@@ -840,11 +627,8 @@ input:-webkit-autofill:active {
   content: '•';
   position: absolute;
   left: 8px;
-  /* CLAUDE DEBUT */
-  left: clamp(6px, 2vw, 10px);
-  font-size: clamp(12px, 3.5vw, 16px);
-  /* CLAUDE FIN */
   color: var(--accent-fluo-orange);
+  font-size: 14px;
   line-height: 1;
   top: 50%;
   transform: translateY(-50%);
@@ -853,11 +637,6 @@ input:-webkit-autofill:active {
 .pins-list {
   max-height: 400px;
   overflow-y: auto;
-  /* CLAUDE DEBUT */
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  /*will-change: scroll-position;*/
-  /* CLAUDE FIN */
   padding-right: 4px;
   border: 1px solid var(--border-color);
 }
@@ -868,26 +647,13 @@ input:-webkit-autofill:active {
   padding: 8px;
   border-bottom: 1px solid var(--border-color);
   gap: 6px;
-  /* CLAUDE DEBUT */
-  min-height: clamp(50px, 12vw, 65px);
-  transition: background-color var(--transition);
-  flex-wrap: wrap;
-  /* CLAUDE FIN */
 }
-.pin-item:hover {
-  /* CLAUDE DEBUT */
-  background-color: rgba(255, 255, 255, 0.05);
-  /* CLAUDE FIN */
-}
+
 .pin-item .pin-code {
   flex: 0 0 50px;
   font-family: monospace;
   font-weight: 700;
-  /* CLAUDE DEBUT */
-  flex: 0 0 clamp(45px, 12vw, 55px);
-  font-size: clamp(12px, 3.5vw, 15px);
-  height: clamp(35px, 10vw, 45px);
-  /* CLAUDE FIN */
+  font-size: 14px;
   text-align: center;
   display: flex;
   justify-content: center;
@@ -903,18 +669,12 @@ input:-webkit-autofill:active {
   text-align: left;
   min-width: 0;
   font-size: 12px;
-  /* CLAUDE DEBUT */
-  flex: 1;
-  min-width: clamp(100px, 25vw, 150px);
-  /* CLAUDE FIN */
 }
 
 .pin-item .pin-contact,
 .pin-item .pin-phone {
+  font-size: 12px;
   line-height: 1.2;
-  /* CLAUDE DEBUT */
-  font-size: clamp(10px, 2.8vw, 12px);
-  /* CLAUDE FIN */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -931,27 +691,17 @@ input:-webkit-autofill:active {
   justify-content: center;
   text-align: left;
   font-size: 12px;
-  /* CLAUDE DEBUT */
-  flex: 0 0 clamp(80px, 20vw, 110px);
-  font-size: clamp(9px, 2.3vw, 11px);
-  /* CLAUDE FIN */
   line-height: 1.2;
 }
 
 .pin-item .pin-date-in-display {
   color: var(--accent-success);
   white-space: nowrap;
-  /* CLAUDE DEBUT */
-  font-size: clamp(9px, 2.3vw, 11px);
-  /* CLAUDE FIN */
 }
 
 .pin-item .pin-date-out-display {
   color: var(--accent-danger);
   white-space: nowrap;
-  /* CLAUDE DEBUT */
-  font-size: clamp(9px, 2.3vw, 11px);
-  /* CLAUDE FIN */
 }
 
 .pin-item .pin-actions {
@@ -960,40 +710,12 @@ input:-webkit-autofill:active {
   gap: 4px;
   align-items: center;
 }
-/* CLAUDE DEBUT */
-@media (max-width: 350px) {
-  .pin-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .pin-item .pin-code {
-    flex: none;
-    align-self: center;
-  }
-
-  .pin-item .pin-contact-info,
-  .pin-item .pin-dates-display {
-    flex: none;
-    text-align: center;
-  }
-
-  .pin-item .pin-actions {
-    justify-content: center;
-  }
-  /* CLAUDE FIN */
-}
 
 .pin-item .btn-edit,
 .pin-item .btn-danger {
   width: var(--btn-size);
   height: var(--btn-size);
-  /* CLAUDE DEBUT */
-  width: var(--mobile-btn-size);
-  height: var(--mobile-btn-size);
-  font-size: clamp(12px, 3.5vw, 16px);
-  /* CLAUDE FIN */
+  font-size: 14px;
 }
 
 .pin-item .pin-code.expired {
@@ -1011,15 +733,14 @@ input:-webkit-autofill:active {
 .return-to-guest-btn {
   margin-left: auto;
   cursor: pointer;
-  /* CLAUDE DEBUT */
   transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
   user-select: none;
   border: none;
   background: none;
   padding: 0;
-  width: clamp(32px, 8vw, 44px);
-  height: clamp(32px, 8vw, 44px);
-  /* CLAUDE FIN */
+  color: transparent;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -1046,22 +767,9 @@ input:-webkit-autofill:active {
   border-radius: 50%;
   display: block;
 }
-/* CLAUDE DEBUT */
-@media (max-width: 350px) {
-  .header h1 {
-    font-size: 11px;
-  }
-
-  .header {
-    padding: 8px 12px;
-  }
-}
-/* CLAUDE FIN */
 
 .pins-list::-webkit-scrollbar {
-  /* CLAUDE DEBUT */
-  width: clamp(4px, 1.5vw, 8px);
-  /* CLAUDE FIN */
+  width: 6px;
 }
 
 .pins-list::-webkit-scrollbar-track {
@@ -1071,8 +779,4 @@ input:-webkit-autofill:active {
 .pins-list::-webkit-scrollbar-thumb {
   background: var(--text-muted);
   border-radius: 3px;
-  /* CLAUDE DEBUT */
-  border-radius: clamp(2px, 0.8vw, 4px);
-  min-height: clamp(20px, 5vw, 30px);
-  /* CLAUDE FIN */
 }
