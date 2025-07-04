@@ -31,26 +31,29 @@
 }
 
 /* Reset et base */
-* {
-  margin: 0;
-  padding: 0;
+/* Réinitialisation universelle du box-sizing pour une prévisibilité maximale */
+html {
+  height: 100%; /* Assure que html prend toute la hauteur disponible du viewport */
   box-sizing: border-box;
 }
-
-/* Base HTML et BODY pour occuper toute la fenêtre et centrer le contenu */
-html {
-  height: 100%; /* Assure que html prend toute la hauteur disponible */
+*,
+*::before,
+*::after {
+  box-sizing: inherit; /* Tous les éléments héritent du box-sizing de html */
 }
 
+/* Configuration du BODY pour occuper toute la fenêtre et centrer le contenu */
 body {
-  margin: 0;
-  padding: 0;
-  height: 100vh; /* Le body prend 100% de la hauteur du viewport */
-  width: 100vw; /* Le body prend 100% de la largeur du viewport */
-  overflow: hidden; /* Cache les barres de défilement */
+  margin: 0; /* Supprime toutes les marges par défaut */
+  padding: 0; /* Supprime tous les remplissages par défaut */
+  width: 100%; /* Prend 100% de la largeur du html/viewport */
+  height: 100%; /* Prend 100% de la hauteur du html/viewport */
+  overflow: hidden; /* Empêche tout défilement */
+
   display: flex; /* Active Flexbox pour le centrage */
-  justify-content: center; /* Centre horizontalement */
-  align-items: center; /* Centre verticalement */
+  justify-content: center; /* Centre horizontalement le contenu */
+  align-items: center; /* Centre verticalement le contenu */
+
   background: var(--bg-primary); /* Couleur de fond de la page entière */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--text-primary);
@@ -58,39 +61,43 @@ body {
   font-size: 14px;
 }
 
-/* Nouveau conteneur racine pour la taille fixe et la mise à l'échelle */
+/* Conteneur racine de l'application pour la taille fixe et la mise à l'échelle */
 #app-wrapper {
-  position: absolute; /* Permet le centrage parfait avec translate */
-  top: 50%;
-  left: 50%;
+  width: 400px; /* Largeur de base de votre design (400px) */
+  height: 650px; /* Hauteur de base de votre design (650px) */
+  width: min(100vw, 100vh * (400 / 650)); /* Largeur s'adapte au viewport, respectant ratio */
+  height: min(100vh, 100vw * (650 / 400)); /* Hauteur s'adapte au viewport, respectant ratio */
 
-  width: 400px; /* Largeur de base de votre design */
-  height: 650px; /* Hauteur de base de votre design */
+  max-width: 400px; /* Ne dépasse jamais la largeur de design */
+  max-height: 650px; /* Ne dépasse jamais la hauteur de design */
+
+  /* Optionnel, pour s'assurer que le ratio est toujours respecté */
+  aspect-ratio: 400 / 650; /* Spécifie un ratio de 400px de large pour 650px de haut */
 
   background: var(--bg-primary);
   border-radius: var(--border-radius);
-  overflow: hidden; /* Important pour cacher tout ce qui dépasse des dimensions fixes */
-  box-shadow: var(--shadow-md); /* Un peu d'ombre pour un meilleur rendu */
+  overflow: hidden; /* Important pour cacher tout ce qui dépasse */
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0; /* Empêche le conteneur de rétrécir sous flexbox */
 
   /* Logique de mise à l'échelle pour s'adapter "plein écran" en gardant les proportions */
-  /* Le facteur d'échelle est le minimum des ratios largeur et hauteur par rapport au viewport */
-  transform: translate(-50%, -50%) scale(min(calc(100vw / 400px), calc(100vh / 650px)));
-  transform-origin: center center; /* Centre la transformation */
+  /* Calcule le facteur d'échelle basé sur la dimension la plus restrictive du viewport */
+  /* Cela permet à l'app de s'agrandir ou de se réduire pour remplir le maximum d'espace */
 }
 
 /* Layout */
 .container {
-  /* Le .container devient un wrapper interne de #app-wrapper */
-  width: 100%; /* Prend toute la largeur de #app-wrapper (400px) */
-  height: 100%; /* Prend toute la hauteur de #app-wrapper (650px) */
-  margin: 0; /* Plus besoin de margin auto, #app-wrapper gère le centrage */
-  background: var(--bg-primary); /* Maintenez la couleur de fond si nécessaire */
-  border-radius: var(--border-radius); /* Maintenez si désiré */
-  overflow: hidden; /* Important */
+  /* Le .container agit comme un wrapper interne pour #app-wrapper */
+  width: 100%; /* Prend 100% de la largeur de #app-wrapper */
+  height: 100%; /* Prend 100% de la hauteur de #app-wrapper */
+  margin: 0;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  overflow: hidden;
   padding: 12px; /* Conserve le padding interne */
-  display: flex; /* Permet à son contenu de s'étirer si nécessaire */
-  flex-direction: column; /* Organise le contenu en colonne */
-  justify-content: flex-start; /* Aligne le contenu en haut */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 /* Utilitaires */
