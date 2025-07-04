@@ -37,66 +37,57 @@
   box-sizing: border-box;
 }
 
-html,
-body {
-  /* Supprimez width: 100%; max-width: 100vw; et overflow-x: hidden; du body */
-  /* pour permettre la mise à l'échelle et le centrage global */
-  min-height: 100vh;
-  /* Ajoutez ces lignes pour le centrage vertical */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; /* Cache le défilement si le scaling est plus grand que l'écran */
-  background: var(--bg-primary); /* Assurez-vous que le body a la couleur de fond */
+/* Base HTML et BODY pour occuper toute la fenêtre et centrer le contenu */
+html {
+  height: 100%; /* Assure que html prend toute la hauteur disponible */
 }
 
 body {
+  margin: 0;
+  padding: 0;
+  height: 100vh; /* Le body prend 100% de la hauteur du viewport */
+  width: 100vw; /* Le body prend 100% de la largeur du viewport */
+  overflow: hidden; /* Cache les barres de défilement */
+  display: flex; /* Active Flexbox pour le centrage */
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
+  background: var(--bg-primary); /* Couleur de fond de la page entière */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--text-primary);
   line-height: 1.4;
-  /* padding: 12px; Supprimé car le padding sera géré par la mise à l'échelle */
   font-size: 14px;
 }
 
-/* Nouveau conteneur racine pour la mise à l'échelle */
+/* Nouveau conteneur racine pour la taille fixe et la mise à l'échelle */
 #app-wrapper {
-  position: relative; /* Nécessaire pour le centrage */
+  position: absolute; /* Permet le centrage parfait avec translate */
+  top: 50%;
+  left: 50%;
+
   width: 400px; /* Largeur de base de votre design */
   height: 650px; /* Hauteur de base de votre design */
-  background: var(--bg-primary); /* Appliquez la couleur de fond ici */
+
+  background: var(--bg-primary);
   border-radius: var(--border-radius);
   overflow: hidden; /* Important pour cacher tout ce qui dépasse des dimensions fixes */
   box-shadow: var(--shadow-md); /* Un peu d'ombre pour un meilleur rendu */
 
-  /* Centrage du wrapper et mise à l'échelle */
-  position: absolute; /* Permet le centrage avec top/left/transform */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%); /* Centrage parfait */
-
-  /* Logique de mise à l'échelle pour s'adapter à la largeur/hauteur de l'écran */
-  /* Le calcul de l'échelle est basé sur la plus petite proportion pour que tout rentre */
-  transform: translate(-50%, -50%) scale(min(1, calc(100vw / 400px), calc(100vh / 650px)));
+  /* Logique de mise à l'échelle pour s'adapter "plein écran" en gardant les proportions */
+  /* Le facteur d'échelle est le minimum des ratios largeur et hauteur par rapport au viewport */
+  transform: translate(-50%, -50%) scale(min(calc(100vw / 400px), calc(100vh / 650px)));
   transform-origin: center center; /* Centre la transformation */
-
-  /* Assurez-vous que le conteneur ne soit pas trop grand si l'écran est plus petit */
-  max-width: 100vw;
-  max-height: 100vh;
 }
 
 /* Layout */
 .container {
-  /* Le .container devient un wrapper interne, il ne gère plus la taille max */
-  /* et sa largeur doit correspondre à la largeur de #app-wrapper pour éviter le dédoublement */
+  /* Le .container devient un wrapper interne de #app-wrapper */
   width: 100%; /* Prend toute la largeur de #app-wrapper (400px) */
   height: 100%; /* Prend toute la hauteur de #app-wrapper (650px) */
   margin: 0; /* Plus besoin de margin auto, #app-wrapper gère le centrage */
-  background: var(
-    --bg-primary
-  ); /* Maintenez la couleur de fond si nécessaire, mais #app-wrapper a déjà une */
-  border-radius: var(--border-radius); /* Peut être maintenu ou déplacé vers #app-wrapper */
+  background: var(--bg-primary); /* Maintenez la couleur de fond si nécessaire */
+  border-radius: var(--border-radius); /* Maintenez si désiré */
   overflow: hidden; /* Important */
-  padding: 12px; /* Conserve le padding interne que vous aviez sur le body */
+  padding: 12px; /* Conserve le padding interne */
   display: flex; /* Permet à son contenu de s'étirer si nécessaire */
   flex-direction: column; /* Organise le contenu en colonne */
   justify-content: flex-start; /* Aligne le contenu en haut */
@@ -675,7 +666,7 @@ input:-webkit-autofill:active {
 }
 
 .pins-list {
-  max-height: 400px; /* Conservez cette hauteur maximale, elle sera mise à l'échelle avec le reste */
+  max-height: 400px;
   overflow-y: auto;
   padding-right: 4px;
   border: 1px solid var(--border-color);
