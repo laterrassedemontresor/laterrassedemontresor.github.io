@@ -67,7 +67,7 @@ body {
   top: 50%;
   left: 50%;
   width: 400px; /* La largeur de base de votre design */
-  height: 650px; /* La hauteur de base de votre design */
+  height: 600px; /* La hauteur de base de votre design */
 
   /* Le transform: translate sera toujours là, mais le scale sera ajouté par JS */
   transform: translate(-50%, -50%);
