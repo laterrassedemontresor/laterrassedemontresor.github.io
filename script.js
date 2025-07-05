@@ -616,13 +616,22 @@ if ('serviceWorker' in navigator) {
         ui.guest.resetSystem();
       },
       handlePortalButton: async () => {
-        // This handler remains for the primary action if needed
-        // but now the visual inversion is handled by the 'click' event listener
-        console.log('Portal button clicked!');
-        // Potentially trigger another webhook or action here
+        // Nouvelle implémentation complète du gestionnaire
+        try {
+          const response = await fetch(config.webhookUrl);
+          if (!response.ok) {
+            console.error(`Webhook failed: ${response.status} ${response.statusText}`);
+            ui.guest.displayMessage('alert', "Erreur lors de l'activation du portail");
+          } else {
+            console.log('Portail activé avec succès!');
+            ui.guest.displayMessage('success', 'Portail activé');
+          }
+        } catch (error) {
+          console.error('Error triggering portal:', error);
+          ui.guest.displayMessage('danger', 'Erreur système. Veuillez réessayer.');
+        }
       },
     },
-
     manager: {
       loadPins: async () => {
         try {
