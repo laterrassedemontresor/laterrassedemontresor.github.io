@@ -129,8 +129,8 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border-color);
-  background: transparent;
+  border-bottom: none;
+  /*background: transparent;*/
 }
 
 .logo-circle-wrapper {
@@ -193,6 +193,7 @@ body {
   position: relative;
   flex-grow: 1;
   justify-content: flex-start;
+  border-top: none; /* Ajout pour supprimer la bordure supérieure */
 }
 
 .guest-state-section {
