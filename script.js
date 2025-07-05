@@ -477,6 +477,13 @@ if ('serviceWorker' in navigator) {
   const handlers = {
     guest: {
       handlePinInput: (e) => {
+        // Gestion de la touche Entrée
+        if (e.type === 'keydown' && e.key === 'Enter') {
+          handlers.guest.checkPin();
+          return;
+        }
+
+        // Gestion normale de l'input
         const input = e.target;
         input.value = input.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
         if (input.value.length > config.pinLength) {
@@ -806,6 +813,7 @@ if ('serviceWorker' in navigator) {
 
   // Initialisation des listeners pour l'interface Guest
   dom.guest.pinInput.addEventListener('input', handlers.guest.handlePinInput);
+  dom.guest.pinInput.addEventListener('keydown', handlers.guest.handlePinInput); // Nouvel écouteur
   dom.guest.checkPinButton.addEventListener('click', handlers.guest.checkPin);
   dom.guest.backspaceButton.addEventListener('click', handlers.guest.handlePinButtonClick);
   dom.guest.logo.addEventListener('click', handlers.guest.handleLogoClick);
