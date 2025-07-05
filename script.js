@@ -569,18 +569,6 @@ if ('serviceWorker' in navigator) {
             // Add click listener for button background inversion
             const handlePortalButtonClick = () => {};
             // --- END New/Modified Code ---
-
-            // Envoyer le webhook
-            try {
-              const response = await fetch(config.webhookUrl);
-              if (!response.ok) {
-                console.error(`Webhook failed: ${response.status} ${response.statusText}`);
-              } else {
-                console.log('Webhook triggered successfully!');
-              }
-            } catch (error) {
-              console.error('Error triggering webhook:', error);
-            }
           }
         } catch (error) {
           console.error('Erreur lors de la vérification du code PIN:', error);
