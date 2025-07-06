@@ -39,12 +39,18 @@
 
 html,
 body {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden; /* Empêche les barres de défilement */
 }
 
+#app-wrapper {
+  position: absolute; /* Positionnement absolu pour permettre le centrage */
+  top: 50%; /* Positionnement vertical au milieu de l'écran */
+  left: 50%; /* Positionnement horizontal au milieu de l'écran */
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg-primary);
@@ -52,9 +58,6 @@ body {
   line-height: 1.4;
   padding: 12px;
   font-size: 14px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
 }
 

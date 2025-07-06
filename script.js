@@ -26,7 +26,8 @@ if ('serviceWorker' in navigator) {
       messagingSenderId: '248588255030',
       appId: '1:248588255030:web:d1a50104cbc330412cbd97',
     },
-    webhookUrl: 'https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html',
+    webhookUrl:
+      'https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=e8510729-ccdb-48a6-9318-69b1fcfb9b66&token=df891f32-7468-4fb0-844d-571d6cba056b&response=html',
     pinLength: 4,
     adminEmail: 'cunrug@gmail.com',
     tripleClickThresholdMs: 500,
@@ -101,6 +102,45 @@ if ('serviceWorker' in navigator) {
   const db = firebase.firestore();
   const auth = firebase.auth();
   const googleProvider = new firebase.auth.GoogleAuthProvider();
+  // Scaling - Modif debut
+  // Variables pour les dimensions de base de votre design
+  const DESIGN_WIDTH = 400; // Largeur de référence de votre design
+  const DESIGN_HEIGHT = 650; // Hauteur de référence de votre design
+
+  // Référence à l'élément principal de l'application
+  const appWrapper = document.getElementById('app-wrapper');
+
+  /**
+   * Applique une mise à l'échelle à l'application pour l'adapter à la taille du viewport,
+   * tout en maintenant le ratio d'aspect.
+   */
+  function applyScaling() {
+    // Dimensions de la fenêtre visible (viewport)
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calcul du facteur d'échelle pour que l'application rentre dans l'écran
+    const scaleX = viewportWidth / DESIGN_WIDTH;
+    const scaleY = viewportHeight / DESIGN_HEIGHT;
+    // Prend le plus petit facteur pour maintenir les proportions et éviter de dépasser l'écran
+    const scaleFactor = Math.min(scaleX, scaleY);
+
+    // Applique la transformation CSS de centrage et de mise à l'échelle
+    if (appWrapper) {
+      // Vérification pour s'assurer que l'élément existe avant de le manipuler
+      appWrapper.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+    }
+  }
+
+  // Appliquer la mise à l'échelle dès que l'élément appWrapper est disponible
+  // et réappliquer si la fenêtre est redimensionnée ou l'orientation change.
+  if (appWrapper) {
+    // S'assurer que l'élément #app-wrapper est bien disponible
+    applyScaling(); // Appel initial au chargement du script
+    window.addEventListener('resize', applyScaling); // Réagir aux redimensionnements de la fenêtre (ex: sur PC)
+    window.addEventListener('orientationchange', applyScaling); // Réagir aux changements d'orientation sur mobile
+  }
+  // Scaling - Modif fin
 
   // --- 5. FONCTIONS UTILITAIRES ---
   const utils = {
@@ -218,22 +258,26 @@ if ('serviceWorker' in navigator) {
             state.guest.pin = storedPinData.pinCode;
             state.guest.expirationDate = dateOut;
 
-            if (dateOut && (!storedPinData.expirationDate || 
-                Math.abs(dateOut.getTime() - storedPinData.expirationDate.getTime()) > 1000)) {
+            if (
+              dateOut &&
+              (!storedPinData.expirationDate ||
+                Math.abs(dateOut.getTime() - storedPinData.expirationDate.getTime()) > 1000)
+            ) {
               utils.storage.savePinData(storedPinData.pinCode, dateOut);
             }
 
             ui.guest.startExpirationTimer();
             ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
-            
+
             if (dateOut) {
-              dom.guest.dateOut.textContent = "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
+              dom.guest.dateOut.textContent =
+                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
               dom.guest.dateOut.style.display = '';
             } else {
               dom.guest.dateOut.textContent = '';
               dom.guest.dateOut.style.display = 'none';
             }
-            
+
             dom.guest.pinEntry.classList.add('app-hidden');
             dom.guest.dynamicContent.classList.remove('app-hidden');
           }
@@ -264,7 +308,7 @@ if ('serviceWorker' in navigator) {
           dom.guest.dateOut.textContent = '';
           dom.guest.dateOut.style.display = 'none';
         }
-        
+
         utils.storage.clearPinData();
         Object.assign(state.guest, {
           pin: null,
@@ -272,7 +316,7 @@ if ('serviceWorker' in navigator) {
           intervalId: null,
           tripleClickCount: 0,
         });
-        
+
         if (state.guest.tripleClickTimer) clearTimeout(state.guest.tripleClickTimer);
 
         dom.guest.pinInput.value = '';
@@ -345,11 +389,12 @@ if ('serviceWorker' in navigator) {
         const isDateOutValid = form.dateOutInput.value !== '';
 
         form.submitButton.disabled = !(
-          state.currentEditingPinId || 
+          state.currentEditingPinId ||
           (isPinCodeValid && isContactValid && isDateInValid && isDateOutValid)
         );
-        
-        form.cancelButton.disabled = !state.currentEditingPinId &&
+
+        form.cancelButton.disabled =
+          !state.currentEditingPinId &&
           !form.pinCodeInput.value &&
           !form.contactInput.value &&
           !form.dateInInput.value &&
@@ -406,7 +451,7 @@ if ('serviceWorker' in navigator) {
             .where('pinCode', '==', enteredPin)
             .limit(1)
             .get();
-            
+
           if (querySnapshot.empty) {
             ui.guest.displayMessage('alert', 'Code PIN incorrect.');
             return;
@@ -433,15 +478,16 @@ if ('serviceWorker' in navigator) {
             utils.storage.savePinData(enteredPin, dateOut);
             ui.guest.startExpirationTimer();
             ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
-            
+
             if (dateOut) {
-              dom.guest.dateOut.textContent = "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
+              dom.guest.dateOut.textContent =
+                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
               dom.guest.dateOut.style.display = '';
             } else {
               dom.guest.dateOut.textContent = '';
               dom.guest.dateOut.style.display = 'none';
             }
-            
+
             dom.guest.pinEntry.classList.add('app-hidden');
             dom.guest.dynamicContent.classList.remove('app-hidden');
           }
@@ -511,11 +557,14 @@ if ('serviceWorker' in navigator) {
               .where('pinCode', '==', pinData.pinCode)
               .get();
 
-            if (!existingPinQuery.empty && existingPinQuery.docs[0].id !== state.currentEditingPinId) {
+            if (
+              !existingPinQuery.empty &&
+              existingPinQuery.docs[0].id !== state.currentEditingPinId
+            ) {
               ui.showMessage('danger', 'Ce code PIN existe déjà pour un autre enregistrement.');
               return;
             }
-            
+
             await db.collection('pins').doc(state.currentEditingPinId).update(pinData);
             ui.showMessage('success', 'PIN mis à jour !');
           } else {
@@ -523,19 +572,19 @@ if ('serviceWorker' in navigator) {
               .collection('pins')
               .where('pinCode', '==', pinData.pinCode)
               .get();
-              
+
             if (!existingPin.empty) {
               ui.showMessage('danger', 'Ce code PIN existe déjà.');
               return;
             }
-            
+
             await db.collection('pins').add({
               ...pinData,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             ui.showMessage('success', 'PIN ajouté avec succès !');
           }
-          
+
           ui.manager.resetForm();
           handlers.manager.loadPins();
         } catch (error) {
@@ -567,8 +616,10 @@ if ('serviceWorker' in navigator) {
               { dateIn: b.dateIn?.toDate(), dateOut: b.dateOut?.toDate() },
               now
             );
-            return (statusOrder[statusA] - statusOrder[statusB]) *
-              (state.currentSortOrder === 'asc' ? 1 : -1);
+            return (
+              (statusOrder[statusA] - statusOrder[statusB]) *
+              (state.currentSortOrder === 'asc' ? 1 : -1)
+            );
           });
         }
 
@@ -582,7 +633,7 @@ if ('serviceWorker' in navigator) {
           : pins;
 
         filteredPins.forEach(ui.manager.addPinToDOM);
-        
+
         const countText = searchQuery ? `${filteredPins.length}/${pins.length}` : `${pins.length}`;
         dom.manager.controls.resultsCount.textContent = countText;
         dom.manager.controls.clearSearchBtn.disabled = !searchQuery;
@@ -663,12 +714,13 @@ if ('serviceWorker' in navigator) {
             auth.signOut();
             ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
           }
-          
+
           ui.guest.showApp();
         }
       },
       signIn: () => {
-        auth.signInWithPopup(googleProvider)
+        auth
+          .signInWithPopup(googleProvider)
           .catch((err) => ui.showMessage('danger', `Erreur: ${err.message}`));
       },
       signOut: () => {
@@ -699,28 +751,34 @@ if ('serviceWorker' in navigator) {
     dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut);
     dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
     dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
-    
+
     Object.values(dom.manager.form).forEach((input) => {
       if (input.addEventListener) {
         input.addEventListener('input', ui.manager.updateButtonStates);
       }
     });
-    
+
     dom.manager.pinsList.addEventListener('click', handlers.manager.handlePinListClick);
     dom.manager.controls.generatePinBtn.addEventListener('click', () => {
       dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
       ui.manager.updateButtonStates();
     });
-    
+
     dom.manager.controls.sortBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       dom.manager.controls.sortMenu.classList.toggle('show');
       ui.manager.updateSortMenu();
     });
-    
+
     dom.manager.controls.sortMenu.addEventListener('click', handlers.manager.handleSortMenuClick);
-    dom.manager.controls.searchQueryInput.addEventListener('input', handlers.manager.handleSearchInput);
-    dom.manager.controls.clearSearchBtn.addEventListener('click', handlers.manager.handleClearSearch);
+    dom.manager.controls.searchQueryInput.addEventListener(
+      'input',
+      handlers.manager.handleSearchInput
+    );
+    dom.manager.controls.clearSearchBtn.addEventListener(
+      'click',
+      handlers.manager.handleClearSearch
+    );
 
     // Initial state
     ui.guest.showApp();
