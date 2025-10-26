@@ -296,25 +296,30 @@ window.addEventListener('load', () => {
   };
   
   /**
-   * Clignote l'écran avec les couleurs Bleu-Blanc-Rouge pour une confirmation visuelle.
+   * Clignote l'écran avec les couleurs Bleu-Blanc-Rouge (drapeau français) pour une confirmation visuelle.
+   * Le cycle est exécuté deux fois pour une meilleure visibilité.
    * @param {string[]} colors Les couleurs à flasher (par défaut: bleu, blanc, rouge).
    * @param {number} durationMs La durée de chaque flash en millisecondes.
+   * @param {number} repeat Le nombre de cycles de clignotement à exécuter.
    * @returns {Promise<void>}
    */
   const flashScreenColors = async (
     colors = ['#0055A4', '#FFFFFF', '#EF4135'], // Bleu, Blanc, Rouge du drapeau
-    durationMs = 200
+    durationMs = 400, // Durée augmentée pour être plus visible
+    repeat = 2 // Double cycle
   ) => {
-    console.log('Déclenchement du flash visuel B-W-R...');
+    console.log(`Déclenchement du flash visuel B-W-R (Durée: ${durationMs}ms, Répétition: ${repeat})...`);
     const originalBodyColor = document.body.style.backgroundColor;
     
     // Fonction utilitaire pour attendre une durée donnée
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
     try {
-      for (const color of colors) {
-        document.body.style.backgroundColor = color;
-        await sleep(durationMs);
+      for (let cycle = 0; cycle < repeat; cycle++) {
+        for (const color of colors) {
+          document.body.style.backgroundColor = color;
+          await sleep(durationMs);
+        }
       }
     } catch (e) {
       console.error('Erreur lors du clignotement de l écran:', e);
@@ -696,7 +701,7 @@ window.addEventListener('load', () => {
             console.log('Webhook Success.');
             ui.guest.displayMessage('success', 'Portail activé !');
             
-            // 3. EFFET VISUEL B-W-R
+            // 3. EFFET VISUEL B-W-R (Double cycle pour une meilleure confirmation)
             await flashScreenColors();
 
             // 4. ANNONCE VOCALE APRÈS LE SUCCÈS
