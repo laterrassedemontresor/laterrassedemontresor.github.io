@@ -1,16 +1,14 @@
 # netlify.toml
-
 [build]
-  publish = "./"                 # dossier à publier (ou "public" si c'est ton build folder)
-  functions = "netlify/functions" # dossier des fonctions Netlify
+  publish = "./"                # ton dossier public (ex: "./" ou "public")
+  command = "node build-version.js && echo 'Build terminé 🚀'"
 
-# Variables d'environnement pour le contexte de production
-[context.production.environment]
-  BUILD_ID = "$DEPLOY_ID"        # injecte le DEPLOY_ID pour versionner automatiquement tes assets
+# Variables d'environnement automatiques (optionnel)
+[build.environment]
+  NODE_VERSION = "18"
 
-# Optionnel : contexte de preview / branches de test
-[context.deploy-preview.environment]
-  BUILD_ID = "$DEPLOY_ID"
-
-[context.branch-deploy.environment]
-  BUILD_ID = "$DEPLOY_ID"
+# Activer les headers HTTP modernes (recommandé pour PWA)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
