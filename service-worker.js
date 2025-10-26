@@ -1,68 +1,80 @@
-// SERVICE WORKER – VERSION AUTOMATIQUE
-
-// BUILD_TIMESTAMP unique pour chaque déploiement
-// Sur Netlify, on peut remplacer __BUILD_ID__ par process.env.DEPLOY_ID pendant le build
-const BUILD_TIMESTAMP = '__BUILD_ID__';
-const CACHE_VERSION = `v-${BUILD_TIMESTAMP}`;
+// Version du cache
+const CACHE_VERSION = 'v1.1';
 const CACHE_NAME = `montresor-gate-cache-${CACHE_VERSION}`;
 
-// Assets à mettre en cache avec versioning
+// Liste des assets à pré-cacher
 const ASSETS_TO_CACHE = [
   '/',
-  `/index.html?t=${BUILD_TIMESTAMP}`,
-  `/style.css?t=${BUILD_TIMESTAMP}`,
-  `/script.js?t=${BUILD_TIMESTAMP}`,
-  `/manifest.json?t=${BUILD_TIMESTAMP}`,
-  `/icons/guest_logo.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/android-chrome-192x192.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/android-chrome-512x512.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/apple-touch-icon.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/favicon-32x32.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/favicon-16x16.png?t=${BUILD_TIMESTAMP}`,
-  `/icons/favicon.ico?t=${BUILD_TIMESTAMP}`,
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/manifest.json',
+  '/icons/guest_logo.png',
+  '/icons/android-chrome-192x192.png',
+  '/icons/android-chrome-512x512.png',
+  '/icons/apple-touch-icon.png',
+  '/icons/favicon-32x32.png',
+  '/icons/favicon-16x16.png',
+  '/icons/favicon.ico',
 ];
 
+// Installation du service worker et pré-cache des assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installation version', CACHE_VERSION);
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS_TO_CACHE))
-      .catch(err => console.error('Erreur cache:', err))
+      .then((cache) => {
+        console.log('Cache ouvert pour version:', CACHE_VERSION);
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .catch((err) => {
+        console.error('Erreur lors de l\'installation du cache:', err);
+      })
   );
 });
 
+// Activation : suppression des anciens caches et notification des clients
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activation version', CACHE_VERSION);
   event.waitUntil(
     caches.keys()
-      .then(names => Promise.all(
-        names.map(name => name !== CACHE_NAME && caches.delete(name))
+      .then((cacheNames) => Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Suppression de l\'ancien cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
       ))
       .then(() => self.clients.claim())
-      .then(() =>
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-          .then(clients => {
-            clients.forEach(client => client.postMessage({ type: 'NEW_VERSION_AVAILABLE' }));
-          })
-      )
+      .then(() => {
+        // Notifier les clients qu'une nouvelle version est disponible
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'NEW_VERSION_AVAILABLE' }));
+        });
+      })
   );
 });
 
+// Gestion des fetch requests
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') return response;
-
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+    caches.match(event.request)
+      .then((cachedResponse) => cachedResponse || fetch(event.request))
+      .then((response) => {
+        // Mettre à jour le cache avec la nouvelle réponse
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Fallback si tout échoue (ex: offline)
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+      })
   );
 });
