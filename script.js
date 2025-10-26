@@ -142,15 +142,13 @@ if ('serviceWorker' in navigator) {
   }
   // Scaling - Modif fin
 
-  // --- 5. FONCTIONS UTILITAIRES ---
+  // --- 5. FONCTIONS UTILITAIRES AUDIO ---
   
-  // Variable pour stocker le contexte audio de manière persistante.
   let audioContextInstance = null;
   
   /**
    * Obtient ou crée l'AudioContext et tente de le relancer s'il est suspendu (bloqué par le navigateur).
    * @returns {Promise<AudioContext | null>} L'instance du contexte audio, ou null si l'API n'est pas supportée.
-   * NOTE: Rendue asynchrone pour attendre la reprise si nécessaire.
    */
   const getAudioContext = async () => {
     if (!window.AudioContext && !window.webkitAudioContext) {
@@ -167,7 +165,8 @@ if ('serviceWorker' in navigator) {
     if (audioContextInstance.state === 'suspended') {
       console.log('AudioContext est suspendu. Tentative de reprise...');
       try {
-          await audioContextInstance.resume();
+          // ATTENTION: La méthode resume() est asynchrone et critique.
+          await audioContextInstance.resume(); 
           console.log('AudioContext repris (était suspendu). État actuel:', audioContextInstance.state);
       } catch (e) {
           console.error("Erreur lors de la reprise du contexte audio:", e);
@@ -181,65 +180,79 @@ if ('serviceWorker' in navigator) {
   }
   
   /**
-   * Génère une série de bips audio pour simuler un carillon, en utilisant l'API Web Audio.
-   * @param {number} count Le nombre de bips à jouer (par défaut 5).
-   * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
-   * @param {number} intervalMs L'intervalle entre chaque bip en millisecondes (par défaut 150).
-   * @param {number} frequency La fréquence du son en Hertz (par défaut 880).
-   * @returns {Promise<boolean>} True si les bips ont été joués, False sinon.
+   * Joue un bip sonore unique.
    */
-  const simulateFiveBeeps = async (count = 5, durationMs = 100, intervalMs = 150, frequency = 880) => {
-    console.log(`Début de la simulation de ${count} bips...`);
-    
-    // Attend que le contexte audio soit actif
-    const audioCtx = await getAudioContext(); 
-    
-    if (!audioCtx || audioCtx.state !== 'running') {
-        console.warn('Impossible de jouer les bips car AudioContext non actif (état:', audioCtx?.state || 'null', ').');
-        return false;
-    }
-    
-    const durationSec = durationMs / 1000;
-    const intervalSec = intervalMs / 1000;
+  const playBeep = (audioCtx, durationMs = 100, frequency = 880) => {
+      const durationSec = durationMs / 1000;
+      const now = audioCtx.currentTime;
 
-    for (let i = 0; i < count; i++) {
-      // Créer un nœud d'oscillateur (génère la forme d'onde)
       const oscillator = audioCtx.createOscillator();
-      // Créer un nœud de gain (contrôle le volume)
       const gainNode = audioCtx.createGain();
 
-      // Connecter l'oscillateur au gain, puis le gain à la destination (haut-parleurs)
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
 
-      // Définir la forme d'onde et la fréquence
       oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(frequency, now);
 
-      // Définir le volume (gain)
-      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+      // Enveloppe ADSR très simple
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(1, now + 0.001); // Attaque très rapide
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, now + durationSec); // Relâchement rapide
 
-      // Calculer l'heure de début et d'arrêt de ce bip
-      // L'ajout du temps est critique pour séparer les bips
-      const startTime = audioCtx.currentTime + i * intervalSec; 
-      const stopTime = startTime + durationSec;
+      oscillator.start(now);
+      oscillator.stop(now + durationSec);
+  }
 
-      // Planifier le démarrage et l'arrêt du son
-      oscillator.start(startTime);
-      oscillator.stop(stopTime);
-      
-      // Ajouter une petite rampe de descente du gain à la fin pour éviter un "clic" audible
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, stopTime); 
+  /**
+   * Génère une série de bips audio pour simuler un carillon en utilisant une planification robuste.
+   * @param {number} count Le nombre de bips à jouer (par défaut 5).
+   * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
+   * @param {number} intervalMs L'intervalle entre chaque bip en millisecondes (par défaut 150).
+   * @returns {Promise<boolean>} True si les bips ont été joués, False sinon.
+   */
+  const simulateFiveBeeps = async (count = 5, durationMs = 100, intervalMs = 150) => {
+    console.log(`Début de la simulation de ${count} bips...`);
+    
+    // 1. Attendre que le contexte audio soit actif
+    const audioCtx = await getAudioContext(); 
+    
+    if (!audioCtx || audioCtx.state !== 'running') {
+        console.warn('Impossible de jouer les bips car AudioContext non actif. Tentative avec API Web Audio non fiable.');
+        // Si le contexte n'est pas running, on ne peut pas garantir la précision. On sort.
+        return false;
     }
-    console.log('Fin du séquencement des bips dans l AudioContext.');
+    
+    // 2. Planifier les bips avec un intervalle précis
+    for (let i = 0; i < count; i++) {
+        // La planification se fait DANS l'AudioContext pour être précise
+        const beepTime = audioCtx.currentTime + i * (intervalMs / 1000);
+        
+        // Création des nœuds
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(880, beepTime); // Fréquence A5
+
+        // Contrôle du volume pour une impulsion sonore courte
+        gainNode.gain.setValueAtTime(0, beepTime);
+        gainNode.gain.linearRampToValueAtTime(0.5, beepTime + 0.01); // Attaque
+        gainNode.gain.linearRampToValueAtTime(0, beepTime + (durationMs / 1000)); // Relâchement
+
+        oscillator.start(beepTime);
+        oscillator.stop(beepTime + (durationMs / 1000));
+    }
+
+    console.log('Fin du séquencement des 5 bips dans l AudioContext.');
     return true;
   };
   
   /**
    * Utilise l'API SpeechSynthesis pour lire un message vocal.
-   * @param {string} text Le texte à lire.
-   * @param {string} lang La langue (par défaut 'fr-FR').
-   * @returns {boolean} True si la lecture est lancée.
    */
   const playTextToSpeech = (text, lang = 'fr-FR') => {
     if (!window.speechSynthesis) {
@@ -247,15 +260,13 @@ if ('serviceWorker' in navigator) {
         return false;
     }
 
-    // Arrêter toute lecture en cours pour éviter les interférences
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    utterance.rate = 1.1; // Vitesse de lecture légèrement augmentée
-    utterance.volume = 1; // Volume
+    utterance.rate = 1.1; 
+    utterance.volume = 1; 
 
-    // Tente de trouver une voix française
     const voices = window.speechSynthesis.getVoices();
     const frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
     if (frenchVoice) {
@@ -266,6 +277,7 @@ if ('serviceWorker' in navigator) {
     window.speechSynthesis.speak(utterance);
     return true;
   };
+  // --- FIN DES FONCTIONS UTILITAIRES AUDIO ---
 
   const utils = {
     storage: {
@@ -536,405 +548,4 @@ if ('serviceWorker' in navigator) {
   const handlers = {
     guest: {
       handlePinInput: (e) => {
-        e.target.value = e.target.value.toUpperCase();
-        ui.guest.updateButtonStates();
-      },
-      handlePinKeydown: (e) => {
-        if (e.key === 'Enter' && dom.guest.pinInput.value.length === config.pinLength) {
-          handlers.guest.validatePin();
-        }
-      },
-      handleBackspace: () => {
-        dom.guest.pinInput.value = dom.guest.pinInput.value.slice(0, -1);
-        ui.guest.updateButtonStates();
-      },
-      validatePin: async () => {
-        const enteredPin = dom.guest.pinInput.value.toUpperCase();
-        dom.guest.pinInput.value = '';
-        ui.guest.updateButtonStates();
-
-        if (enteredPin.length !== config.pinLength) {
-          ui.guest.displayMessage(
-            'alert',
-            `Le code PIN doit contenir ${config.pinLength} caractères.`
-          );
-          return;
-        }
-
-        if (enteredPin === config.managerPinCode) {
-          dom.guest.loginContainer.classList.remove('app-hidden');
-          dom.guest.pinEntry.classList.add('app-hidden');
-          dom.guest.dynamicContent.classList.add('app-hidden');
-          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
-          return;
-        }
-
-        try {
-          const querySnapshot = await db
-            .collection('pins')
-            .where('pinCode', '==', enteredPin)
-            .limit(1)
-            .get();
-
-          if (querySnapshot.empty) {
-            ui.guest.displayMessage('alert', 'Code PIN incorrect.');
-            return;
-          }
-
-          const pinData = querySnapshot.docs[0].data();
-          const now = new Date();
-          const dateIn = pinData.dateIn?.toDate();
-          const dateOut = pinData.dateOut?.toDate();
-
-          if (dateIn && now < dateIn) {
-            ui.guest.displayMessage(
-              'info',
-              `Votre code sera actif à partir du ${utils.formatDateDisplay(dateIn)}.`
-            );
-          } else if (dateOut && now > dateOut) {
-            ui.guest.displayMessage(
-              'alert',
-              `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`
-            );
-          } else {
-            state.guest.pin = enteredPin;
-            state.guest.expirationDate = dateOut;
-            utils.storage.savePinData(enteredPin, dateOut);
-            ui.guest.startExpirationTimer();
-            ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
-
-            if (dateOut) {
-              dom.guest.dateOut.textContent =
-                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
-              dom.guest.dateOut.style.display = '';
-            } else {
-              dom.guest.dateOut.textContent = '';
-              dom.guest.dateOut.style.display = 'none';
-            }
-
-            dom.guest.pinEntry.classList.add('app-hidden');
-            dom.guest.dynamicContent.classList.remove('app-hidden');
-          }
-        } catch (error) {
-          console.error('Erreur de validation du PIN:', error);
-          ui.guest.displayMessage('danger', 'Erreur de connexion. Réessayez.');
-        }
-      },
-      triggerPortal: async () => {
-        if (!state.guest.pin) return;
-        
-        console.log('--- Déclenchement du portail initié (Clic utilisateur) ---');
-        
-        // 🚀 1. Déclenchement du son AVANT le Webhook, en attendant sa fin
-        const audioSucceeded = await simulateFiveBeeps(); 
-        
-        try {
-          // 2. EXÉCUTER LE WEBHOOK
-          const response = await fetch(config.webhookUrl);
-          const data = await response.text();
-          
-          if (response.ok && data.includes('Success')) {
-            console.log('Webhook Success.');
-            ui.guest.displayMessage('success', 'Portail activé !');
-            // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
-            if (audioSucceeded) {
-              playTextToSpeech('Portail activé, bienvenue.'); 
-            }
-          } else {
-            console.error('Webhook Error/Failure:', data || response.statusText);
-            ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
-          }
-        } catch (error) {
-          // 4. GESTION DES ERREURS RÉSEAU (TypeError: Failed to fetch)
-          console.error('Erreur webhook (network/CORS):', error);
-          
-          // Si le Webhook a fonctionné physiquement mais que le navigateur a eu une erreur de communication (TypeError: Failed to fetch)
-          // nous affichons le message de succès et l'annonce vocale.
-          if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-             console.warn('TypeError: Failed to fetch detecté. Affichage du succès car l utilisateur confirme la commande physique (problème CORS ou réponse serveur).');
-             ui.guest.displayMessage('success', 'Portail activé ! (Vérifiez la console pour les erreurs de communication)');
-             if (audioSucceeded) {
-                playTextToSpeech('Portail activé, bienvenue.'); 
-             }
-          } else {
-             ui.guest.displayMessage('danger', 'Erreur de communication Webhook (voir console).');
-          }
-        }
-        console.log('--- Fin du déclenchement du portail ---');
-      },
-      handleLogoClick: () => {
-        state.guest.tripleClickCount++;
-        if (state.guest.tripleClickTimer) clearTimeout(state.guest.tripleClickTimer);
-
-        state.guest.tripleClickTimer = setTimeout(() => {
-          state.guest.tripleClickCount = 0;
-        }, config.tripleClickThresholdMs);
-
-        if (state.guest.tripleClickCount === 3) {
-          clearTimeout(state.guest.tripleClickTimer);
-          state.guest.tripleClickCount = 0;
-          dom.guest.loginContainer.classList.remove('app-hidden');
-          dom.guest.pinEntry.classList.add('app-hidden');
-          dom.guest.dynamicContent.classList.add('app-hidden');
-          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
-        }
-      },
-    },
-
-    manager: {
-      handleFormSubmit: async (e) => {
-        e.preventDefault();
-        const { form } = dom.manager;
-        const dateIn = new Date(form.dateInInput.value);
-        const dateOut = new Date(form.dateOutInput.value);
-
-        if (dateIn > dateOut) {
-          ui.showMessage('danger', 'Erreur de date : IN est postérieure à OUT');
-          return;
-        }
-
-        const pinData = {
-          pinCode: form.pinCodeInput.value.toUpperCase(),
-          dateIn: firebase.firestore.Timestamp.fromDate(dateIn),
-          dateOut: firebase.firestore.Timestamp.fromDate(dateOut),
-          contact: form.contactInput.value.trim(),
-          phone: form.phoneInput.value.trim(),
-        };
-
-        try {
-          if (state.currentEditingPinId) {
-            const existingPinQuery = await db
-              .collection('pins')
-              .where('pinCode', '==', pinData.pinCode)
-              .get();
-
-            if (
-              !existingPinQuery.empty &&
-              existingPinQuery.docs[0].id !== state.currentEditingPinId
-            ) {
-              ui.showMessage('danger', 'Ce code PIN existe déjà pour un autre enregistrement.');
-              return;
-            }
-
-            await db.collection('pins').doc(state.currentEditingPinId).update(pinData);
-            ui.showMessage('success', 'PIN mis à jour !');
-          } else {
-            const existingPin = await db
-              .collection('pins')
-              .where('pinCode', '==', pinData.pinCode)
-              .get();
-
-            if (!existingPin.empty) {
-              ui.showMessage('danger', 'Ce code PIN existe déjà.');
-              return;
-            }
-
-            await db.collection('pins').add({
-              ...pinData,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-            ui.showMessage('success', 'PIN ajouté avec succès !');
-          }
-
-          ui.manager.resetForm();
-          handlers.manager.loadPins();
-        } catch (error) {
-          console.error('Erreur Firestore:', error);
-          ui.showMessage('danger', `Erreur: ${error.message}`);
-        }
-      },
-      loadPins: async () => {
-        dom.manager.pinsList.innerHTML = '';
-        const searchQuery = dom.manager.controls.searchQueryInput.value.trim().toLowerCase();
-        let query = db.collection('pins');
-
-        if (state.currentSortBy !== 'status') {
-          query = query.orderBy(state.currentSortBy, state.currentSortOrder);
-        }
-
-        const snapshot = await query.get();
-        let pins = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        if (state.currentSortBy === 'status') {
-          const now = new Date();
-          const statusOrder = { active: 1, future: 2, expired: 3 };
-          pins.sort((a, b) => {
-            const statusA = utils.getPinStatus(
-              { dateIn: a.dateIn?.toDate(), dateOut: a.dateOut?.toDate() },
-              now
-            );
-            const statusB = utils.getPinStatus(
-              { dateIn: b.dateIn?.toDate(), dateOut: b.dateOut?.toDate() },
-              now
-            );
-            return (
-              (statusOrder[statusA] - statusOrder[statusB]) *
-              (state.currentSortOrder === 'asc' ? 1 : -1)
-            );
-          });
-        }
-
-        const filteredPins = searchQuery
-          ? pins.filter(
-              (pin) =>
-                pin.pinCode?.toLowerCase().includes(searchQuery) ||
-                pin.contact?.toLowerCase().includes(searchQuery) ||
-                pin.phone?.toLowerCase().includes(searchQuery)
-            )
-          : pins;
-
-        filteredPins.forEach(ui.manager.addPinToDOM);
-
-        const countText = searchQuery ? `${filteredPins.length}/${pins.length}` : `${pins.length}`;
-        dom.manager.controls.resultsCount.textContent = countText;
-        dom.manager.controls.clearSearchBtn.disabled = !searchQuery;
-      },
-      handlePinListClick: async (e) => {
-        const button = e.target.closest('button[data-action]');
-        if (!button) return;
-
-        const pinItem = button.closest('.pin-item');
-        const pinId = pinItem.dataset.id;
-        const action = button.dataset.action;
-
-        if (action === 'delete') {
-          if (confirm('Supprimer ce PIN ?')) {
-            await db.collection('pins').doc(pinId).delete();
-            ui.showMessage('success', 'PIN supprimé.');
-            handlers.manager.loadPins();
-            if (state.currentEditingPinId === pinId) ui.manager.resetForm();
-          }
-        } else if (action === 'edit') {
-          const doc = await db.collection('pins').doc(pinId).get();
-          if (!doc.exists) return;
-
-          const data = doc.data();
-          const { form } = dom.manager;
-
-          form.pinCodeInput.value = data.pinCode;
-          form.dateInInput.value = data.dateIn.toDate().toISOString().slice(0, 16);
-          form.dateOutInput.value = data.dateOut.toDate().toISOString().slice(0, 16);
-          form.contactInput.value = data.contact;
-          form.phoneInput.value = data.phone || '';
-          state.currentEditingPinId = pinId;
-
-          ui.manager.updateButtonStates();
-          form.form.classList.add('is-active');
-          form.pinCodeInput.focus();
-        }
-      },
-      handleSortMenuClick: (e) => {
-        const sortBy = e.target.dataset.sortBy;
-        if (sortBy) {
-          state.currentSortBy = sortBy;
-          handlers.manager.loadPins();
-          ui.manager.updateSortMenu();
-          dom.manager.controls.sortMenu.classList.remove('show');
-        }
-      },
-      handleSearchInput: () => {
-        clearTimeout(state.debounceTimer);
-        state.debounceTimer = setTimeout(handlers.manager.loadPins, 300);
-      },
-      handleClearSearch: () => {
-        dom.manager.controls.searchQueryInput.value = '';
-        handlers.manager.loadPins();
-        dom.manager.controls.searchQueryInput.focus();
-      },
-    },
-
-    auth: {
-      onAuthStateChanged: (user) => {
-        if (user && user.email === config.adminEmail) {
-          dom.manager.returnToGuestBtn.style.display = 'flex';
-
-          if (user.photoURL) {
-            dom.manager.userAvatar.src = user.photoURL;
-            dom.manager.userAvatar.style.display = 'block';
-          } else {
-            dom.manager.userAvatar.style.display = 'none';
-          }
-
-          ui.manager.showApp();
-        } else {
-          dom.manager.returnToGuestBtn.style.display = 'none';
-          dom.manager.userAvatar.style.display = 'none';
-          dom.manager.userAvatar.src = '';
-
-          if (user) {
-            auth.signOut();
-            ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
-          }
-
-          ui.guest.showApp();
-        }
-      },
-      signIn: () => {
-        auth
-          .signInWithPopup(googleProvider)
-          .catch((err) => ui.showMessage('danger', `Erreur: ${err.message}`));
-      },
-      signOut: () => {
-        auth.signOut().then(() => ui.showMessage('info', 'Déconnexion réussie.'));
-      },
-    },
-  };
-
-  // --- 8. INITIALISATION ---
-  const init = () => {
-    // General Listeners
-    auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
-    document.addEventListener('click', () => {
-      dom.manager.controls.sortMenu.classList.remove('show');
-    });
-
-    // Guest Listeners
-    dom.guest.pinInput.addEventListener('input', handlers.guest.handlePinInput);
-    dom.guest.pinInput.addEventListener('keydown', handlers.guest.handlePinKeydown);
-    dom.guest.checkPinButton.addEventListener('click', handlers.guest.validatePin);
-    dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
-    dom.guest.portalButton.addEventListener('click', handlers.guest.triggerPortal);
-    dom.guest.resetButton.addEventListener('click', ui.guest.resetSystem);
-    dom.guest.logo.addEventListener('click', handlers.guest.handleLogoClick);
-    dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
-
-    // Manager Listeners
-    dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut);
-    dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
-    dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
-
-    Object.values(dom.manager.form).forEach((input) => {
-      if (input.addEventListener) {
-        input.addEventListener('input', ui.manager.updateButtonStates);
-      }
-    });
-
-    dom.manager.pinsList.addEventListener('click', handlers.manager.handlePinListClick);
-    dom.manager.controls.generatePinBtn.addEventListener('click', () => {
-      dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
-      ui.manager.updateButtonStates();
-    });
-
-    dom.manager.controls.sortBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dom.manager.controls.sortMenu.classList.toggle('show');
-      ui.manager.updateSortMenu();
-    });
-
-    dom.manager.controls.sortMenu.addEventListener('click', handlers.manager.handleSortMenuClick);
-    dom.manager.controls.searchQueryInput.addEventListener(
-      'input',
-      handlers.manager.handleSearchInput
-    );
-    dom.manager.controls.clearSearchBtn.addEventListener(
-      'click',
-      handlers.manager.handleClearSearch
-    );
-
-    // Initial state
-    ui.guest.showApp();
-  };
-
-  // Lancer l'application une fois le DOM chargé
-  init();
-})();
+        e.
