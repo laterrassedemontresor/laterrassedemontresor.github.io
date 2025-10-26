@@ -149,9 +149,10 @@ if ('serviceWorker' in navigator) {
   
   /**
    * Obtient ou crée l'AudioContext et tente de le relancer s'il est suspendu (bloqué par le navigateur).
-   * @returns {AudioContext | null} L'instance du contexte audio, ou null si l'API n'est pas supportée.
+   * @returns {Promise<AudioContext | null>} L'instance du contexte audio, ou null si l'API n'est pas supportée.
+   * NOTE: Rendue asynchrone pour attendre la reprise si nécessaire.
    */
-  const getAudioContext = () => {
+  const getAudioContext = async () => {
     if (!window.AudioContext && !window.webkitAudioContext) {
         console.error('API Web Audio non supportée par ce navigateur.');
         return null;
@@ -165,10 +166,13 @@ if ('serviceWorker' in navigator) {
     // Tente de reprendre le contexte s'il est suspendu (bloqué)
     if (audioContextInstance.state === 'suspended') {
       console.log('AudioContext est suspendu. Tentative de reprise...');
-      // La reprise doit être gérée par une promesse
-      audioContextInstance.resume().then(() => {
+      try {
+          await audioContextInstance.resume();
           console.log('AudioContext repris (était suspendu). État actuel:', audioContextInstance.state);
-      }).catch(e => console.error("Erreur lors de la reprise du contexte audio:", e));
+      } catch (e) {
+          console.error("Erreur lors de la reprise du contexte audio:", e);
+          return null;
+      }
     } else {
         console.log('AudioContext déjà actif. État actuel:', audioContextInstance.state);
     }
@@ -182,14 +186,17 @@ if ('serviceWorker' in navigator) {
    * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
    * @param {number} intervalMs L'intervalle entre chaque bip en millisecondes (par défaut 150).
    * @param {number} frequency La fréquence du son en Hertz (par défaut 880).
+   * @returns {Promise<boolean>} True si les bips ont été joués, False sinon.
    */
-  const simulateFiveBeeps = (count = 5, durationMs = 100, intervalMs = 150, frequency = 880) => {
+  const simulateFiveBeeps = async (count = 5, durationMs = 100, intervalMs = 150, frequency = 880) => {
     console.log(`Début de la simulation de ${count} bips...`);
-    // Le getAudioContext est appelé ici pour s'assurer que le contexte est créé et en cours de reprise
-    const audioCtx = getAudioContext(); 
-    if (!audioCtx) {
-        console.warn('Impossible de jouer les bips car aucun AudioContext n a pu être obtenu.');
-        return;
+    
+    // Attend que le contexte audio soit actif
+    const audioCtx = await getAudioContext(); 
+    
+    if (!audioCtx || audioCtx.state !== 'running') {
+        console.warn('Impossible de jouer les bips car AudioContext non actif (état:', audioCtx?.state || 'null', ').');
+        return false;
     }
     
     const durationSec = durationMs / 1000;
@@ -213,7 +220,8 @@ if ('serviceWorker' in navigator) {
       gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
 
       // Calculer l'heure de début et d'arrêt de ce bip
-      const startTime = audioCtx.currentTime + i * intervalSec;
+      // L'ajout du temps est critique pour séparer les bips
+      const startTime = audioCtx.currentTime + i * intervalSec; 
       const stopTime = startTime + durationSec;
 
       // Planifier le démarrage et l'arrêt du son
@@ -224,8 +232,41 @@ if ('serviceWorker' in navigator) {
       gainNode.gain.exponentialRampToValueAtTime(0.00001, stopTime); 
     }
     console.log('Fin du séquencement des bips dans l AudioContext.');
+    return true;
   };
   
+  /**
+   * Utilise l'API SpeechSynthesis pour lire un message vocal.
+   * @param {string} text Le texte à lire.
+   * @param {string} lang La langue (par défaut 'fr-FR').
+   * @returns {boolean} True si la lecture est lancée.
+   */
+  const playTextToSpeech = (text, lang = 'fr-FR') => {
+    if (!window.speechSynthesis) {
+        console.warn('API SpeechSynthesis non supportée.');
+        return false;
+    }
+
+    // Arrêter toute lecture en cours pour éviter les interférences
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 1.1; // Vitesse de lecture légèrement augmentée
+    utterance.volume = 1; // Volume
+
+    // Tente de trouver une voix française
+    const voices = window.speechSynthesis.getVoices();
+    const frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
+    if (frenchVoice) {
+        utterance.voice = frenchVoice;
+    }
+    
+    console.log(`Lecture vocale initiée: "${text}"`);
+    window.speechSynthesis.speak(utterance);
+    return true;
+  };
+
   const utils = {
     storage: {
       savePinData: (pinCode, expirationDate) => {
@@ -584,29 +625,40 @@ if ('serviceWorker' in navigator) {
         
         console.log('--- Déclenchement du portail initié (Clic utilisateur) ---');
         
-        // 🚀 TENTER DE DÉBLOQUER ET JOUER LE SON IMMÉDIATEMENT APRÈS LE CLIC
-        // Cela garantit que l'interaction utilisateur débloque l'AudioContext.
-        simulateFiveBeeps(); 
+        // 🚀 1. Déclenchement du son AVANT le Webhook, en attendant sa fin
+        const audioSucceeded = await simulateFiveBeeps(); 
         
         try {
-          // Bien que le son soit joué, nous tentons de reprendre le contexte ici
-          // au cas où simulateFiveBeeps n'aurait pas encore terminé la promesse de reprise.
-          getAudioContext(); 
-          
+          // 2. EXÉCUTER LE WEBHOOK
           const response = await fetch(config.webhookUrl);
           const data = await response.text();
           
           if (response.ok && data.includes('Success')) {
             console.log('Webhook Success.');
             ui.guest.displayMessage('success', 'Portail activé !');
+            // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
+            if (audioSucceeded) {
+              playTextToSpeech('Portail activé, bienvenue.'); 
+            }
           } else {
             console.error('Webhook Error/Failure:', data || response.statusText);
             ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
           }
         } catch (error) {
+          // 4. GESTION DES ERREURS RÉSEAU (TypeError: Failed to fetch)
           console.error('Erreur webhook (network/CORS):', error);
-          // 🚨 Message mis à jour pour indiquer que le problème est réseau/serveur, pas la commande elle-même.
-          ui.guest.displayMessage('danger', 'COMMANDE EXÉCUTÉE, MAIS LE WEBHOOK EST INJOIGNABLE (voir console).');
+          
+          // Si le Webhook a fonctionné physiquement mais que le navigateur a eu une erreur de communication (TypeError: Failed to fetch)
+          // nous affichons le message de succès et l'annonce vocale.
+          if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+             console.warn('TypeError: Failed to fetch detecté. Affichage du succès car l utilisateur confirme la commande physique (problème CORS ou réponse serveur).');
+             ui.guest.displayMessage('success', 'Portail activé ! (Vérifiez la console pour les erreurs de communication)');
+             if (audioSucceeded) {
+                playTextToSpeech('Portail activé, bienvenue.'); 
+             }
+          } else {
+             ui.guest.displayMessage('danger', 'Erreur de communication Webhook (voir console).');
+          }
         }
         console.log('--- Fin du déclenchement du portail ---');
       },
