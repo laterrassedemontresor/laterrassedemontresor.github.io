@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.2'; // 🔥 Incrémente à chaque déploiement
+const CACHE_VERSION = 'v1.3'; // 🔥 Incrémente à chaque déploiement
 const CACHE_NAME = `montresor-gate-cache-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   '/',
