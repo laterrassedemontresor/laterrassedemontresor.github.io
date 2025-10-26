@@ -143,6 +143,52 @@ if ('serviceWorker' in navigator) {
   // Scaling - Modif fin
 
   // --- 5. FONCTIONS UTILITAIRES ---
+  
+  /**
+   * Génère une série de bips audio pour simuler un carillon, en utilisant l'API Web Audio.
+   * @param {number} count Le nombre de bips à jouer (par défaut 5).
+   * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
+   * @param {number} intervalMs L'intervalle entre chaque bip en millisecondes (par défaut 150).
+   * @param {number} frequency La fréquence du son en Hertz (par défaut 880).
+   */
+  const simulateFiveBeeps = (count = 5, durationMs = 100, intervalMs = 150, frequency = 880) => {
+    // Vérifier la compatibilité de l'API Web Audio
+    if (!window.AudioContext && !window.webkitAudioContext) return;
+    
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const durationSec = durationMs / 1000;
+    const intervalSec = intervalMs / 1000;
+
+    for (let i = 0; i < count; i++) {
+      // Créer un nœud d'oscillateur (génère la forme d'onde)
+      const oscillator = audioCtx.createOscillator();
+      // Créer un nœud de gain (contrôle le volume)
+      const gainNode = audioCtx.createGain();
+
+      // Connecter l'oscillateur au gain, puis le gain à la destination (haut-parleurs)
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      // Définir la forme d'onde (sinus, carré, etc.) et la fréquence
+      oscillator.type = 'square'; // Un son de type "carré" est plus "bip" que sinus
+      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+      // Définir le volume (gain)
+      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+
+      // Calculer l'heure de début et d'arrêt de ce bip
+      const startTime = audioCtx.currentTime + i * intervalSec;
+      const stopTime = startTime + durationSec;
+
+      // Planifier le démarrage et l'arrêt du son
+      oscillator.start(startTime);
+      oscillator.stop(stopTime);
+      
+      // Ajouter une petite rampe de descente du gain à la fin pour éviter un "clic" audible
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, stopTime); 
+    }
+  };
+  
   const utils = {
     storage: {
       savePinData: (pinCode, expirationDate) => {
@@ -502,6 +548,7 @@ if ('serviceWorker' in navigator) {
           const response = await fetch(config.webhookUrl);
           const data = await response.text();
           if (response.ok && data.includes('Success')) {
+            simulateFiveBeeps(); // ⬅️ MODIFICATION : Appel de la fonction de bips
             ui.guest.displayMessage('success', 'Portail activé !');
           } else {
             ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
