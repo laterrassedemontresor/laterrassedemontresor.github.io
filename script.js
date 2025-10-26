@@ -1,5 +1,7 @@
 'use strict';
+// ================================
 // ServiceWorker auto-update listener
+// ================================
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data?.type === 'NEW_VERSION_AVAILABLE') {
@@ -8,13 +10,19 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
+
+// ==========================================
 // Affiche la version dynamique dans le header
+// ==========================================
 const versionEl = document.getElementById('appVersion');
 if (versionEl) {
+  // Netlify remplacera __BUILD_ID__ par le DEPLOY_ID
   versionEl.textContent = 'v' + '__BUILD_ID__';
 }
 
+// ==========================================
 // Enregistrement du Service Worker
+// ==========================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
@@ -27,6 +35,23 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// ==========================================
+// TOUS LES AUTRES FONCTIONNEMENTS DE L'APP
+// (PIN, boutons, Firebase, gestion manager/guest)
+// ==========================================
+
+// Exemple : gestion du champ PIN et activation du bouton ✓
+const guestPinInput = document.getElementById('guestPinInput');
+const guestCheckPinButton = document.getElementById('guestCheckPinButton');
+
+if (guestPinInput && guestCheckPinButton) {
+  guestPinInput.addEventListener('input', () => {
+    // Activation du bouton si 4 caractères saisis
+    guestCheckPinButton.disabled = guestPinInput.value.length !== 4;
+  });
+}
+
 
 // Encapsulation de tout le script
 (() => {
