@@ -144,6 +144,29 @@ if ('serviceWorker' in navigator) {
 
   // --- 5. FONCTIONS UTILITAIRES ---
   
+  // Variable pour stocker le contexte audio de manière persistante.
+  let audioContextInstance = null;
+  
+  /**
+   * Obtient ou crée l'AudioContext et tente de le relancer s'il est suspendu (bloqué par le navigateur).
+   * @returns {AudioContext | null} L'instance du contexte audio, ou null si l'API n'est pas supportée.
+   */
+  const getAudioContext = () => {
+    if (!window.AudioContext && !window.webkitAudioContext) return null;
+    
+    if (!audioContextInstance) {
+      audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    // Tente de reprendre le contexte s'il est suspendu (bloqué)
+    if (audioContextInstance.state === 'suspended') {
+      // La reprise doit être gérée par une promesse
+      audioContextInstance.resume().catch(e => console.error("Erreur lors de la reprise du contexte audio:", e));
+    }
+    
+    return audioContextInstance;
+  }
+  
   /**
    * Génère une série de bips audio pour simuler un carillon, en utilisant l'API Web Audio.
    * @param {number} count Le nombre de bips à jouer (par défaut 5).
@@ -152,10 +175,9 @@ if ('serviceWorker' in navigator) {
    * @param {number} frequency La fréquence du son en Hertz (par défaut 880).
    */
   const simulateFiveBeeps = (count = 5, durationMs = 100, intervalMs = 150, frequency = 880) => {
-    // Vérifier la compatibilité de l'API Web Audio
-    if (!window.AudioContext && !window.webkitAudioContext) return;
+    const audioCtx = getAudioContext();
+    if (!audioCtx) return;
     
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const durationSec = durationMs / 1000;
     const intervalSec = intervalMs / 1000;
 
@@ -169,8 +191,8 @@ if ('serviceWorker' in navigator) {
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
 
-      // Définir la forme d'onde (sinus, carré, etc.) et la fréquence
-      oscillator.type = 'square'; // Un son de type "carré" est plus "bip" que sinus
+      // Définir la forme d'onde et la fréquence
+      oscillator.type = 'square';
       oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
       // Définir le volume (gain)
@@ -548,7 +570,7 @@ if ('serviceWorker' in navigator) {
           const response = await fetch(config.webhookUrl);
           const data = await response.text();
           if (response.ok && data.includes('Success')) {
-            simulateFiveBeeps(); // ⬅️ MODIFICATION : Appel de la fonction de bips
+            simulateFiveBeeps(); // <-- Appel de la fonction de bips corrigée
             ui.guest.displayMessage('success', 'Portail activé !');
           } else {
             ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
