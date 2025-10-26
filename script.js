@@ -8,6 +8,11 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
+// Affiche la version dynamique dans le header
+const versionEl = document.getElementById('appVersion');
+if (versionEl) {
+  versionEl.textContent = 'v' + '__BUILD_ID__';
+}
 
 // Enregistrement du Service Worker
 if ('serviceWorker' in navigator) {
