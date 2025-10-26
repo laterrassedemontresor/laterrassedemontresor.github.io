@@ -143,6 +143,142 @@ if ('serviceWorker' in navigator) {
   // Scaling - Modif fin
 
   // --- 5. FONCTIONS UTILITAIRES ---
+
+  // Variable pour stocker le contexte audio de manière persistante.
+  let audioContextInstance = null;
+
+  /**
+   * Obtient ou crée l'AudioContext et tente de le relancer s'il est suspendu (bloqué par le navigateur).
+   * @returns {Promise<AudioContext | null>} L'instance du contexte audio, ou null si l'API n'est pas supportée.
+   * NOTE: Rendue asynchrone pour attendre la reprise si nécessaire.
+   */
+  const getAudioContext = async () => {
+    if (!window.AudioContext && !window.webkitAudioContext) {
+      console.error('API Web Audio non supportée par ce navigateur.');
+      return null;
+    }
+
+    if (!audioContextInstance) {
+      audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('AudioContext créé pour la première fois.');
+    }
+
+    // Tente de reprendre le contexte s'il est suspendu (bloqué)
+    if (audioContextInstance.state === 'suspended') {
+      console.log('AudioContext est suspendu. Tentative de reprise...');
+      try {
+        await audioContextInstance.resume();
+        console.log(
+          'AudioContext repris (était suspendu). État actuel:',
+          audioContextInstance.state
+        );
+      } catch (e) {
+        console.error('Erreur lors de la reprise du contexte audio:', e);
+        return null;
+      }
+    } else {
+      console.log('AudioContext déjà actif. État actuel:', audioContextInstance.state);
+    }
+
+    return audioContextInstance;
+  };
+
+  /**
+   * Génère une série de bips audio pour simuler un carillon, en utilisant l'API Web Audio.
+   * @param {number} count Le nombre de bips à jouer (par défaut 5).
+   * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
+   * @param {number} intervalMs L'intervalle entre chaque bip en millisecondes (par défaut 150).
+   * @param {number} frequency La fréquence du son en Hertz (par défaut 880).
+   * @returns {Promise<boolean>} True si les bips ont été joués, False sinon.
+   */
+  const simulateFiveBeeps = async (
+    count = 5,
+    durationMs = 100,
+    intervalMs = 150,
+    frequency = 880
+  ) => {
+    console.log(`Début de la simulation de ${count} bips...`);
+
+    // Attend que le contexte audio soit actif
+    const audioCtx = await getAudioContext();
+
+    if (!audioCtx || audioCtx.state !== 'running') {
+      console.warn(
+        'Impossible de jouer les bips car AudioContext non actif (état:',
+        audioCtx?.state || 'null',
+        ').'
+      );
+      return false;
+    }
+
+    const durationSec = durationMs / 1000;
+    const intervalSec = intervalMs / 1000;
+
+    for (let i = 0; i < count; i++) {
+      // Créer un nœud d'oscillateur (génère la forme d'onde)
+      const oscillator = audioCtx.createOscillator();
+      // Créer un nœud de gain (contrôle le volume)
+      const gainNode = audioCtx.createGain();
+
+      // Connecter l'oscillateur au gain, puis le gain à la destination (haut-parleurs)
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      // Définir la forme d'onde et la fréquence
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+      // Définir le volume (gain)
+      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+
+      // Calculer l'heure de début et d'arrêt de ce bip
+      // L'ajout du temps est critique pour séparer les bips
+      const startTime = audioCtx.currentTime + i * intervalSec;
+      const stopTime = startTime + durationSec;
+
+      // Planifier le démarrage et l'arrêt du son
+      oscillator.start(startTime);
+      oscillator.stop(stopTime);
+
+      // Ajouter une petite rampe de descente du gain à la fin pour éviter un "clic" audible
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, stopTime);
+    }
+    console.log('Fin du séquencement des bips dans l AudioContext.');
+    return true;
+  };
+
+  /**
+   * Utilise l'API SpeechSynthesis pour lire un message vocal.
+   * @param {string} text Le texte à lire.
+   * @param {string} lang La langue (par défaut 'fr-FR').
+   * @returns {boolean} True si la lecture est lancée.
+   */
+  const playTextToSpeech = (text, lang = 'fr-FR') => {
+    if (!window.speechSynthesis) {
+      console.warn('API SpeechSynthesis non supportée.');
+      return false;
+    }
+
+    // Arrêter toute lecture en cours pour éviter les interférences
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 1.1; // Vitesse de lecture légèrement augmentée
+    utterance.volume = 1; // Volume
+
+    // Tente de trouver une voix française
+    const voices = window.speechSynthesis.getVoices();
+    const frenchVoice = voices.find((voice) => voice.lang.startsWith('fr'));
+    if (frenchVoice) {
+      utterance.voice = frenchVoice;
+    }
+
+    console.log(`Lecture vocale initiée: "${text}"`);
+    window.speechSynthesis.speak(utterance);
+    return true;
+  };
+
   const utils = {
     storage: {
       savePinData: (pinCode, expirationDate) => {
@@ -199,113 +335,6 @@ if ('serviceWorker' in navigator) {
       return 'active';
     },
   };
-
-  // *****modif du 26/10/25 Carrillon+message vocal+flash ******
-  // Fonctions pour les nouvelles fonctionnalités audio et visuelles
-  const portalEffects = {
-    // Audio context pour les sons
-    audioContext: null,
-    
-    // Créer et jouer un son de carillon
-    playChimeSound: function() {
-      try {
-        if (!this.audioContext) {
-          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        
-        const duration = 2; // Durée en secondes
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Configuration pour un son de carillon/harpe
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // Do
-        oscillator.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.3); // Mi
-        oscillator.frequency.setValueAtTime(783.99, this.audioContext.currentTime + 0.6); // Sol
-        oscillator.frequency.setValueAtTime(1046.50, this.audioContext.currentTime + 0.9); // Do aigu
-        
-        // Enveloppe du volume
-        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
-        
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + duration);
-      } catch (error) {
-        console.warn('Impossible de jouer le son de carillon:', error);
-        // Fallback: utiliser un son de notification système via l'API Web Audio simple
-        try {
-          const beep = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUgBjiN1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmUg");
-          beep.volume = 0.3;
-          beep.play().catch(e => console.warn('Fallback audio également en échec:', e));
-        } catch (fallbackError) {
-          console.warn('Fallback audio en échec:', fallbackError);
-        }
-      }
-    },
-    
-    // Générer une annonce vocale
-    speakAnnouncement: function(text) {
-      if ('speechSynthesis' in window) {
-        // Arrêter toute synthèse en cours
-        speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'fr-FR';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-        
-        speechSynthesis.speak(utterance);
-      }
-    },
-    
-    // Faire clignoter l'écran avec les couleurs spécifiées
-    flashScreen: function() {
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      overlay.style.zIndex = '9999';
-      overlay.style.pointerEvents = 'none';
-      overlay.style.transition = 'background-color 0.3s ease';
-      
-      document.body.appendChild(overlay);
-      
-      // Séquence de clignotement: bleu -> blanc -> rouge
-      const colors = ['rgba(0, 0, 255, 0.3)', 'rgba(255, 255, 255, 0.3)', 'rgba(255, 0, 0, 0.3)'];
-      let currentIndex = 0;
-      
-      const flashInterval = setInterval(() => {
-        overlay.style.backgroundColor = colors[currentIndex];
-        currentIndex = (currentIndex + 1) % colors.length;
-      }, 300);
-      
-      // Arrêter après 1.5 secondes (5 cycles)
-      setTimeout(() => {
-        clearInterval(flashInterval);
-        overlay.style.backgroundColor = 'transparent';
-        setTimeout(() => {
-          if (overlay.parentNode) {
-            overlay.parentNode.removeChild(overlay);
-          }
-        }, 300);
-      }, 1500);
-    },
-    
-    // Exécuter tous les effets pour l'activation réussie du portail
-    triggerSuccessEffects: function() {
-      this.playChimeSound();
-      this.speakAnnouncement('Portail activé');
-      this.flashScreen();
-    }
-  };
-  // *****fin modif du 26/10/25 Carrillon+message vocal+flash ******
 
   // --- 6. MANIPULATION DE L'UI ---
   const ui = {
@@ -605,27 +634,47 @@ if ('serviceWorker' in navigator) {
       },
       triggerPortal: async () => {
         if (!state.guest.pin) return;
+
+        console.log('--- Déclenchement du portail initié (Clic utilisateur) ---');
+
+        // 🚀 1. Déclenchement du son AVANT le Webhook, en attendant sa fin
+        const audioSucceeded = await simulateFiveBeeps();
+
         try {
-          // *****modif du 26/10/25 Carrillon+message vocal+flash ******
-          // Jouer le son de carillon immédiatement au clic
-          portalEffects.playChimeSound();
-          // *****fin modif du 26/10/25 Carrillon+message vocal+flash ******
-          
+          // 2. EXÉCUTER LE WEBHOOK
           const response = await fetch(config.webhookUrl);
           const data = await response.text();
+
           if (response.ok && data.includes('Success')) {
-            // *****modif du 26/10/25 Carrillon+message vocal+flash ******
-            // Si l'instruction a bien été envoyée, déclencher tous les effets
-            portalEffects.triggerSuccessEffects();
+            console.log('Webhook Success.');
             ui.guest.displayMessage('success', 'Portail activé !');
-            // *****fin modif du 26/10/25 Carrillon+message vocal+flash ******
+            // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
+            if (audioSucceeded) {
+              playTextToSpeech('Portail activé, bienvenue.');
+            }
           } else {
+            console.error('Webhook Error/Failure:', data || response.statusText);
             ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
           }
         } catch (error) {
-          console.error('Erreur webhook:', error);
-          ui.guest.displayMessage('danger', 'commande éxécutée');
+          // 4. GESTION DES ERREURS RÉSEAU (TypeError: Failed to fetch)
+          console.error('Erreur webhook (network/CORS):', error);
+
+          // Si le Webhook a fonctionné physiquement mais que le navigateur a eu une erreur de communication (TypeError: Failed to fetch)
+          // nous affichons le message de succès et l'annonce vocale.
+          if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+            console.warn(
+              'TypeError: Failed to fetch detecté. Affichage du succès car l utilisateur confirme la commande physique (problème CORS ou réponse serveur).'
+            );
+            ui.guest.displayMessage('success', 'Portail activé ! ');
+            if (audioSucceeded) {
+              playTextToSpeech('Portail activé, bienvenue.');
+            }
+          } else {
+            ui.guest.displayMessage('danger', 'Erreur de communication Webhook (voir console).');
+          }
         }
+        console.log('--- Fin du déclenchement du portail ---');
       },
       handleLogoClick: () => {
         state.guest.tripleClickCount++;
@@ -847,47 +896,59 @@ if ('serviceWorker' in navigator) {
 
   // --- 8. INITIALISATION ---
   const init = () => {
-    // Écouteurs Guest
+    // General Listeners
+    auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
+    document.addEventListener('click', () => {
+      dom.manager.controls.sortMenu.classList.remove('show');
+    });
+
+    // Guest Listeners
     dom.guest.pinInput.addEventListener('input', handlers.guest.handlePinInput);
     dom.guest.pinInput.addEventListener('keydown', handlers.guest.handlePinKeydown);
-    dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
     dom.guest.checkPinButton.addEventListener('click', handlers.guest.validatePin);
+    dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
     dom.guest.portalButton.addEventListener('click', handlers.guest.triggerPortal);
     dom.guest.resetButton.addEventListener('click', ui.guest.resetSystem);
     dom.guest.logo.addEventListener('click', handlers.guest.handleLogoClick);
+    dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
 
-    // Écouteurs Manager
+    // Manager Listeners
     dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut);
     dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
-    dom.manager.form.form.addEventListener('input', ui.manager.updateButtonStates);
     dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
+
+    Object.values(dom.manager.form).forEach((input) => {
+      if (input.addEventListener) {
+        input.addEventListener('input', ui.manager.updateButtonStates);
+      }
+    });
+
     dom.manager.pinsList.addEventListener('click', handlers.manager.handlePinListClick);
     dom.manager.controls.generatePinBtn.addEventListener('click', () => {
       dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
       ui.manager.updateButtonStates();
     });
-    dom.manager.controls.sortBtn.addEventListener('click', () => {
+
+    dom.manager.controls.sortBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       dom.manager.controls.sortMenu.classList.toggle('show');
+      ui.manager.updateSortMenu();
     });
+
     dom.manager.controls.sortMenu.addEventListener('click', handlers.manager.handleSortMenuClick);
     dom.manager.controls.searchQueryInput.addEventListener(
       'input',
       handlers.manager.handleSearchInput
     );
-    dom.manager.controls.clearSearchBtn.addEventListener('click', handlers.manager.handleClearSearch);
-    dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
+    dom.manager.controls.clearSearchBtn.addEventListener(
+      'click',
+      handlers.manager.handleClearSearch
+    );
 
-    // Auth
-    auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
-
-    // Initialisation
+    // Initial state
     ui.guest.showApp();
-    ui.manager.updateButtonStates();
-    ui.manager.updateSortMenu();
   };
 
-  // Lancement de l'application
+  // Lancer l'application une fois le DOM chargé
   init();
 })();
-
-[file content end]
