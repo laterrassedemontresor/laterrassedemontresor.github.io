@@ -5,19 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>La Terrasse de Montrésor</title>
     <meta name="description" content="Système de gestion d'accès pour La Terrasse de Montrésor" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <link rel="icon" href="/icons/favicon.ico" />
-    <link rel="stylesheet" href="style.css" />
+    
+    <!-- Manifest versionné -->
+    <link rel="manifest" href="/manifest.json?t=__BUILD_ID__" />
+    
+    <!-- Icônes versionnées -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png?t=__BUILD_ID__" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png?t=__BUILD_ID__" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?t=__BUILD_ID__" />
+    <link rel="icon" href="/icons/favicon.ico?t=__BUILD_ID__" />
+    
+    <!-- CSS versionné -->
+    <link rel="stylesheet" href="style.css?t=__BUILD_ID__" />
+    
+    <!-- Firebase scripts (externes, pas besoin de versioning) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js" defer></script>
-    <script
-      src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"
-      defer
-    ></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js" defer></script>
-    <script src="script.js" defer></script>
+    
+    <!-- Script principal versionné -->
+    <script src="script.js?t=__BUILD_ID__" defer></script>
   </head>
   <body>
      <div id="app-wrapper">
@@ -26,17 +33,17 @@
         <header class="guest-header">
           <div class="logo-circle-wrapper" title="v1.2 ©kunu2025">
             <img
-              src="/icons/guest_logo.png"
+              src="/icons/guest_logo.png?t=__BUILD_ID__"
               class="guest-logo"
               id="guestLogo"
               alt="Logo La Terrasse"
             />
           </div>
           <h1 class="guest-title">
-            Bienvenue
-            <br />
-            à la Terrasse de Montrésor v1.3b
-          </h1>
+  Bienvenue
+  <br />
+  à la Terrasse de Montrésor <span id="appVersion"></span>
+</h1>
         </header>
         <div class="guest-message" id="guestMessage" aria-live="polite">
           Saisissez votre code d'accès
