@@ -1,3 +1,16 @@
+# netlify.toml
+
 [build]
-  functions = "netlify/functions"
-  publish = "./" # Ou "public", ou le nom de votre dossier
+  publish = "./"                 # dossier à publier (ou "public" si c'est ton build folder)
+  functions = "netlify/functions" # dossier des fonctions Netlify
+
+# Variables d'environnement pour le contexte de production
+[context.production.environment]
+  BUILD_ID = "$DEPLOY_ID"        # injecte le DEPLOY_ID pour versionner automatiquement tes assets
+
+# Optionnel : contexte de preview / branches de test
+[context.deploy-preview.environment]
+  BUILD_ID = "$DEPLOY_ID"
+
+[context.branch-deploy.environment]
+  BUILD_ID = "$DEPLOY_ID"
