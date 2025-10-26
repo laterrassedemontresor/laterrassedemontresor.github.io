@@ -180,31 +180,6 @@ if ('serviceWorker' in navigator) {
   }
   
   /**
-   * Joue un bip sonore unique.
-   */
-  const playBeep = (audioCtx, durationMs = 100, frequency = 880) => {
-      const durationSec = durationMs / 1000;
-      const now = audioCtx.currentTime;
-
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(frequency, now);
-
-      // Enveloppe ADSR très simple
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(1, now + 0.001); // Attaque très rapide
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, now + durationSec); // Relâchement rapide
-
-      oscillator.start(now);
-      oscillator.stop(now + durationSec);
-  }
-
-  /**
    * Génère une série de bips audio pour simuler un carillon en utilisant une planification robuste.
    * @param {number} count Le nombre de bips à jouer (par défaut 5).
    * @param {number} durationMs La durée de chaque bip en millisecondes (par défaut 100).
@@ -548,4 +523,405 @@ if ('serviceWorker' in navigator) {
   const handlers = {
     guest: {
       handlePinInput: (e) => {
-        e.
+        e.target.value = e.target.value.toUpperCase();
+        ui.guest.updateButtonStates();
+      },
+      handlePinKeydown: (e) => {
+        if (e.key === 'Enter' && dom.guest.pinInput.value.length === config.pinLength) {
+          handlers.guest.validatePin();
+        }
+      },
+      handleBackspace: () => {
+        dom.guest.pinInput.value = dom.guest.pinInput.value.slice(0, -1);
+        ui.guest.updateButtonStates();
+      },
+      validatePin: async () => {
+        const enteredPin = dom.guest.pinInput.value.toUpperCase();
+        dom.guest.pinInput.value = '';
+        ui.guest.updateButtonStates();
+
+        if (enteredPin.length !== config.pinLength) {
+          ui.guest.displayMessage(
+            'alert',
+            `Le code PIN doit contenir ${config.pinLength} caractères.`
+          );
+          return;
+        }
+
+        if (enteredPin === config.managerPinCode) {
+          dom.guest.loginContainer.classList.remove('app-hidden');
+          dom.guest.pinEntry.classList.add('app-hidden');
+          dom.guest.dynamicContent.classList.add('app-hidden');
+          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
+          return;
+        }
+
+        try {
+          const querySnapshot = await db
+            .collection('pins')
+            .where('pinCode', '==', enteredPin)
+            .limit(1)
+            .get();
+
+          if (querySnapshot.empty) {
+            ui.guest.displayMessage('alert', 'Code PIN incorrect.');
+            return;
+          }
+
+          const pinData = querySnapshot.docs[0].data();
+          const now = new Date();
+          const dateIn = pinData.dateIn?.toDate();
+          const dateOut = pinData.dateOut?.toDate();
+
+          if (dateIn && now < dateIn) {
+            ui.guest.displayMessage(
+              'info',
+              `Votre code sera actif à partir du ${utils.formatDateDisplay(dateIn)}.`
+            );
+          } else if (dateOut && now > dateOut) {
+            ui.guest.displayMessage(
+              'alert',
+              `Votre code PIN a expiré le ${utils.formatDateDisplay(dateOut)}.`
+            );
+          } else {
+            state.guest.pin = enteredPin;
+            state.guest.expirationDate = dateOut;
+            utils.storage.savePinData(enteredPin, dateOut);
+            ui.guest.startExpirationTimer();
+            ui.guest.displayMessage('success', 'Code PIN actif. Bienvenue !');
+
+            if (dateOut) {
+              dom.guest.dateOut.textContent =
+                "Valable jusqu'au : " + utils.formatDateDisplay(dateOut);
+              dom.guest.dateOut.style.display = '';
+            } else {
+              dom.guest.dateOut.textContent = '';
+              dom.guest.dateOut.style.display = 'none';
+            }
+
+            dom.guest.pinEntry.classList.add('app-hidden');
+            dom.guest.dynamicContent.classList.remove('app-hidden');
+          }
+        } catch (error) {
+          console.error('Erreur de validation du PIN:', error);
+          ui.guest.displayMessage('danger', 'Erreur de connexion. Réessayez.');
+        }
+      },
+      triggerPortal: async () => {
+        if (!state.guest.pin) return;
+        
+        console.log('--- Déclenchement du portail initié (Clic utilisateur) ---');
+        
+        // 1. Déclenchement du son AVANT le Webhook
+        const audioSucceeded = await simulateFiveBeeps(); 
+        
+        try {
+          // 2. EXÉCUTER LE WEBHOOK
+          const response = await fetch(config.webhookUrl);
+          const data = await response.text();
+          
+          if (response.ok && data.includes('Success')) {
+            console.log('Webhook Success.');
+            ui.guest.displayMessage('success', 'Portail activé !');
+            // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
+            if (audioSucceeded) {
+              playTextToSpeech('Portail activé, bienvenue.'); 
+            }
+          } catch (error) {
+             // 4. GESTION DES ERREURS/RÉSEAU (y compris TypeError: Failed to fetch)
+             console.error('Erreur webhook (network/CORS ou échec de réponse):', error);
+             
+             // Si le Webhook a fonctionné physiquement (selon votre confirmation) mais que le navigateur a eu une erreur de communication réseau (Failed to fetch, souvent lié à CORS/réponse non lisible)
+             if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                 console.warn('TypeError: Failed to fetch détecté. Affichage du succès car la commande physique est présumée réussie (problème CORS/réponse).');
+                 ui.guest.displayMessage('success', 'Portail activé ! (Vérifiez la console pour les erreurs de communication)');
+                 if (audioSucceeded) {
+                    playTextToSpeech('Portail activé, bienvenue.'); 
+                 }
+             } else {
+                ui.guest.displayMessage('danger', 'Erreur de communication Webhook (voir console).');
+             }
+          }
+        } catch (error) {
+           // Si fetch lui-même échoue pour des raisons non gérées ci-dessus
+           console.error('Erreur inattendue du Webhook:', error);
+           ui.guest.displayMessage('danger', 'Erreur inattendue du Webhook (voir console).');
+        }
+        console.log('--- Fin du déclenchement du portail ---');
+      },
+      handleLogoClick: () => {
+        state.guest.tripleClickCount++;
+        if (state.guest.tripleClickTimer) clearTimeout(state.guest.tripleClickTimer);
+
+        state.guest.tripleClickTimer = setTimeout(() => {
+          state.guest.tripleClickCount = 0;
+        }, config.tripleClickThresholdMs);
+
+        if (state.guest.tripleClickCount === 3) {
+          clearTimeout(state.guest.tripleClickTimer);
+          state.guest.tripleClickCount = 0;
+          dom.guest.loginContainer.classList.remove('app-hidden');
+          dom.guest.pinEntry.classList.add('app-hidden');
+          dom.guest.dynamicContent.classList.add('app-hidden');
+          ui.guest.displayMessage('info', 'Accès Manager. Connectez-vous avec Google.');
+        }
+      },
+    },
+
+    manager: {
+      handleFormSubmit: async (e) => {
+        e.preventDefault();
+        const { form } = dom.manager;
+        const dateIn = new Date(form.dateInInput.value);
+        const dateOut = new Date(form.dateOutInput.value);
+
+        if (dateIn > dateOut) {
+          ui.showMessage('danger', 'Erreur de date : IN est postérieure à OUT');
+          return;
+        }
+
+        const pinData = {
+          pinCode: form.pinCodeInput.value.toUpperCase(),
+          dateIn: firebase.firestore.Timestamp.fromDate(dateIn),
+          dateOut: firebase.firestore.Timestamp.fromDate(dateOut),
+          contact: form.contactInput.value.trim(),
+          phone: form.phoneInput.value.trim(),
+        };
+
+        try {
+          if (state.currentEditingPinId) {
+            const existingPinQuery = await db
+              .collection('pins')
+              .where('pinCode', '==', pinData.pinCode)
+              .get();
+
+            if (
+              !existingPinQuery.empty &&
+              existingPinQuery.docs[0].id !== state.currentEditingPinId
+            ) {
+              ui.showMessage('danger', 'Ce code PIN existe déjà pour un autre enregistrement.');
+              return;
+            }
+
+            await db.collection('pins').doc(state.currentEditingPinId).update(pinData);
+            ui.showMessage('success', 'PIN mis à jour !');
+          } else {
+            const existingPin = await db
+              .collection('pins')
+              .where('pinCode', '==', pinData.pinCode)
+              .get();
+
+            if (!existingPin.empty) {
+              ui.showMessage('danger', 'Ce code PIN existe déjà.');
+              return;
+            }
+
+            await db.collection('pins').add({
+              ...pinData,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            ui.showMessage('success', 'PIN ajouté avec succès !');
+          }
+
+          ui.manager.resetForm();
+          handlers.manager.loadPins();
+        } catch (error) {
+          console.error('Erreur Firestore:', error);
+          ui.showMessage('danger', `Erreur: ${error.message}`);
+        }
+      },
+      loadPins: async () => {
+        dom.manager.pinsList.innerHTML = '';
+        const searchQuery = dom.manager.controls.searchQueryInput.value.trim().toLowerCase();
+        let query = db.collection('pins');
+
+        if (state.currentSortBy !== 'status') {
+          query = query.orderBy(state.currentSortBy, state.currentSortOrder);
+        }
+
+        const snapshot = await query.get();
+        let pins = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+        if (state.currentSortBy === 'status') {
+          const now = new Date();
+          const statusOrder = { active: 1, future: 2, expired: 3 };
+          pins.sort((a, b) => {
+            const statusA = utils.getPinStatus(
+              { dateIn: a.dateIn?.toDate(), dateOut: a.dateOut?.toDate() },
+              now
+            );
+            const statusB = utils.getPinStatus(
+              { dateIn: b.dateIn?.toDate(), dateOut: b.dateOut?.toDate() },
+              now
+            );
+            return (
+              (statusOrder[statusA] - statusOrder[statusB]) *
+              (state.currentSortOrder === 'asc' ? 1 : -1)
+            );
+          });
+        }
+
+        const filteredPins = searchQuery
+          ? pins.filter(
+              (pin) =>
+                pin.pinCode?.toLowerCase().includes(searchQuery) ||
+                pin.contact?.toLowerCase().includes(searchQuery) ||
+                pin.phone?.toLowerCase().includes(searchQuery)
+            )
+          : pins;
+
+        filteredPins.forEach(ui.manager.addPinToDOM);
+
+        const countText = searchQuery ? `${filteredPins.length}/${pins.length}` : `${pins.length}`;
+        dom.manager.controls.resultsCount.textContent = countText;
+        dom.manager.controls.clearSearchBtn.disabled = !searchQuery;
+      },
+      handlePinListClick: async (e) => {
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+
+        const pinItem = button.closest('.pin-item');
+        const pinId = pinItem.dataset.id;
+        const action = button.dataset.action;
+
+        if (action === 'delete') {
+          if (confirm('Supprimer ce PIN ?')) {
+            await db.collection('pins').doc(pinId).delete();
+            ui.showMessage('success', 'PIN supprimé.');
+            handlers.manager.loadPins();
+            if (state.currentEditingPinId === pinId) ui.manager.resetForm();
+          }
+        } else if (action === 'edit') {
+          const doc = await db.collection('pins').doc(pinId).get();
+          if (!doc.exists) return;
+
+          const data = doc.data();
+          const { form } = dom.manager;
+
+          form.pinCodeInput.value = data.pinCode;
+          form.dateInInput.value = data.dateIn.toDate().toISOString().slice(0, 16);
+          form.dateOutInput.value = data.dateOut.toDate().toISOString().slice(0, 16);
+          form.contactInput.value = data.contact;
+          form.phoneInput.value = data.phone || '';
+          state.currentEditingPinId = pinId;
+
+          ui.manager.updateButtonStates();
+          form.form.classList.add('is-active');
+          form.pinCodeInput.focus();
+        }
+      },
+      handleSortMenuClick: (e) => {
+        const sortBy = e.target.dataset.sortBy;
+        if (sortBy) {
+          state.currentSortBy = sortBy;
+          handlers.manager.loadPins();
+          ui.manager.updateSortMenu();
+          dom.manager.controls.sortMenu.classList.remove('show');
+        }
+      },
+      handleSearchInput: () => {
+        clearTimeout(state.debounceTimer);
+        state.debounceTimer = setTimeout(handlers.manager.loadPins, 300);
+      },
+      handleClearSearch: () => {
+        dom.manager.controls.searchQueryInput.value = '';
+        handlers.manager.loadPins();
+        dom.manager.controls.searchQueryInput.focus();
+      },
+    },
+
+    auth: {
+      onAuthStateChanged: (user) => {
+        if (user && user.email === config.adminEmail) {
+          dom.manager.returnToGuestBtn.style.display = 'flex';
+
+          if (user.photoURL) {
+            dom.manager.userAvatar.src = user.photoURL;
+            dom.manager.userAvatar.style.display = 'block';
+          } else {
+            dom.manager.userAvatar.style.display = 'none';
+          }
+
+          ui.manager.showApp();
+        } else {
+          dom.manager.returnToGuestBtn.style.display = 'none';
+          dom.manager.userAvatar.style.display = 'none';
+          dom.manager.userAvatar.src = '';
+
+          if (user) {
+            auth.signOut();
+            ui.showMessage('danger', 'Accès refusé. Compte non administrateur.');
+          }
+
+          ui.guest.showApp();
+        }
+      },
+      signIn: () => {
+        auth
+          .signInWithPopup(googleProvider)
+          .catch((err) => ui.showMessage('danger', `Erreur: ${err.message}`));
+      },
+      signOut: () => {
+        auth.signOut().then(() => ui.showMessage('info', 'Déconnexion réussie.'));
+      },
+    },
+  };
+
+  // --- 8. INITIALISATION ---
+  const init = () => {
+    // General Listeners
+    auth.onAuthStateChanged(handlers.auth.onAuthStateChanged);
+    document.addEventListener('click', () => {
+      dom.manager.controls.sortMenu.classList.remove('show');
+    });
+
+    // Guest Listeners
+    dom.guest.pinInput.addEventListener('input', handlers.guest.handlePinInput);
+    dom.guest.pinInput.addEventListener('keydown', handlers.guest.handlePinKeydown);
+    dom.guest.checkPinButton.addEventListener('click', handlers.guest.validatePin);
+    dom.guest.backspaceButton.addEventListener('click', handlers.guest.handleBackspace);
+    dom.guest.portalButton.addEventListener('click', handlers.guest.triggerPortal);
+    dom.guest.resetButton.addEventListener('click', ui.guest.resetSystem);
+    dom.guest.logo.addEventListener('click', handlers.guest.handleLogoClick);
+    dom.guest.googleSignInBtn.addEventListener('click', handlers.auth.signIn);
+
+    // Manager Listeners
+    dom.manager.returnToGuestBtn.addEventListener('click', handlers.auth.signOut);
+    dom.manager.form.form.addEventListener('submit', handlers.manager.handleFormSubmit);
+    dom.manager.form.cancelButton.addEventListener('click', ui.manager.resetForm);
+
+    Object.values(dom.manager.form).forEach((input) => {
+      if (input.addEventListener) {
+        input.addEventListener('input', ui.manager.updateButtonStates);
+      }
+    });
+
+    dom.manager.pinsList.addEventListener('click', handlers.manager.handlePinListClick);
+    dom.manager.controls.generatePinBtn.addEventListener('click', () => {
+      dom.manager.form.pinCodeInput.value = utils.generateRandomPin(config.pinLength);
+      ui.manager.updateButtonStates();
+    });
+
+    dom.manager.controls.sortBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dom.manager.controls.sortMenu.classList.toggle('show');
+      ui.manager.updateSortMenu();
+    });
+
+    dom.manager.controls.sortMenu.addEventListener('click', handlers.manager.handleSortMenuClick);
+    dom.manager.controls.searchQueryInput.addEventListener(
+      'input',
+      handlers.manager.handleSearchInput
+    );
+    dom.manager.controls.clearSearchBtn.addEventListener(
+      'click',
+      handlers.manager.handleClearSearch
+    );
+
+    // Initial state
+    ui.guest.showApp();
+  };
+
+  // Lancer l'application une fois le DOM chargé
+  init();
+})();
