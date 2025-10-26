@@ -1,21 +1,21 @@
 'use strict';
 
 // --- Gestion du Service Worker et affichage de version ---
-window.addEventListener("load", () => {
+window.addEventListener('load', () => {
   // ServiceWorker auto-update listener
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data?.type === "NEW_VERSION_AVAILABLE") {
-        console.log("🔄 Nouvelle version détectée, rechargement automatique...");
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'NEW_VERSION_AVAILABLE') {
+        console.log('🔄 Nouvelle version détectée, rechargement automatique...');
         window.location.reload();
       }
     });
 
     // Enregistrement du Service Worker
     navigator.serviceWorker
-      .register("/service-worker.js")
+      .register('/service-worker.js')
       .then((registration) => {
-        console.log("Service Worker enregistré avec succès:", registration.scope);
+        console.log('Service Worker enregistré avec succès:', registration.scope);
       })
       .catch((error) => {
         console.error("Échec de l'enregistrement du Service Worker:", error);
@@ -23,13 +23,12 @@ window.addEventListener("load", () => {
   }
 
   // Affiche la version dynamique dans le header (après que le DOM soit chargé)
-  const versionEl = document.getElementById("appVersion");
+  const versionEl = document.getElementById('appVersion');
   if (versionEl) {
-    versionEl.textContent = "v" + "__BUILD_ID__";
+    versionEl.textContent = 'v' + '__BUILD_ID__';
   }
 });
 // --- Fin du bloc version/SW ---
-
 
 // Encapsulation de tout le script
 (() => {
@@ -295,6 +294,37 @@ window.addEventListener("load", () => {
     window.speechSynthesis.speak(utterance);
     return true;
   };
+  
+  /**
+   * Clignote l'écran avec les couleurs Bleu-Blanc-Rouge pour une confirmation visuelle.
+   * @param {string[]} colors Les couleurs à flasher (par défaut: bleu, blanc, rouge).
+   * @param {number} durationMs La durée de chaque flash en millisecondes.
+   * @returns {Promise<void>}
+   */
+  const flashScreenColors = async (
+    colors = ['#0055A4', '#FFFFFF', '#EF4135'], // Bleu, Blanc, Rouge du drapeau
+    durationMs = 200
+  ) => {
+    console.log('Déclenchement du flash visuel B-W-R...');
+    const originalBodyColor = document.body.style.backgroundColor;
+    
+    // Fonction utilitaire pour attendre une durée donnée
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      for (const color of colors) {
+        document.body.style.backgroundColor = color;
+        await sleep(durationMs);
+      }
+    } catch (e) {
+      console.error('Erreur lors du clignotement de l écran:', e);
+    } finally {
+      // Retour à la couleur d'origine (ou transparent pour le CSS de l'app)
+      document.body.style.backgroundColor = originalBodyColor;
+      console.log('Flash terminé.');
+    }
+  };
+
 
   const utils = {
     storage: {
@@ -665,7 +695,11 @@ window.addEventListener("load", () => {
           if (response.ok && data.includes('Success')) {
             console.log('Webhook Success.');
             ui.guest.displayMessage('success', 'Portail activé !');
-            // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
+            
+            // 3. EFFET VISUEL B-W-R
+            await flashScreenColors();
+
+            // 4. ANNONCE VOCALE APRÈS LE SUCCÈS
             if (audioSucceeded) {
               playTextToSpeech('Portail activé');
             }
@@ -674,16 +708,20 @@ window.addEventListener("load", () => {
             ui.guest.displayMessage('danger', `Erreur portail: ${data || response.statusText}`);
           }
         } catch (error) {
-          // 4. GESTION DES ERREURS RÉSEAU (TypeError: Failed to fetch)
+          // 5. GESTION DES ERREURS RÉSEAU (TypeError: Failed to fetch)
           console.error('Erreur webhook (network/CORS):', error);
 
           // Si le Webhook a fonctionné physiquement mais que le navigateur a eu une erreur de communication (TypeError: Failed to fetch)
-          // nous affichons le message de succès et l'annonce vocale.
+          // nous affichons le message de succès, l'effet visuel et l'annonce vocale.
           if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
             console.warn(
               'TypeError: Failed to fetch detecté. Affichage du succès car l utilisateur confirme la commande physique (problème CORS ou réponse serveur).'
             );
             ui.guest.displayMessage('success', 'Portail activé ! ');
+            
+            // Effet visuel même en cas de "Failed to fetch" pour la confirmation physique
+            await flashScreenColors();
+
             if (audioSucceeded) {
               playTextToSpeech('Portail activé');
             }
