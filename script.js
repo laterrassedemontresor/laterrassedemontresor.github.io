@@ -1,25 +1,17 @@
 'use strict';
+
 // --- Gestion du Service Worker et affichage de version ---
+window.addEventListener("load", () => {
+  // ServiceWorker auto-update listener
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data?.type === "NEW_VERSION_AVAILABLE") {
+        console.log("🔄 Nouvelle version détectée, rechargement automatique...");
+        window.location.reload();
+      }
+    });
 
-// ServiceWorker auto-update listener
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data?.type === "NEW_VERSION_AVAILABLE") {
-      console.log("🔄 Nouvelle version détectée, rechargement automatique...");
-      window.location.reload();
-    }
-  });
-}
-
-// Affiche la version dynamique dans le header
-const versionEl = document.getElementById("appVersion");
-if (versionEl) {
-  versionEl.textContent = "v" + "__BUILD_ID__";
-}
-
-// Enregistrement du Service Worker
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+    // Enregistrement du Service Worker
     navigator.serviceWorker
       .register("/service-worker.js")
       .then((registration) => {
@@ -28,9 +20,14 @@ if ("serviceWorker" in navigator) {
       .catch((error) => {
         console.error("Échec de l'enregistrement du Service Worker:", error);
       });
-  });
-}
+  }
 
+  // Affiche la version dynamique dans le header (après que le DOM soit chargé)
+  const versionEl = document.getElementById("appVersion");
+  if (versionEl) {
+    versionEl.textContent = "v" + "__BUILD_ID__";
+  }
+});
 // --- Fin du bloc version/SW ---
 
 
