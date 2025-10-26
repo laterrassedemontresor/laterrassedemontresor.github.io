@@ -685,7 +685,7 @@ window.addEventListener("load", () => {
             );
             ui.guest.displayMessage('success', 'Portail activé ! ');
             if (audioSucceeded) {
-              playTextToSpeech('Portail activé, bienvenue.');
+              playTextToSpeech('Portail activé');
             }
           } else {
             ui.guest.displayMessage('danger', 'Erreur de communication Webhook (voir console).');
