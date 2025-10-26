@@ -650,7 +650,7 @@ if ('serviceWorker' in navigator) {
             ui.guest.displayMessage('success', 'Portail activé !');
             // 3. ANNONCE VOCALE APRÈS LE SUCCÈS
             if (audioSucceeded) {
-              playTextToSpeech('Portail activé, bienvenue.');
+              playTextToSpeech('Portail activé');
             }
           } else {
             console.error('Webhook Error/Failure:', data || response.statusText);
