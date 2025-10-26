@@ -1,4 +1,13 @@
 'use strict';
+// ServiceWorker auto-update listener
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'NEW_VERSION_AVAILABLE') {
+      console.log('🔄 Nouvelle version détectée, rechargement automatique...');
+      window.location.reload();
+    }
+  });
+}
 
 // Enregistrement du Service Worker
 if ('serviceWorker' in navigator) {
