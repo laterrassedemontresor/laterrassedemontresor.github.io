@@ -1,5 +1,3 @@
-[file name]: script OK.js
-[file content begin]
 'use strict';
 
 // Enregistrement du Service Worker
