@@ -305,8 +305,8 @@ window.addEventListener('load', () => {
    */
   const flashScreenColors = async (
     colors = ['#0055A4', '#FFFFFF', '#EF4135'], // Bleu, Blanc, Rouge du drapeau
-    durationMs = 200, // Durée augmentée pour être plus visible
-    repeat = 2 // Double cycle
+    durationMs = 100, // Durée augmentée pour être plus visible
+    repeat = 3 // nbre de cycles
   ) => {
     console.log(`Déclenchement du flash visuel B-W-R (Durée: ${durationMs}ms, Répétition: ${repeat})...`);
     const originalBodyColor = document.body.style.backgroundColor;
