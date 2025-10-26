@@ -1,34 +1,29 @@
 'use strict';
-// ================================
+// --- Gestion du Service Worker et affichage de version ---
+
 // ServiceWorker auto-update listener
-// ================================
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'NEW_VERSION_AVAILABLE') {
-      console.log('🔄 Nouvelle version détectée, rechargement automatique...');
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type === "NEW_VERSION_AVAILABLE") {
+      console.log("🔄 Nouvelle version détectée, rechargement automatique...");
       window.location.reload();
     }
   });
 }
 
-// ==========================================
 // Affiche la version dynamique dans le header
-// ==========================================
-const versionEl = document.getElementById('appVersion');
+const versionEl = document.getElementById("appVersion");
 if (versionEl) {
-  // Netlify remplacera __BUILD_ID__ par le DEPLOY_ID
-  versionEl.textContent = 'v' + '__BUILD_ID__';
+  versionEl.textContent = "v" + "__BUILD_ID__";
 }
 
-// ==========================================
 // Enregistrement du Service Worker
-// ==========================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register('/service-worker.js')
+      .register("/service-worker.js")
       .then((registration) => {
-        console.log('Service Worker enregistré avec succès:', registration.scope);
+        console.log("Service Worker enregistré avec succès:", registration.scope);
       })
       .catch((error) => {
         console.error("Échec de l'enregistrement du Service Worker:", error);
@@ -36,21 +31,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ==========================================
-// TOUS LES AUTRES FONCTIONNEMENTS DE L'APP
-// (PIN, boutons, Firebase, gestion manager/guest)
-// ==========================================
-
-// Exemple : gestion du champ PIN et activation du bouton ✓
-const guestPinInput = document.getElementById('guestPinInput');
-const guestCheckPinButton = document.getElementById('guestCheckPinButton');
-
-if (guestPinInput && guestCheckPinButton) {
-  guestPinInput.addEventListener('input', () => {
-    // Activation du bouton si 4 caractères saisis
-    guestCheckPinButton.disabled = guestPinInput.value.length !== 4;
-  });
-}
+// --- Fin du bloc version/SW ---
 
 
 // Encapsulation de tout le script
