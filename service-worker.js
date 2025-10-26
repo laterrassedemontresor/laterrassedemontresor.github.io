@@ -2,7 +2,7 @@
 
 // 🚨 ÉTAPE 1 : TOUJOURS INCRÉMENTER CETTE VERSION À CHAQUE DÉPLOIEMENT
 // Par exemple, passez de 'v1.2' à 'v1.3' pour la prochaine mise à jour.
-const CACHE_VERSION = 'v1.3'; 
+const CACHE_VERSION = 'v1.5'; 
 const CACHE_NAME = `montresor-gate-cache-${CACHE_VERSION}`;
 
 // Liste des assets à pré-cacher
