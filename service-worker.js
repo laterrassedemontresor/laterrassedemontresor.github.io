@@ -22,4 +22,47 @@ const ASSETS_TO_CACHE = [
   `/icons/favicon.ico?t=${BUILD_TIMESTAMP}`,
 ];
 
-self.addEventListener
+self.addEventListener('install', (event) => {
+  console.log('[SW] Installation version', CACHE_VERSION);
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(ASSETS_TO_CACHE))
+      .catch(err => console.error('Erreur cache:', err))
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activation version', CACHE_VERSION);
+  event.waitUntil(
+    caches.keys()
+      .then(names => Promise.all(
+        names.map(name => name !== CACHE_NAME && caches.delete(name))
+      ))
+      .then(() => self.clients.claim())
+      .then(() =>
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+          .then(clients => {
+            clients.forEach(client => client.postMessage({ type: 'NEW_VERSION_AVAILABLE' }));
+          })
+      )
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') return response;
+
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      });
+    })
+  );
+});
